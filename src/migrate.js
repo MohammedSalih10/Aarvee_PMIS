@@ -140,6 +140,13 @@ function mergeDatesIntoTentative(db) {
   }
 }
 
+// projects.division was dropped (every project is a Railways zone, and nothing
+// displayed or used it); remove the column from databases created before that.
+function dropProjectDivision(db) {
+  const cols = db.prepare('PRAGMA table_info(projects)').all().map((c) => c.name);
+  if (cols.includes('division')) db.exec('ALTER TABLE projects DROP COLUMN division');
+}
+
 function renameLegacyColumnKeys(db) {
   for (const [tab, renames] of Object.entries(LEGACY_COLUMN_RENAMES)) {
     const scope = 'activity_id IN (SELECT id FROM project_activities WHERE tab = ?)';
@@ -176,6 +183,7 @@ function migrate(db) {
     seedActivityColumns(db);
     backfillColumnWeights(db);
     renameLegacyColumnKeys(db);
+    dropProjectDivision(db);
   })();
 }
 

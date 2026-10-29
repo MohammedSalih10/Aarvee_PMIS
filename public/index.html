@@ -119,7 +119,7 @@ select option{background:var(--surface);color:var(--ink)}
 .auth-msg{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px}
 .auth-logo-link{display:block;width:254px;height:83px}
 .auth-logo{display:block;width:100%;height:100%;object-fit:cover;object-position:68% 50%}
-.auth-msg h2{margin:0;max-width:520px;font-size:40px;font-weight:700;letter-spacing:-.8px;line-height:1.15}
+.auth-msg h2{margin:0;max-width:520px;font-size:40px;font-weight:600;letter-spacing:-.8px;line-height:1.15}
 .auth-msg p{margin:0;max-width:520px;font-size:16px;line-height:25px;color:var(--muted)}
 .contact-link{color:inherit;text-decoration:none}
 .contact-link:hover{text-decoration:underline}
@@ -447,6 +447,14 @@ table.sgrid td.n{min-width:160px;text-align:left;white-space:normal}
 #modal .box{width:100%;max-width:820px;max-height:88vh;overflow:auto;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-pop)}
 #modal h3{margin:0 0 4px;font-size:20px;font-weight:600}
 #modal .ctx{margin:0 0 18px;font-size:14.5px;color:var(--muted)}
+/* Second layer: confirm / request dialogs raised from inside #modal (keeps the form underneath intact) */
+#modal2{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,34,51,.5)}
+#modal2.on{display:flex}
+#modal2 .box{width:100%;max-width:460px;max-height:88vh;overflow:auto;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-pop)}
+#modal2 h3{margin:0 0 4px;font-size:20px;font-weight:600}
+#modal2 .ctx{margin:0 0 14px;font-size:14.5px;color:var(--muted)}
+#modal2 .freeze-note{display:flex;gap:10px;margin:0 0 12px;padding:10px 12px;border-radius:9px;background:var(--warning-soft);color:var(--amber-ink);font-size:14.5px;line-height:1.5}
+#modal2 .freeze-list{margin:0 0 4px;padding-left:18px;font-size:14px;color:var(--muted)}
 .mf{margin-bottom:14px}
 .mf label{display:block;margin-bottom:6px;font-size:14.5px;font-weight:600}
 .mf input,.mf select,.mf textarea{width:100%;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font-size:15.5px}
@@ -477,6 +485,22 @@ table.mtbl th{padding:6px 4px;color:var(--muted);font-size:12.5px;font-weight:60
 table.mtbl td{padding:3px 4px}
 table.mtbl input{width:84px;height:32px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);font-size:14.5px}
 table.mtbl input:disabled{background:var(--head);color:var(--muted)}
+table.mtbl input.frozen{background:var(--head);color:var(--muted);cursor:pointer;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:12px}
+table.mtbl input.frozen.req-pending{background-color:var(--warning-soft);color:var(--amber-ink);border-color:var(--warning)}
+.mtbl-hint{margin:-8px 0 8px;font-size:13.5px;color:var(--muted)}
+.rq-list{display:flex;flex-direction:column;gap:10px}
+.rq-item{padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.rq-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.rq-top strong{font-size:15px}
+.rq-chg{margin:6px 0 2px;font-size:15px}.rq-chg s{color:var(--muted)}
+.rq-meta{margin:0;font-size:13.5px;color:var(--muted)}
+.rq-reason{margin:6px 0 0;font-size:14.5px}
+.rq-st{display:inline-flex;padding:2px 9px;border-radius:10px;font-size:12.5px;font-weight:700;text-transform:capitalize}
+.rq-st.pending{background:var(--warning-soft);color:var(--amber-ink)}.rq-st.approved{background:var(--success-soft);color:var(--success)}.rq-st.rejected{background:var(--danger-soft);color:var(--danger)}
+.rq-act{display:flex;gap:8px;align-items:center;margin-top:10px}
+.rq-act input{flex:1;min-width:0;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);font-size:14px}
+.rq-act button{height:34px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:14px;font-weight:600}
+.rq-act .ok{background:var(--success);color:#fff;border-color:transparent}.rq-act .no{color:var(--danger)}
 .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
 .actions button{height:40px;padding:0 18px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-size:15.5px;font-weight:600}
 .actions button:hover{background:var(--head)}
@@ -545,6 +569,7 @@ table.mtbl input:disabled{background:var(--head);color:var(--muted)}
     <label class="tn-search"><span data-ic="search"></span><input id="searchBox" type="search" placeholder="Search projects, codes..." aria-label="Search projects"></label>
     <button class="icon-btn theme-btn" type="button" title="Toggle dark mode" aria-label="Toggle dark mode"><span data-ic="moon" data-s="18"></span></button>
     <button class="icon-btn" id="bellBtn" type="button" title="Alerts" aria-label="Alerts"><span data-ic="bell" data-s="18"></span><b class="dot" id="bellDot" hidden></b></button>
+    <button class="icon-btn" id="reqBtn" type="button" title="Financial change requests" aria-label="Financial change requests" style="display:none"><span data-ic="shield-check" data-s="18"></span><b class="dot" id="reqDot" hidden></b></button>
     <span class="tn-vdiv"></span>
     <div class="user-menu" id="userMenu">
       <button type="button" class="um-btn" id="umBtn" aria-haspopup="menu"><span class="avatar" id="avatar">&ndash;</span><span class="um-text"><strong id="whoami">&mdash;</strong></span><span data-ic="chevron-down"></span></button>
@@ -586,7 +611,7 @@ table.mtbl input:disabled{background:var(--head);color:var(--muted)}
         </div>
       </div>
       <div class="table-wrap"><table class="tbl" id="tbl"></table></div>
-      <div class="card-foot"><span class="cf-legend"><span data-ic="rupee" data-s="14"></span><span id="footLegend">Edit monthly planned / actual figures</span></span><span id="footTotal"></span></div>
+      <div class="card-foot"><span class="cf-legend"><span data-ic="rupee" data-s="14"></span><span id="footLegend">Edit monthly ABP / actual figures</span></span><span id="footTotal"></span></div>
     </section>
 
     <section class="insights">
@@ -681,8 +706,8 @@ table.mtbl input:disabled{background:var(--head);color:var(--muted)}
         <svg id="pdLife" viewBox="0 0 400 230"></svg><div class="legend" id="pdLifeLegend" style="justify-content:center"></div></div>
     </div>
     <div class="pd-charts">
-      <div class="card chart-card"><div class="cc-head"><div><h3>Billing</h3><p class="cc-sub">Plan vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgB"></div><svg id="pdCB" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpB"></div></div>
-      <div class="card chart-card"><div class="cc-head"><div><h3>Collection</h3><p class="cc-sub">Plan vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgC"></div><svg id="pdCC" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpC"></div></div>
+      <div class="card chart-card"><div class="cc-head"><div><h3>Billing</h3><p class="cc-sub">ABP vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgB"></div><svg id="pdCB" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpB"></div></div>
+      <div class="card chart-card"><div class="cc-head"><div><h3>Collection</h3><p class="cc-sub">ABP vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgC"></div><svg id="pdCC" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpC"></div></div>
     </div>
     <div class="pd-tbar"><label for="pdTgtMonth">Targets for month</label><input type="month" id="pdTgtMonth"></div>
     <div class="pd-tables">
@@ -765,6 +790,7 @@ table.mtbl input:disabled{background:var(--head);color:var(--muted)}
 <footer class="foot" id="appFoot" hidden><span>&copy; <span class="yr">2026</span> <a href="https://aarvee.com/" target="_blank" rel="noopener noreferrer">Aarvee Engineering Consultants Limited</a></span><span class="foot-brand">aarvee PMIS</span></footer>
 
 <div id="modal"><div class="box" id="modalBox"></div></div>
+<div id="modal2"><div class="box" id="modal2Box"></div></div>
 <div id="toast"></div>
 <div id="cellTip" class="cell-tip"></div>
 
@@ -816,7 +842,6 @@ const canManageAccess = () => state.user && (state.user.role === 'pmo' || state.
 // Granting a Lead/Coordinator per-corridor edit access is admin-only -- pmo
 // keeps every other assignment-management capability, but not this one.
 const canGrantEditAccess = () => state.user && state.user.role === 'admin';
-
 const state = {
   user: null, projects: [], fiscalYear: null, quarter: 4, type: '',
   meta: null, search: '', tableMode: 'summary', chartMode: 'monthly',
@@ -958,10 +983,13 @@ async function enter(user){
   $('modeHint').textContent = canEdit()
     ? 'Select a row to filter the charts · ₹ edits monthly figures · › opens the project dashboard'
     : 'Review-only · select a row to filter the charts · › opens the project dashboard';
-  $('footLegend').textContent = canEdit() ? 'Edit monthly planned / actual figures' : 'View monthly planned / actual figures';
+  $('footLegend').textContent = canEdit() ? 'Edit monthly ABP / actual figures' : 'View monthly ABP / actual figures';
   $('addProjectBtn').style.display = (user.role === 'pmo' || user.role === 'admin') ? '' : 'none';
   $('manageUsersBtn').style.display = (user.role === 'admin') ? '' : 'none';
   $('exportBtn').style.display = canEdit() ? '' : 'none';
+  $('reqBtn').style.display = (canEdit() || user.role === 'mgmt') ? '' : 'none';
+  $('reqDot').hidden = true;
+  refreshReqBadge();
   $('loginView').classList.add('hidden');
   $('appTop').hidden = false; $('appFoot').hidden = false;
   showView('dashView');
@@ -1081,7 +1109,7 @@ function renderKpis(){
   const ratio = (a, d) => (d ? Math.round(a / d * 100) + '%' : '0%');
   const items = [
     ['Work Order Value', wo, 'briefcase', '', `${P.length} active project${P.length === 1 ? '' : 's'}`],
-    ['Billing (YTD)', b, 'receipt', '', `${ratio(b, pb)} of planned`],
+    ['Billing (YTD)', b, 'receipt', '', `${ratio(b, pb)} of ABP`],
     ['Collection (YTD)', c, 'wallet', 'green', `${ratio(c, b)} of billed`],
     ['Expenditure (YTD)', e, 'trending-down', 'amber', b ? `${ratio(e, b)} of billing` : 'Fiscal year to date'],
     ['Net Margin', m, 'percent', 'green', `${(b ? m / b * 100 : 0).toFixed(1)}% margin`],
@@ -1187,7 +1215,7 @@ function misTableHtml(rows){
     <th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th><th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
     <th class="grp sep"></th><th class="grp"></th></tr><tr>`
     + ['Project code','Project name','Work Order Value','Total billing (Inc GST)','Total collection (Inc GST)','Expenditure (Inc GST)','Margin','Margin %',
-       'Billing','Collection','Total','%','Total','%','Plan','Actual','Plan','Actual','Total','Work %','Total','Work %','Billing','Collection']
+       'Billing','Collection','Total','%','Total','%','ABP','Actual','ABP','Actual','Total','Work %','Total','Work %','Billing','Collection']
       .map((x, i) => `<th class="lb${SEP.includes(i-2)?' sep':''}">${x}</th>`).join('')
     + '</tr></thead><tbody>';
   if (!rows.length){
@@ -1219,7 +1247,7 @@ function renderCharts(){
     barChart('ch1','lg1','tp1', months, 'Billing', last, ['var(--bill-pl)', 'var(--bill-ac)']);
     barChart('ch2','lg2','tp2', months, 'Collection', last, ['var(--col-pl)', 'var(--col-ac)']);
   }
-  const sub = `${cum ? 'Cumulative' : 'Planned vs actual'} &middot; &#8377; Cr &middot; ${esc(name)}`;
+  const sub = `${cum ? 'Cumulative' : 'ABP vs actual'} &middot; &#8377; Cr &middot; ${esc(name)}`;
   $('s1').innerHTML = sub; $('s2').innerHTML = sub;
 }
 
@@ -1269,8 +1297,8 @@ function barChart(svgId, legendId, tipId, months, kind, last, [cPl, cAc]){
   const svg = $(svgId);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = g + `<line id="${svgId}v" y1="${T}" y2="${base}" stroke="var(--subtle)" stroke-dasharray="3 3" style="display:none"/><rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/>`;
-  legendToggles(legendId, hid, [['pl','Planned',cPl,1],['ac','Actual',cAc,1]], renderCharts);
-  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(fy, i)}</b><br>Planned: ${pl[i].toFixed(2)}`
+  legendToggles(legendId, hid, [['pl','ABP',cPl,1],['ac','Actual',cAc,1]], renderCharts);
+  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(fy, i)}</b><br>ABP:${pl[i].toFixed(2)}`
     + (i <= last ? `<br>Actual: ${ac[i].toFixed(2)}` : ''));
 }
 
@@ -1294,8 +1322,8 @@ function cumChart(svgId, legendId, tipId, months, kind, last){
   const path = (arr, key, dash) => hid.has(key) ? '' : `<path d="${arr.map((v,i) => v == null ? null : x(i)+','+y(v)).filter(Boolean).map((pt,i) => (i?'L':'M')+pt).join('')}" fill="none" stroke="var(--${key})" stroke-width="2.5" ${dash?'stroke-dasharray="6 5"':''}/>`;
   g += path(pl,'pl') + path(ac,'ac') + path(fc,'fc',1);
   $(svgId).innerHTML = g + `<line id="${svgId}v" y1="${T}" y2="${T+ih}" stroke="var(--muted)" style="display:none"/><rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/>`;
-  legendToggles(legendId, hid, [['pl','Planned','var(--pl)'],['ac','Actual','var(--ac)'],['fc','Forecast','var(--fc)'],['mo','Actual in month','var(--mo)']], renderCharts);
-  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(state.fiscalYear, i)}</b><br>Planned: ${pl[i].toFixed(2)}`
+  legendToggles(legendId, hid, [['pl','ABP','var(--pl)'],['ac','Actual','var(--ac)'],['fc','Forecast','var(--fc)'],['mo','Actual in month','var(--mo)']], renderCharts);
+  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(state.fiscalYear, i)}</b><br>ABP:${pl[i].toFixed(2)}`
     + (i <= last ? `<br>Actual: ${ac[i].toFixed(2)}<br>In month: ${mo[i].toFixed(2)}` : fc[i] != null ? `<br>Forecast: ${fc[i].toFixed(2)}` : ''));
 }
 
@@ -1324,7 +1352,6 @@ $('addProjectBtn').onclick = () => {
     <div class="mf"><label>Name</label><input id="npName" type="text"></div>
     <div class="mf"><label>Type</label><select id="npType"><option value="FLS">FLS</option><option value="DPR">DPR</option></select></div>
     <div class="mf"><label>Work order value (&#8377; Cr)</label><input id="npWo" type="number" step="0.01"></div>
-    <div class="mf"><label>Division</label><input id="npDiv" type="text"></div>
     <div class="mf"><label>Responsible person</label><input id="npResp" type="text"></div>
     <div class="mf"><label>Stage</label><input id="npStage" type="text"></div>
     <div class="actions"><button type="button" id="npCancel">Cancel</button><button type="button" class="primary" id="npSave">Save</button></div>`);
@@ -1333,7 +1360,7 @@ $('addProjectBtn').onclick = () => {
     try {
       await api('/projects', { method: 'POST', body: {
         code: Number($('npCode').value), name: $('npName').value.trim(), type: $('npType').value, woValueCr: Number($('npWo').value) || 0,
-        division: $('npDiv').value.trim() || null, responsiblePerson: $('npResp').value.trim() || null, stage: $('npStage').value.trim() || null,
+        responsiblePerson: $('npResp').value.trim() || null, stage: $('npStage').value.trim() || null,
       }});
       closeModal(); toast('Project added'); loadAll();
     } catch (err) { toast(err.message, true); }
@@ -1341,25 +1368,47 @@ $('addProjectBtn').onclick = () => {
 };
 
 /* ---------- Financials modal ---------- */
+// ABP billing / ABP collection freeze once saved non-zero (enforced server-side);
+// a pmo then raises a change request that admin/mgmt approve. Admin edits directly.
+const FROZEN_LABEL = { planBilling: 'ABP billing', planCollection: 'ABP collection' };
+function openModal2(html){ $('modal2Box').innerHTML = html; $('modal2').classList.add('on'); }
+function closeModal2(){ $('modal2').classList.remove('on'); }
+$('modal2').addEventListener('click', (e) => { if (e.target.id === 'modal2') closeModal2(); });
+
 async function openFinancialsModal(projectId){
   const p = state.projects.find((x) => x.id === projectId);
-  const { months } = await api(`/projects/${projectId}/financials?fiscalYear=${state.fiscalYear}`);
+  const [{ months }, { requests }] = await Promise.all([
+    api(`/projects/${projectId}/financials?fiscalYear=${state.fiscalYear}`),
+    // Only decorates frozen cells; a failure here must not stop the figures from loading.
+    api(`/projects/${projectId}/financials/change-requests?fiscalYear=${state.fiscalYear}`).catch(() => ({ requests: [] })),
+  ]);
   const ro = !canEdit();
+  const pending = new Map(requests.map((r) => [`${r.monthIndex}:${r.field}`, r]));
+  const planInput = (m, k) => {
+    const v = m[k];
+    if (!ro && Number(v) !== 0 && state.user.role !== 'admin') {
+      const rq = pending.get(`${m.monthIndex}:${k}`);
+      const title = rq ? `Change to ${rq.newValue} requested — awaiting management approval` : 'Frozen — click to request a change';
+      return `<input data-k="${k}" data-frozen="1" class="frozen${rq ? ' req-pending' : ''}" value="${v}" readonly title="${esc(title)}">`;
+    }
+    return `<input data-k="${k}" value="${v}" ${ro?'disabled':''}>`;
+  };
   const rowHtml = (m) => `<tr><td>${MONTHS[m.monthIndex]}</td>
-    <td><input data-k="planBilling" value="${m.planBilling}" ${ro?'disabled':''}></td>
+    <td>${planInput(m, 'planBilling')}</td>
     <td><input data-k="actualBilling" value="${m.actualBilling}" ${ro?'disabled':''}></td>
-    <td><input data-k="planCollection" value="${m.planCollection}" ${ro?'disabled':''}></td>
+    <td>${planInput(m, 'planCollection')}</td>
     <td><input data-k="actualCollection" value="${m.actualCollection}" ${ro?'disabled':''}></td>
     <td><input data-k="expenditure" value="${m.expenditure}" ${ro?'disabled':''}></td>
     <td><input data-k="forecastBilling" value="${m.forecastBilling}" ${ro?'disabled':''}></td>
     <td><input data-k="forecastCollection" value="${m.forecastCollection}" ${ro?'disabled':''}></td></tr>`;
   openModal(`<h3>${esc(p.name)} (${p.code})</h3><p class="ctx">FY ${state.fiscalYear}-${String((state.fiscalYear+1)%100).padStart(2,'0')} monthly figures, &#8377; Cr${ro?' &middot; read-only':''}</p>
-    <table class="mtbl"><thead><tr><th>Month</th><th>Plan billing</th><th>Actual billing</th><th>Plan collection</th><th>Actual collection</th><th>Expenditure</th><th>Forecast billing</th><th>Forecast collection</th></tr></thead>
+    ${!ro && state.user.role === 'pmo' ? '<p class="mtbl-hint">ABP billing and ABP collection are frozen once saved. Click a locked cell to request a change.</p>' : ''}
+    <table class="mtbl"><thead><tr><th>Month</th><th>ABP billing</th><th>Actual billing</th><th>ABP collection</th><th>Actual collection</th><th>Expenditure</th><th>Forecast billing</th><th>Forecast collection</th></tr></thead>
     <tbody id="finRows">${months.map(rowHtml).join('')}</tbody></table>
     <div class="actions"><button type="button" id="finClose">${ro?'Close':'Cancel'}</button>${ro?'':'<button type=\"button\" class=\"primary\" id=\"finSave\">Save all</button>'}</div>`);
   $('finClose').onclick = closeModal;
   if (!ro) {
-    $('finSave').onclick = async () => {
+    const doSave = async () => {
       const rows = Array.from(document.querySelectorAll('#finRows tr'));
       try {
         await Promise.all(rows.map((tr, i) => {
@@ -1370,7 +1419,94 @@ async function openFinancialsModal(projectId){
         closeModal(); toast('Financials saved'); loadAll();
       } catch (err) { toast(err.message, true); }
     };
+    $('finSave').onclick = () => {
+      // ABP cells going from 0 to a value are about to freeze -- confirm first.
+      const toFreeze = [];
+      document.querySelectorAll('#finRows tr').forEach((tr, i) => {
+        ['planBilling', 'planCollection'].forEach((k) => {
+          const val = Number(tr.querySelector(`input[data-k="${k}"]`).value) || 0;
+          if (val !== 0 && Number(months[i][k]) === 0) toFreeze.push(`${MONTHS[i]} &ndash; ${FROZEN_LABEL[k]}: ${val}`);
+        });
+      });
+      if (!toFreeze.length) return doSave();
+      openModal2(`<h3>Freeze ABP figures?</h3>
+        <p class="ctx">${esc(p.name)} (${p.code}) &middot; ${fyLabel(state.fiscalYear)}</p>
+        <div class="freeze-note"><span data-ic="lock-keyhole" data-s="18"></span><span>Once saved, ABP billing and ABP collection <b>cannot be changed without management permission</b>.</span></div>
+        <ul class="freeze-list">${toFreeze.map((t) => `<li>${t}</li>`).join('')}</ul>
+        <div class="actions"><button type="button" id="frzBack">Go back</button><button type="button" class="primary" id="frzOk">Save &amp; freeze</button></div>`);
+      hydrateIcons($('modal2Box'));
+      $('frzBack').onclick = closeModal2;
+      $('frzOk').onclick = () => { closeModal2(); doSave(); };
+    };
+    $('finRows').addEventListener('click', (e) => {
+      const inp = e.target.closest('input[data-frozen]');
+      if (!inp) return;
+      const mi = Array.from($('finRows').children).indexOf(inp.closest('tr'));
+      const k = inp.dataset.k;
+      if (pending.has(`${mi}:${k}`)) return toast('A change request for this figure is already pending', true);
+      openModal2(`<h3>Request change</h3>
+        <p class="ctx">${esc(p.name)} (${p.code}) &middot; ${MONTHS[mi]} ${fyLabel(state.fiscalYear)} &middot; ${FROZEN_LABEL[k]}</p>
+        <div class="mf"><label>Current value (&#8377; Cr)</label><input value="${esc(inp.value)}" disabled></div>
+        <div class="mf"><label>Requested value (&#8377; Cr)</label><input id="crVal" type="number" step="any" min="0"></div>
+        <div class="mf"><label>Reason</label><textarea id="crReason" placeholder="Why does this figure need to change?"></textarea></div>
+        <div class="actions"><button type="button" id="crCancel">Cancel</button><button type="button" class="primary" id="crSend">Send for approval</button></div>`);
+      $('crCancel').onclick = closeModal2;
+      $('crSend').onclick = async () => {
+        try {
+          await api(`/projects/${projectId}/financials/${state.fiscalYear}/${mi}/change-requests`, {
+            method: 'POST', body: { field: k, newValue: Number($('crVal').value), reason: $('crReason').value.trim() },
+          });
+          pending.set(`${mi}:${k}`, { newValue: $('crVal').value });
+          inp.classList.add('req-pending');
+          inp.title = `Change to ${$('crVal').value} requested — awaiting management approval`;
+          closeModal2(); toast('Change request sent for management approval'); refreshReqBadge();
+        } catch (err) { toast(err.message, true); }
+      };
+    });
   }
+}
+
+/* ---------- Financial change requests (approvals inbox) ---------- */
+const isApprover = () => state.user && (state.user.role === 'admin' || state.user.role === 'mgmt');
+async function refreshReqBadge(){
+  if (!isApprover()) return;
+  try {
+    const { requests } = await api('/financial-change-requests?status=pending');
+    $('reqDot').hidden = !requests.length; $('reqDot').textContent = requests.length;
+  } catch {}
+}
+setInterval(refreshReqBadge, 60000);
+$('reqBtn').onclick = openRequestsInbox;
+async function openRequestsInbox(){
+  let requests;
+  try { ({ requests } = await api('/financial-change-requests')); } catch (err) { return toast(err.message, true); }
+  const approver = isApprover();
+  const item = (r) => `<div class="rq-item">
+    <div class="rq-top"><strong>${esc(r.projectName)} (${r.projectCode})</strong><span class="rq-st ${r.status}">${r.status}</span></div>
+    <p class="rq-chg">${FROZEN_LABEL[r.field]} &middot; ${MONTHS[r.monthIndex]} ${fyLabel(r.fiscalYear)}: <s>${r.oldValue}</s> &rarr; <b>${r.newValue}</b> &#8377; Cr</p>
+    <p class="rq-reason">&ldquo;${esc(r.reason)}&rdquo;</p>
+    <p class="rq-meta">Requested by ${esc(r.requestedBy)} &middot; ${esc(r.requestedAt)}${r.decidedBy
+      ? `<br>${r.status} by ${esc(r.decidedBy)} &middot; ${esc(r.decidedAt)}${r.decisionNote ? ' &mdash; ' + esc(r.decisionNote) : ''}` : ''}</p>
+    ${approver && r.status === 'pending' ? `<div class="rq-act"><input data-note placeholder="Note (optional)" maxlength="300">
+      <button type="button" class="ok" data-approve="${r.id}">Approve</button><button type="button" class="no" data-reject="${r.id}">Reject</button></div>` : ''}
+  </div>`;
+  openModal(`<h3>${approver ? 'Financial change requests' : 'My change requests'}</h3>
+    <p class="ctx">${approver ? 'Approving applies the new ABP figure immediately.' : 'Requests to change frozen ABP figures, and their outcome.'}</p>
+    <div class="rq-list">${requests.length ? requests.map(item).join('') : '<p class="ctx">No change requests.</p>'}</div>
+    <div class="actions"><button type="button" id="rqClose">Close</button></div>`);
+  $('rqClose').onclick = closeModal;
+  const decide = (id, verb, el) => async () => {
+    const note = el.closest('.rq-item').querySelector('[data-note]').value.trim();
+    try {
+      await api(`/financial-change-requests/${id}/${verb}`, { method: 'POST', body: { note } });
+      toast(verb === 'approve' ? 'Change approved and applied' : 'Change rejected');
+      refreshReqBadge();
+      if ($('dashView').classList.contains('on')) loadAll();
+      openRequestsInbox();
+    } catch (err) { toast(err.message, true); }
+  };
+  document.querySelectorAll('#modalBox [data-approve]').forEach((b) => b.onclick = decide(b.dataset.approve, 'approve', b));
+  document.querySelectorAll('#modalBox [data-reject]').forEach((b) => b.onclick = decide(b.dataset.reject, 'reject', b));
 }
 
 /* ---------- Alerts ---------- */
@@ -1466,8 +1602,7 @@ function openListPopup(cardId, context){
       e.stopPropagation();
       orig.querySelector(`button[data-id="${b.dataset.id}"]`).click();
       li.remove();
-    });
-  });
+    });  });
 }
 ['alertsCard', 'pendingCard'].forEach((id) => bindListPopup(id, () => 'All projects'));
 $('alertToggle').onclick = () => setAddOpen('alertAdd', 'alertToggle', $('alertAdd').style.display === 'none');
@@ -1478,8 +1613,7 @@ $('alertAddBtn').onclick = async () => {
   $('alertMsg').value=''; $('alertDue').value=''; setAddOpen('alertAdd', 'alertToggle', false); loadAll();
 };
 
-/* ---------- Pending actions ---------- */
-function renderPending(items){
+/* ---------- Pending actions ---------- */function renderPending(items){
   const editable = canEdit();
   $('pendCount').textContent = items.length;
   $('pendList').innerHTML = items.length
@@ -1489,8 +1623,7 @@ function renderPending(items){
     e.stopPropagation();
     await api(`/pending/${b.dataset.id}/done`, { method: 'PATCH' }); loadAll();
   });
-  bindAlertNav('#pendList');
-  $('pendToggle').style.display = editable ? '' : 'none';
+  bindAlertNav('#pendList');  $('pendToggle').style.display = editable ? '' : 'none';
   if (!editable) setAddOpen('pendAdd', 'pendToggle', false);
 }
 $('pendToggle').onclick = () => setAddOpen('pendAdd', 'pendToggle', $('pendAdd').style.display === 'none');
@@ -1594,8 +1727,7 @@ function renderProjectPending(items){
     e.stopPropagation();
     await api(`/pending/${b.dataset.id}/done`, { method: 'PATCH' }); loadProjectAlertsPending();
   });
-  bindProjectAlertNav('#pdPendList');
-  $('pdPendToggle').style.display = editable ? '' : 'none';
+  bindProjectAlertNav('#pdPendList');  $('pdPendToggle').style.display = editable ? '' : 'none';
   if (!editable) setAddOpen('pdPendAdd', 'pdPendToggle', false);
 }
 $('pdAlertToggle').onclick = () => setAddOpen('pdAlertAdd', 'pdAlertToggle', $('pdAlertAdd').style.display === 'none');

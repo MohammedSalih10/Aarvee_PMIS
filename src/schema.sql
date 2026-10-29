@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS projects (
   name TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('FLS','DPR')),
   wo_value_cr REAL NOT NULL DEFAULT 0,
-  division TEXT,
   responsible_person TEXT,
   stage TEXT,
   -- Project dashboard (mockup page 3) header fields.
@@ -169,6 +168,26 @@ CREATE TABLE IF NOT EXISTS financial_entries (
   updated_by TEXT,
   updated_at TEXT,
   UNIQUE(project_id, fiscal_year, month_index)
+);
+
+-- ABP billing / ABP collection are frozen once a non-zero value is saved (see
+-- financials.routes.js). A pmo changes a frozen figure by filing a request here;
+-- an admin or mgmt user approves (value is applied) or rejects it.
+CREATE TABLE IF NOT EXISTS financial_change_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  fiscal_year INTEGER NOT NULL,
+  month_index INTEGER NOT NULL CHECK(month_index BETWEEN 0 AND 11),
+  field TEXT NOT NULL CHECK(field IN ('planBilling','planCollection')),
+  old_value REAL NOT NULL,
+  new_value REAL NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+  requested_by TEXT NOT NULL,
+  requested_at TEXT NOT NULL DEFAULT (datetime('now')),
+  decided_by TEXT,
+  decided_at TEXT,
+  decision_note TEXT
 );
 
 CREATE TABLE IF NOT EXISTS alerts (
