@@ -114,6 +114,35 @@ CREATE TABLE IF NOT EXISTS project_column_progress (
   UNIQUE(project_id, column_id)
 );
 
+-- Optional payment-milestone header band (KD 1, KD 2 ...) above a project's
+-- activity columns, per tab. Each milestone carries a claim weightage (all of
+-- a project+tab's milestones sum to 100) and owns a set of columns. A project
+-- opts in by saving milestones; percent_basis picks whether the corridor
+-- "% Complete" is weighted by column weightage ('column', the default) or by
+-- these milestone weightages ('kd'). No rows = no band, plain column basis.
+CREATE TABLE IF NOT EXISTS project_milestone_config (
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+  percent_basis TEXT NOT NULL DEFAULT 'column' CHECK(percent_basis IN ('column','kd')),
+  PRIMARY KEY (project_id, tab)
+);
+
+CREATE TABLE IF NOT EXISTS project_milestones (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+  label TEXT NOT NULL,
+  weightage REAL NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0
+);
+
+-- A column belongs to at most one milestone (enforced on save).
+CREATE TABLE IF NOT EXISTS project_milestone_columns (
+  milestone_id INTEGER NOT NULL REFERENCES project_milestones(id) ON DELETE CASCADE,
+  column_id INTEGER NOT NULL REFERENCES activity_columns(id) ON DELETE CASCADE,
+  PRIMARY KEY (milestone_id, column_id)
+);
+
 -- tentative_date's meaning follows the cell's status (tentative start/finish/
 -- approval -- src/activityConstants.js: TENTATIVE_DATE_LABEL). While the cell
 -- is Yet to Start or In Progress, deriveCellAlert alerts from ALERT_LEAD_DAYS
@@ -122,8 +151,15 @@ CREATE TABLE IF NOT EXISTS activity_cells (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   activity_id INTEGER NOT NULL REFERENCES project_activities(id) ON DELETE CASCADE,
   column_key TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'YTS' CHECK(status IN ('YTS','IP','OH','SUB','APP','NA')),
+  status TEXT NOT NULL DEFAULT 'YTS' CHECK(status IN ('YTS','IP','OH','SUB','CC','APP','NA')),
   tentative_date TEXT,
+  -- Only meaningful while status is Yet to Start (alongside the tentative
+  -- start date); cleared on any other status.
+  planned_finish_date TEXT,
+  -- Comment Compliance revision number. Kept (not cleared) when the status
+  -- moves on, so the cell can't be reset to revision 1 to dodge the
+  -- management/admin approval needed beyond MAX_FREE_REVISION.
+  revision INTEGER,
   remarks TEXT,
   signed INTEGER NOT NULL DEFAULT 0,
   updated_by TEXT,
@@ -138,9 +174,28 @@ CREATE TABLE IF NOT EXISTS activity_audit_log (
   column_key TEXT NOT NULL,
   from_status TEXT,
   to_status TEXT,
+  revision INTEGER, -- Comment Compliance revision recorded by this entry
   remarks TEXT,
   updated_by TEXT NOT NULL,
   updated_at TEXT NOT NULL
+);
+
+-- Comment Compliance revisions beyond MAX_FREE_REVISION: raised by whoever has
+-- edit access to the cell, applied to the cell when admin/mgmt approve.
+CREATE TABLE IF NOT EXISTS activity_revision_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  activity_id INTEGER NOT NULL REFERENCES project_activities(id) ON DELETE CASCADE,
+  column_key TEXT NOT NULL,
+  from_revision INTEGER NOT NULL,
+  to_revision INTEGER NOT NULL,
+  approval_date TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+  requested_by TEXT NOT NULL,
+  requested_at TEXT NOT NULL DEFAULT (datetime('now')),
+  decided_by TEXT,
+  decided_at TEXT,
+  decision_note TEXT
 );
 
 CREATE TABLE IF NOT EXISTS activity_attachments (
@@ -188,6 +243,32 @@ CREATE TABLE IF NOT EXISTS financial_change_requests (
   decided_by TEXT,
   decided_at TEXT,
   decision_note TEXT
+);
+
+-- Contractual end date is frozen once set; a pmo raises a request, admin/mgmt decide it.
+CREATE TABLE IF NOT EXISTS contract_end_change_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  old_value TEXT NOT NULL,
+  new_value TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+  requested_by TEXT NOT NULL,
+  requested_at TEXT NOT NULL DEFAULT (datetime('now')),
+  decided_by TEXT,
+  decided_at TEXT,
+  decision_note TEXT
+);
+
+-- Which approved/rejected change requests (any kind: 'fin' ABP figure, 'end'
+-- contractual end date, 'rev' Comment Compliance revision) the requester has
+-- already looked at, so the inbox badge only counts new results.
+CREATE TABLE IF NOT EXISTS request_result_seen (
+  username TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK(kind IN ('fin','end','rev')),
+  request_id INTEGER NOT NULL,
+  seen_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (username, kind, request_id)
 );
 
 CREATE TABLE IF NOT EXISTS alerts (

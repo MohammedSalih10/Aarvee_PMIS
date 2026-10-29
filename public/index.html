@@ -29,6 +29,7 @@
   --act-sub:#C6EFCE;--act-sub-ink:#1E6B33;--act-app:#70AD47;--act-app-ink:#FFFFFF;
   --act-hold:#a19f9f;--act-hold-ink:#5D7387;--act-ip:#FFCC80;--act-ip-ink:#7A4A00;
   --act-ipb:#FFF200;--act-ipb-ink:#5C5400;--act-ytsb:#f86d7d;--act-ytsb-ink:#9C1F28;
+  --act-cc:#D9D2F3;--act-cc-ink:#4B3A8C;--act-ccr:#E8A0B8;--act-ccr-ink:#6B0F2E;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -43,6 +44,7 @@
     --act-sub:#1B3A26;--act-sub-ink:#8FD4A5;--act-app:#2F6B32;--act-app-ink:#D8F5DB;
     --act-hold:#334455;--act-hold-ink:#A9BBCB;--act-ip:#5C3A14;--act-ip-ink:#FFC98A;
     --act-ipb:#5A5212;--act-ipb-ink:#FFF29E;--act-ytsb:#4A1E22;--act-ytsb-ink:#FF9AA2;
+    --act-cc:#2B2650;--act-cc-ink:#C9C2F5;--act-ccr:#5A1B33;--act-ccr-ink:#FFB3C9;
     color-scheme:dark;
   }
   :root:not([data-theme="light"]) .auth-msg h2,
@@ -59,6 +61,7 @@
   --act-sub:#1B3A26;--act-sub-ink:#8FD4A5;--act-app:#2F6B32;--act-app-ink:#D8F5DB;
   --act-hold:#334455;--act-hold-ink:#A9BBCB;--act-ip:#5C3A14;--act-ip-ink:#FFC98A;
   --act-ipb:#5A5212;--act-ipb-ink:#FFF29E;--act-ytsb:#4A1E22;--act-ytsb-ink:#FF9AA2;
+  --act-cc:#2B2650;--act-cc-ink:#C9C2F5;--act-ccr:#5A1B33;--act-ccr-ink:#FFB3C9;
   color-scheme:dark;
 }
 :root[data-theme="dark"] .auth-msg h2,
@@ -369,6 +372,8 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 .kl{padding:11px 12px 11px 0;border-bottom:1px solid var(--border);font-size:14.5px;color:var(--muted)}
 .kv{padding:11px 0;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .kvs > :nth-last-child(-n+2){border-bottom:0}
+.kv.req-pending{color:var(--amber-ink)}
+.kv.req-changed{color:var(--success)}
 .bud-wrap{display:flex;align-items:center;gap:12px}
 .bud-legend{display:flex;flex:1;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
 .bud-legend i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:3px;vertical-align:-1px}
@@ -391,6 +396,8 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 
 /* ACTIVITY VIEW */
 .chips{display:flex;gap:8px;flex-wrap:wrap}
+/* Activity matrix legend chips sit at the right edge of the card header. */
+#statusChips{margin-left:auto;justify-content:flex-end}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);font-size:14px;font-weight:600}
 .chip.on{box-shadow:0 0 0 2px var(--ink)}
 /* Bounded height + its own scrollbars, so the horizontal scrollbar sits right
@@ -412,6 +419,23 @@ table.agrid thead th.frz{background:var(--head);z-index:4}
 table.agrid td.frz.line{background:var(--primary-soft)}
 table.agrid td.frz.pin{background:var(--head)}
 table.agrid th.frz.frz-end,table.agrid td.frz.frz-end{box-shadow:inset -1px 0 var(--border-strong)}
+/* Separate (not collapsed) borders: collapsed ones don't travel with sticky
+   cells, which left a gap between the two header rows while scrolling. */
+table.agrid{border-collapse:separate;border-spacing:0}
+table.agrid thead th.kd{background:var(--primary-soft);color:var(--primary);font-weight:700;border-top:2px solid var(--primary);border-bottom:2px solid var(--primary)}
+table.agrid thead tr:nth-child(2) th{border-top:0}
+table.agrid thead th.kd small{display:block;font-size:12px;font-weight:600}
+table.agrid thead th.kd-none{background:var(--head);border-top:0;border-bottom:1px solid var(--border)}
+/* KD edges: a solid line down the left of every KD's first column (and the
+   right of its last when no other KD follows), through header and body. */
+table.agrid td.kd-l,table.agrid td.kd-r{position:relative}
+/* top/bottom -1px: run over each cell's 1px bottom border (outside the
+   positioned box) so the line stays unbroken between rows. */
+table.agrid .kd-l::before,table.agrid .kd-r::after{content:'';position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--primary);pointer-events:none}
+table.agrid thead th.kd-l::before,table.agrid thead th.kd-r::after{top:-2px;bottom:-2px}
+table.agrid .kd-l::before{left:0}
+table.agrid .kd-r::after{right:0}
+table.agrid thead th small.kd-basis{display:block;font-size:11px;font-weight:500}
 .g-YTS{background:var(--danger-soft);color:var(--danger)}
 .g-IP{background:var(--warning-soft);color:var(--amber-ink)}
 .g-OH{background:var(--primary-soft);color:var(--primary)}
@@ -419,12 +443,20 @@ table.agrid th.frz.frz-end,table.agrid td.frz.frz-end{box-shadow:inset -1px 0 va
 .g-NA{color:var(--subtle)}
 .g-BEHIND{background:var(--danger);color:#fff}
 .chip.g-C,.chip.g-IP,.chip.g-OH,.chip.g-YTS,.chip.g-BEHIND,
-.chip.cs-SUB,.chip.cs-APP,.chip.cs-OH,.chip.cs-IP,.chip.cs-IPB,.chip.cs-YTSB{border-color:transparent}
+.chip.cs-SUB,.chip.cs-CC,.chip.cs-CCR,.chip.cs-APP,.chip.cs-OH,.chip.cs-IP,.chip.cs-IPB,.chip.cs-YTSB{border-color:transparent}
 /* Activity matrix cell colors -- Submitted/Approved/Hold/In Progress kept
    distinct, and "behind schedule" (deriveCellAlert's 'overdue') folds into
    the fill itself instead of only a border, per the activity-matrix legend. */
 .cs-SUB{background:var(--act-sub);color:var(--act-sub-ink)}
 .cs-APP{background:var(--act-app);color:var(--act-app-ink)}
+.cs-CC{background:var(--act-cc);color:var(--act-cc-ink)}
+.cs-CCR{background:var(--act-ccr);color:var(--act-ccr-ink)}
+.histrow.rej{border-left:3px solid var(--danger);background:var(--danger-soft);padding-left:8px}
+.histrow.req{border-left:3px solid var(--warning);background:var(--warning-soft);padding-left:8px}
+.histrow.ok{border-left:3px solid var(--success);background:var(--success-soft);padding-left:8px}
+.cc-rej-note{margin:0 0 10px;padding:8px 10px;border-radius:8px;background:var(--danger-soft);color:var(--danger);font-size:13px}
+.cell-hist{margin:12px 0 0;max-height:190px;overflow:auto;border-top:1px solid var(--border);padding-top:8px}
+.cell-hist h4{margin:0 0 6px;font-size:13px}
 .cs-OH{background:var(--act-hold);color:var(--act-hold-ink)}
 .cs-IP{background:var(--act-ip);color:var(--act-ip-ink)}
 .cs-IPB{background:var(--act-ipb);color:var(--act-ipb-ink)}
@@ -475,6 +507,10 @@ table.sgrid td.n{min-width:160px;text-align:left;white-space:normal}
 .eg-col-name{font-weight:600;font-size:15px;word-break:break-word}
 .eg-col .eg-weight{width:64px;height:32px;padding:0 6px}
 .eg-col-weight{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:14px}
+.eg-col select.eg-col-ms{width:100%;height:30px;padding:0 4px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);font-size:13px}
+.eg-ms{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.eg-ms .eg-ms-label{width:150px;height:34px;padding:0 10px}
+.eg-ms .eg-ms-weight{width:70px;height:34px;padding:0 6px}
 .eg-col-actions{display:flex;gap:4px}
 .eg-col-form{width:160px;align-items:stretch}
 .eg-col-form input{margin-bottom:8px}
@@ -485,17 +521,21 @@ table.mtbl th{padding:6px 4px;color:var(--muted);font-size:12.5px;font-weight:60
 table.mtbl td{padding:3px 4px}
 table.mtbl input{width:84px;height:32px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);font-size:14.5px}
 table.mtbl input:disabled{background:var(--head);color:var(--muted)}
-table.mtbl input.frozen{background:var(--head);color:var(--muted);cursor:pointer;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:12px}
-table.mtbl input.frozen.req-pending{background-color:var(--warning-soft);color:var(--amber-ink);border-color:var(--warning)}
+table.mtbl input.frozen,.mf input.frozen{background:var(--head);color:var(--muted);cursor:pointer;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:12px}
+table.mtbl input.frozen.req-pending,.mf input.frozen.req-pending{background-color:var(--warning-soft);color:var(--amber-ink);border-color:var(--warning)}
+table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--success-soft);color:var(--success);border-color:var(--success);font-weight:600}
 .mtbl-hint{margin:-8px 0 8px;font-size:13.5px;color:var(--muted)}
 .rq-list{display:flex;flex-direction:column;gap:10px}
 .rq-item{padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.rq-item.rq-nav{cursor:pointer}
+.rq-item.rq-nav:hover{background:var(--head)}
 .rq-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
 .rq-top strong{font-size:15px}
 .rq-chg{margin:6px 0 2px;font-size:15px}.rq-chg s{color:var(--muted)}
 .rq-meta{margin:0;font-size:13.5px;color:var(--muted)}
 .rq-reason{margin:6px 0 0;font-size:14.5px}
 .rq-st{display:inline-flex;padding:2px 9px;border-radius:10px;font-size:12.5px;font-weight:700;text-transform:capitalize}
+.rq-new{display:inline-flex;margin-left:6px;padding:2px 8px;border-radius:10px;font-size:11.5px;font-weight:700;background:var(--primary);color:var(--on-primary)}
 .rq-st.pending{background:var(--warning-soft);color:var(--amber-ink)}.rq-st.approved{background:var(--success-soft);color:var(--success)}.rq-st.rejected{background:var(--danger-soft);color:var(--danger)}
 .rq-act{display:flex;gap:8px;align-items:center;margin-top:10px}
 .rq-act input{flex:1;min-width:0;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);font-size:14px}
@@ -1184,17 +1224,18 @@ $('exportBtn').onclick = () => {
 };
 
 /* Detailed MIS table — column layout follows the mockup (lifecycle, ABP YTD,
-   first two months of the quarter, quarter totals). */
+   the three months of the quarter, quarter totals). */
 function misTableHtml(rows){
   const q = state.quarter, fy = state.fiscalYear, cutoff = q * 3 - 1;
-  const iA = (q - 1) * 3, iB = iA + 1, qIdx = [iA, iA + 1, iA + 2];
+  const iA = (q - 1) * 3, iB = iA + 1, iC = iA + 2, qIdx = [iA, iA + 1, iA + 2];
   const calc = (p) => {
-    const L = p.lifetime, mg = L.billing - L.expenditure, A = p.months[iA], B = p.months[iB];
+    const L = p.lifetime, mg = L.billing - L.expenditure, A = p.months[iA], B = p.months[iB], C = p.months[iC];
     return {
       wo: p.woValueCr, tb: L.billing, tc: L.collection, ex: L.expenditure, mg,
       abpB: p.ytd.planBilling, abpC: p.ytd.planCollection, yb: p.ytd.actualBilling, yc: p.ytd.actualCollection,
       aPB: A.planBilling, aAB: A.actualBilling, aPC: A.planCollection, aAC: A.actualCollection,
       bAB: B.actualBilling, bPB: B.planBilling, bAC: B.actualCollection, bPC: B.planCollection,
+      cAB: C.actualBilling, cPB: C.planBilling, cAC: C.actualCollection, cPC: C.planCollection,
       qb: qIdx.reduce((s, i) => s + p.months[i].actualBilling, 0), qc: qIdx.reduce((s, i) => s + p.months[i].actualCollection, 0),
     };
   };
@@ -1204,22 +1245,23 @@ function misTableHtml(rows){
     fmt(x.abpB), fmt(x.abpC), fmt(x.yb), pct(div(x.yb, x.abpB)), fmt(x.yc), pct(div(x.yc, x.abpC)),
     fmt(x.aPB), fmt(x.aAB), fmt(x.aPC), fmt(x.aAC),
     fmt(x.bAB), pct(div(x.bAB, x.bPB)), fmt(x.bAC), pct(div(x.bAC, x.bPC)),
+    fmt(x.cAB), pct(div(x.cAB, x.cPB)), fmt(x.cAC), pct(div(x.cAC, x.cPC)),
     fmt(x.qb), fmt(x.qc),
   ];
-  const SEP = [6, 12, 16, 20]; // first column of each dashed group (index into cells())
+  const SEP = [6, 12, 16, 20, 24]; // first column of each dashed group (index into cells())
   const td = (v, i) => `<td class="num${SEP.includes(i)?' sep':''}">${v}</td>`;
   let html = `<thead><tr><th class="grp" colspan="2" rowspan="2">Railways<br>(Till ${monLabel(fy, cutoff)})</th><th class="grp" colspan="6" rowspan="2">&#10227; Lifecycle</th>
     <th class="grp sep" colspan="6">ABP ${fy%100}-${(fy+1)%100} YTD</th><th class="grp sep" colspan="4">${monLabel(fy, iA)}</th>
-    <th class="grp sep" colspan="4">${monLabel(fy, iB)}</th><th class="grp sep" colspan="2">Q${q}</th><th class="grp" rowspan="3"></th></tr>
+    <th class="grp sep" colspan="4">${monLabel(fy, iB)}</th><th class="grp sep" colspan="4">${monLabel(fy, iC)}</th><th class="grp sep" colspan="2">Q${q}</th><th class="grp" rowspan="3"></th></tr>
     <tr><th class="grp sep" colspan="2">ABP</th><th class="grp" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
-    <th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th><th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
+    <th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th><th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th><th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
     <th class="grp sep"></th><th class="grp"></th></tr><tr>`
     + ['Project code','Project name','Work Order Value','Total billing (Inc GST)','Total collection (Inc GST)','Expenditure (Inc GST)','Margin','Margin %',
-       'Billing','Collection','Total','%','Total','%','ABP','Actual','ABP','Actual','Total','Work %','Total','Work %','Billing','Collection']
+       'Billing','Collection','Total','%','Total','%','ABP','Actual','ABP','Actual','Total','Work %','Total','Work %','Total','Work %','Total','Work %','Billing','Collection']
       .map((x, i) => `<th class="lb${SEP.includes(i-2)?' sep':''}">${x}</th>`).join('')
     + '</tr></thead><tbody>';
   if (!rows.length){
-    html += `<tr><td colspan="25" class="empty">${state.search ? 'No projects match your search.' : 'No projects assigned to you yet.'}</td></tr>`;
+    html += `<tr><td colspan="29" class="empty">${state.search ? 'No projects match your search.' : 'No projects assigned to you yet.'}</td></tr>`;
   } else {
     const data = rows.map(calc);
     rows.forEach((p, r) => {
@@ -1229,7 +1271,7 @@ function misTableHtml(rows){
         + `<td><button class="iconbtn" data-fin="${p.id}" title="Monthly financials">${ic('rupee', 14)}</button></td></tr>`;
     });
     const T = {}; Object.keys(data[0]).forEach((k) => { T[k] = data.reduce((a, x) => a + x[k], 0); });
-    const tot = cells(T); [17, 19].forEach((i) => { tot[i] = ''; }); // work % totals aren't meaningful
+    const tot = cells(T); [17, 19, 21, 23].forEach((i) => { tot[i] = ''; }); // work % totals aren't meaningful
     html += `<tr class="tot"><td colspan="2">Total</td>${tot.map(td).join('')}<td></td></tr>`;
   }
   return html + '</tbody>';
@@ -1377,21 +1419,27 @@ $('modal2').addEventListener('click', (e) => { if (e.target.id === 'modal2') clo
 
 async function openFinancialsModal(projectId){
   const p = state.projects.find((x) => x.id === projectId);
-  const [{ months }, { requests }] = await Promise.all([
+  const [{ months }, { requests, approved = [] }] = await Promise.all([
     api(`/projects/${projectId}/financials?fiscalYear=${state.fiscalYear}`),
     // Only decorates frozen cells; a failure here must not stop the figures from loading.
     api(`/projects/${projectId}/financials/change-requests?fiscalYear=${state.fiscalYear}`).catch(() => ({ requests: [] })),
   ]);
   const ro = !canEdit();
   const pending = new Map(requests.map((r) => [`${r.monthIndex}:${r.field}`, r]));
+  // Latest approved change per cell (list is oldest-first); only counts while the value still matches.
+  const changed = new Map(approved.map((r) => [`${r.monthIndex}:${r.field}`, r]));
   const planInput = (m, k) => {
     const v = m[k];
+    const ap = changed.get(`${m.monthIndex}:${k}`);
+    const wasChanged = ap && Number(ap.newValue) === Number(v);
+    const chgTitle = wasChanged ? `Changed from ${ap.oldValue} to ${ap.newValue} (approved by ${ap.decidedBy})` : '';
     if (!ro && Number(v) !== 0 && state.user.role !== 'admin') {
       const rq = pending.get(`${m.monthIndex}:${k}`);
-      const title = rq ? `Change to ${rq.newValue} requested — awaiting management approval` : 'Frozen — click to request a change';
-      return `<input data-k="${k}" data-frozen="1" class="frozen${rq ? ' req-pending' : ''}" value="${v}" readonly title="${esc(title)}">`;
+      const title = rq ? `Change to ${rq.newValue} requested — awaiting management approval`
+        : (wasChanged ? `${chgTitle} — click to request another change` : 'Frozen — click to request a change');
+      return `<input data-k="${k}" data-frozen="1" class="frozen${rq ? ' req-pending' : (wasChanged ? ' req-changed' : '')}" value="${v}" readonly title="${esc(title)}">`;
     }
-    return `<input data-k="${k}" value="${v}" ${ro?'disabled':''}>`;
+    return `<input data-k="${k}" class="${wasChanged ? 'req-changed' : ''}" value="${v}" ${ro?'disabled':''}${wasChanged ? ` title="${esc(chgTitle)}"` : ''}>`;
   };
   const rowHtml = (m) => `<tr><td>${MONTHS[m.monthIndex]}</td>
     <td>${planInput(m, 'planBilling')}</td>
@@ -1443,7 +1491,27 @@ async function openFinancialsModal(projectId){
       if (!inp) return;
       const mi = Array.from($('finRows').children).indexOf(inp.closest('tr'));
       const k = inp.dataset.k;
-      if (pending.has(`${mi}:${k}`)) return toast('A change request for this figure is already pending', true);
+      const open = pending.get(`${mi}:${k}`);
+      if (open) {
+        if (open.requestedBy !== state.user.username) return toast('A change request for this figure is already pending', true);
+        // Own pending request: let the user withdraw it (e.g. wrong value) and raise a corrected one.
+        openModal2(`<h3>Change request pending</h3>
+          <p class="ctx">${esc(p.name)} (${p.code}) &middot; ${MONTHS[mi]} ${fyLabel(state.fiscalYear)} &middot; ${FROZEN_LABEL[k]}</p>
+          <p class="rq-chg"><s>${open.oldValue}</s> &rarr; <b>${open.newValue}</b> &#8377; Cr</p>
+          <p class="rq-reason">&ldquo;${esc(open.reason)}&rdquo;</p>
+          <div class="actions"><button type="button" id="crKeep">Keep</button><button type="button" class="primary" id="crDelete">Delete request</button></div>`);
+        $('crKeep').onclick = closeModal2;
+        $('crDelete').onclick = async () => {
+          try {
+            await api(`/financial-change-requests/${open.id}`, { method: 'DELETE' });
+            pending.delete(`${mi}:${k}`);
+            inp.classList.remove('req-pending');
+            inp.title = 'Frozen — click to request a change';
+            closeModal2(); toast('Change request deleted'); refreshReqBadge();
+          } catch (err) { toast(err.message, true); }
+        };
+        return;
+      }
       openModal2(`<h3>Request change</h3>
         <p class="ctx">${esc(p.name)} (${p.code}) &middot; ${MONTHS[mi]} ${fyLabel(state.fiscalYear)} &middot; ${FROZEN_LABEL[k]}</p>
         <div class="mf"><label>Current value (&#8377; Cr)</label><input value="${esc(inp.value)}" disabled></div>
@@ -1453,10 +1521,12 @@ async function openFinancialsModal(projectId){
       $('crCancel').onclick = closeModal2;
       $('crSend').onclick = async () => {
         try {
-          await api(`/projects/${projectId}/financials/${state.fiscalYear}/${mi}/change-requests`, {
+          const { id } = await api(`/projects/${projectId}/financials/${state.fiscalYear}/${mi}/change-requests`, {
             method: 'POST', body: { field: k, newValue: Number($('crVal').value), reason: $('crReason').value.trim() },
           });
-          pending.set(`${mi}:${k}`, { newValue: $('crVal').value });
+          pending.set(`${mi}:${k}`, {
+            id, requestedBy: state.user.username, oldValue: inp.value, newValue: $('crVal').value, reason: $('crReason').value.trim(),
+          });
           inp.classList.add('req-pending');
           inp.title = `Change to ${$('crVal').value} requested — awaiting management approval`;
           closeModal2(); toast('Change request sent for management approval'); refreshReqBadge();
@@ -1466,47 +1536,106 @@ async function openFinancialsModal(projectId){
   }
 }
 
-/* ---------- Financial change requests (approvals inbox) ---------- */
+/* ---------- Change requests: ABP figures + contractual end date (approvals inbox) ---------- */
 const isApprover = () => state.user && (state.user.role === 'admin' || state.user.role === 'mgmt');
+// Two request kinds share this inbox: ABP figures ('fin') and the contractual end date ('end').
+// Plus Comment Compliance revisions past the free limit ('rev').
+const REQ_BASE = { fin: '/financial-change-requests', end: '/contract-end-change-requests', rev: '/revision-requests' };
 async function refreshReqBadge(){
+  // Requesters (pmo etc.) are badged for results they haven't seen yet --
+  // approved or rejected, any request kind; approvers for pending ones below.
+  if (state.user && !isApprover()) {
+    try {
+      const { count } = await api('/request-results/unseen');
+      $('reqDot').hidden = !count; $('reqDot').textContent = count;
+    } catch {}
+    return;
+  }
   if (!isApprover()) return;
   try {
-    const { requests } = await api('/financial-change-requests?status=pending');
-    $('reqDot').hidden = !requests.length; $('reqDot').textContent = requests.length;
+    const [f, e, v] = await Promise.all([api(REQ_BASE.fin + '?status=pending'), api(REQ_BASE.end + '?status=pending'), api(REQ_BASE.rev + '?status=pending')]);
+    const n = f.requests.length + e.requests.length + v.requests.length;
+    $('reqDot').hidden = !n; $('reqDot').textContent = n;
   } catch {}
 }
 setInterval(refreshReqBadge, 60000);
 $('reqBtn').onclick = openRequestsInbox;
 async function openRequestsInbox(){
   let requests;
-  try { ({ requests } = await api('/financial-change-requests')); } catch (err) { return toast(err.message, true); }
+  // Results the requester hasn't opened yet get a "New" tag; opening the inbox
+  // marks them all seen and clears the badge.
+  const unseen = new Set();
+  try {
+    if (!isApprover()) (await api('/request-results/unseen')).unseen.forEach((u) => unseen.add(`${u.kind}:${u.id}`));
+    const [f, e, v] = await Promise.all([api(REQ_BASE.fin), api(REQ_BASE.end), api(REQ_BASE.rev)]);
+    // Pending first, then newest activity first (timestamps are sortable 'YYYY-MM-DD HH:MM:SS').
+    requests = [...f.requests.map((r) => ({ ...r, kind: 'fin' })), ...e.requests.map((r) => ({ ...r, kind: 'end' })),
+      ...v.requests.map((r) => ({ ...r, kind: 'rev' }))]
+      .sort((a, b) => (b.status === 'pending') - (a.status === 'pending')
+        || (b.decidedAt || b.requestedAt).localeCompare(a.decidedAt || a.requestedAt));
+  } catch (err) { return toast(err.message, true); }
   const approver = isApprover();
-  const item = (r) => `<div class="rq-item">
-    <div class="rq-top"><strong>${esc(r.projectName)} (${r.projectCode})</strong><span class="rq-st ${r.status}">${r.status}</span></div>
-    <p class="rq-chg">${FROZEN_LABEL[r.field]} &middot; ${MONTHS[r.monthIndex]} ${fyLabel(r.fiscalYear)}: <s>${r.oldValue}</s> &rarr; <b>${r.newValue}</b> &#8377; Cr</p>
+  const change = (r) => r.kind === 'rev'
+    ? `${esc(r.corridor)} &middot; ${esc(r.columnKey)} &mdash; Comment Compliance: Revision ${r.fromRevision} &rarr; <b>Revision ${r.toRevision}</b>, approval date <b>${fmtDate(r.approvalDate)}</b>`
+    : r.kind === 'end'
+    ? `Contractual end date: <s>${fmtDate(r.oldValue)}</s> &rarr; <b>${fmtDate(r.newValue)}</b>`
+    : `${FROZEN_LABEL[r.field]} &middot; ${MONTHS[r.monthIndex]} ${fyLabel(r.fiscalYear)}: <s>${r.oldValue}</s> &rarr; <b>${r.newValue}</b> &#8377; Cr`;
+  // Revision requests belong to one activity cell: clicking the item jumps to
+  // it (same as clicking an alert); buttons/inputs inside keep their own action.
+  const navAttrs = (r) => r.kind === 'rev'
+    ? ` data-nav-project="${r.projectId}" data-nav-tab="${esc(r.tab)}" data-nav-corridor="${esc(r.corridor)}" data-nav-col="${esc(r.columnKey)}" title="Click to open this activity"`
+    : '';
+  const item = (r) => `<div class="rq-item${r.kind === 'rev' ? ' rq-nav' : ''}"${navAttrs(r)}>
+    <div class="rq-top"><strong>${esc(r.projectName)} (${r.projectCode})</strong><span><span class="rq-st ${r.status}">${r.status}</span>${unseen.has(`${r.kind}:${r.id}`) ? '<span class="rq-new">New</span>' : ''}</span></div>
+    <p class="rq-chg">${change(r)}</p>
     <p class="rq-reason">&ldquo;${esc(r.reason)}&rdquo;</p>
     <p class="rq-meta">Requested by ${esc(r.requestedBy)} &middot; ${esc(r.requestedAt)}${r.decidedBy
       ? `<br>${r.status} by ${esc(r.decidedBy)} &middot; ${esc(r.decidedAt)}${r.decisionNote ? ' &mdash; ' + esc(r.decisionNote) : ''}` : ''}</p>
     ${approver && r.status === 'pending' ? `<div class="rq-act"><input data-note placeholder="Note (optional)" maxlength="300">
-      <button type="button" class="ok" data-approve="${r.id}">Approve</button><button type="button" class="no" data-reject="${r.id}">Reject</button></div>` : ''}
+      <button type="button" class="ok" data-kind="${r.kind}" data-approve="${r.id}">Approve</button><button type="button" class="no" data-kind="${r.kind}" data-reject="${r.id}">Reject</button></div>` : ''}
+    ${r.status === 'pending' && (state.user.role === 'admin' || r.requestedBy === state.user.username)
+      ? `<div class="rq-act"><button type="button" class="no" data-kind="${r.kind}" data-delete="${r.id}">Delete request</button></div>` : ''}
   </div>`;
-  openModal(`<h3>${approver ? 'Financial change requests' : 'My change requests'}</h3>
-    <p class="ctx">${approver ? 'Approving applies the new ABP figure immediately.' : 'Requests to change frozen ABP figures, and their outcome.'}</p>
+  openModal(`<h3>${approver ? 'Change requests' : 'My change requests'}</h3>
+    <p class="ctx">${approver ? 'Approving applies the new ABP figure, contractual end date or Comment Compliance revision immediately.' : 'Requests to change frozen ABP figures and contractual end dates, or to go beyond Comment Compliance revision 2, and their outcome.'}</p>
     <div class="rq-list">${requests.length ? requests.map(item).join('') : '<p class="ctx">No change requests.</p>'}</div>
     <div class="actions"><button type="button" id="rqClose">Close</button></div>`);
   $('rqClose').onclick = closeModal;
+  document.querySelectorAll('#modalBox .rq-nav').forEach((el) => el.addEventListener('click', (e) => {
+    if (e.target.closest('button, input, textarea, select')) return;
+    closeModal();
+    goToAlertTarget({
+      projectId: Number(el.dataset.navProject), tab: el.dataset.navTab,
+      corridor: el.dataset.navCorridor, column: el.dataset.navCol,
+    });
+  }));
+  if (unseen.size) api('/request-results/seen', { method: 'POST' }).then(refreshReqBadge).catch(() => {});
+  // Refresh whichever page is showing figures/dates this inbox can change.
+  const reloadViews = () => {
+    if ($('dashView').classList.contains('on')) loadAll();
+    if ($('projectView').classList.contains('on') && state.project.id) loadProjectView();
+    if ($('activityView') && $('activityView').classList.contains('on')) loadActivityRows();
+  };
   const decide = (id, verb, el) => async () => {
     const note = el.closest('.rq-item').querySelector('[data-note]').value.trim();
     try {
-      await api(`/financial-change-requests/${id}/${verb}`, { method: 'POST', body: { note } });
+      await api(`${REQ_BASE[el.dataset.kind]}/${id}/${verb}`, { method: 'POST', body: { note } });
       toast(verb === 'approve' ? 'Change approved and applied' : 'Change rejected');
-      refreshReqBadge();
-      if ($('dashView').classList.contains('on')) loadAll();
+      refreshReqBadge(); reloadViews();
       openRequestsInbox();
     } catch (err) { toast(err.message, true); }
   };
   document.querySelectorAll('#modalBox [data-approve]').forEach((b) => b.onclick = decide(b.dataset.approve, 'approve', b));
   document.querySelectorAll('#modalBox [data-reject]').forEach((b) => b.onclick = decide(b.dataset.reject, 'reject', b));
+  document.querySelectorAll('#modalBox [data-delete]').forEach((b) => b.onclick = async () => {
+    if (!confirm('Delete this change request?')) return;
+    try {
+      await api(`${REQ_BASE[b.dataset.kind]}/${b.dataset.delete}`, { method: 'DELETE' });
+      toast('Change request deleted');
+      refreshReqBadge(); reloadViews();
+      openRequestsInbox();
+    } catch (err) { toast(err.message, true); }
+  });
 }
 
 /* ---------- Alerts ---------- */
@@ -1660,6 +1789,12 @@ $('pdField').onclick = () => openActivityView('field');
 $('pdOffice').onclick = () => openActivityView('office');
 $('pdSchedule').onclick = () => openScheduleView();
 
+// Contractual end date request state, so the project view can colour the date (pending = amber, changed = green).
+async function loadProjectEndReq(){
+  try { state.project.endReq = await api(`/projects/${state.project.id}/contract-end/change-requests`); }
+  catch { state.project.endReq = { requests: [], approved: [] }; }
+}
+
 async function loadProjectView(){
   const id = state.project.id, fy = state.project.fiscalYear;
   const [dash, fin] = await Promise.all([
@@ -1667,6 +1802,7 @@ async function loadProjectView(){
     api(`/projects/${id}/financials?fiscalYear=${fy}`),
   ]);
   state.project.data = dash; state.project.months = fin.months;
+  await loadProjectEndReq();
   if (!state.project.targetMonth) state.project.targetMonth = defaultTargetMonth(dash.deliverables);
   $('pdTgtMonth').value = state.project.targetMonth;
   const p = dash.project;
@@ -1748,8 +1884,14 @@ $('pdPendAddBtn').onclick = async () => {
 
 function renderProjectView(){
   const { project: p, percentComplete, budget, lifetime, deliverables } = state.project.data;
-  const kv = (rows) => rows.map(([l, v]) => `<div class="kl">${l}</div><div class="kv">${v}</div>`).join('');
-  $('pdKl').innerHTML = kv([['Contractual Start date', fmtDate(p.contractStart)], ['Contractual End Date', fmtDate(p.contractEnd)],
+  const kv = (rows) => rows.map(([l, v, cls, title]) => `<div class="kl">${l}</div><div class="kv${cls ? ' ' + cls : ''}"${title ? ` title="${esc(title)}"` : ''}>${v}</div>`).join('');
+  const er = state.project.endReq || { requests: [], approved: [] };
+  const endPend = er.requests[0], endAppr = er.approved[er.approved.length - 1];
+  const endChg = !endPend && endAppr && endAppr.newValue === p.contractEnd;
+  const endCls = endPend ? 'req-pending' : (endChg ? 'req-changed' : '');
+  const endTip = endPend ? `Change to ${fmtDate(endPend.newValue)} requested — awaiting management approval`
+    : (endChg ? `Changed from ${fmtDate(endAppr.oldValue)} to ${fmtDate(endAppr.newValue)}` : '');
+  $('pdKl').innerHTML = kv([['Contractual Start date', fmtDate(p.contractStart)], ['Contractual End Date', fmtDate(p.contractEnd), endCls, endTip],
     ['Forecast Project Completion', fmtDate(p.forecastCompletion)], ['EOT received up to', fmtDate(p.eotUpto)],
     ['Overall % Complete', percentComplete == null ? '&mdash;' : Math.round(percentComplete) + '%']]);
   $('pdKr').innerHTML = kv([['O/S', fmt(lifetime.billing - lifetime.collection) + ' Cr'], ['Unbilled Revenue', fmt(p.unbilledRevenueCr) + ' Cr'],
@@ -1892,9 +2034,27 @@ function openAddDeliverable(kind, label){
 $('pdAddB').onclick = () => openAddDeliverable('billing', 'Billing');
 $('pdAddC').onclick = () => openAddDeliverable('collection', 'Collection');
 
-$('pdEdit').onclick = () => {
+$('pdEdit').onclick = async () => {
   const { project: p, budget } = state.project.data;
-  const dateF = (id, label, v) => `<div class="mf"><label>${label}</label><input id="${id}" type="date" value="${v || ''}"></div>`;
+  // Contractual end date freezes once set (server-enforced); a pmo requests a change, admin edits directly.
+  let endReq = { requests: [], approved: [] };
+  try { endReq = await api(`/projects/${state.project.id}/contract-end/change-requests`); } catch {}
+  let endPending = endReq.requests[0] || null;
+  const endApproved = endReq.approved[endReq.approved.length - 1];
+  const endChanged = endApproved && endApproved.newValue === p.contractEnd;
+  const endFrozen = !!p.contractEnd && state.user.role !== 'admin';
+  const endTitle = () => {
+    if (endPending) return `Change to ${fmtDate(endPending.newValue)} requested — awaiting management approval`;
+    const parts = [];
+    if (endChanged) parts.push(`Changed from ${fmtDate(endApproved.oldValue)} to ${fmtDate(endApproved.newValue)} (approved by ${endApproved.decidedBy})`);
+    if (endFrozen) parts.push('Frozen — click to request a change');
+    return parts.join(' — ');
+  };
+  const endCls = () => (endFrozen ? 'frozen ' : '') + (endPending ? 'req-pending' : (endChanged ? 'req-changed' : ''));
+  const endField = `<div class="mf"><label>Contractual end date</label><input id="edEnd" type="date" value="${p.contractEnd || ''}" class="${endCls()}"
+    ${endFrozen ? 'readonly' : ''} title="${esc(endTitle())}"></div>`;
+  const dateF = (id, label, v) => id === 'edEnd' ? endField
+    : `<div class="mf"><label>${label}</label><input id="${id}" type="date" value="${v || ''}"></div>`;
   const numF = (id, label, v) => `<div class="mf"><label>${label} (&#8377; Cr)</label><input id="${id}" type="number" step="0.01" value="${v}"></div>`;
   openModal(`<h3>Project details</h3><p class="ctx">${esc(p.name)} (${p.code})</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
@@ -1908,6 +2068,43 @@ $('pdEdit').onclick = () => {
     </tbody></table>
     <div class="actions"><button type="button" id="edCancel">Cancel</button><button type="button" class="primary" id="edSave">Save</button></div>`);
   $('edCancel').onclick = closeModal;
+  const ctx = `${esc(p.name)} (${p.code}) &middot; Contractual end date`;
+  const refreshEnd = () => {
+    $('edEnd').className = endCls(); $('edEnd').title = endTitle();
+    loadProjectEndReq().then(renderProjectView);
+  };
+  if (endFrozen) $('edEnd').addEventListener('click', () => {
+    if (endPending) {
+      if (endPending.requestedBy !== state.user.username) return toast('A change request for this date is already pending', true);
+      // Own pending request: let the user withdraw it (e.g. wrong date) and raise a corrected one.
+      openModal2(`<h3>Change request pending</h3><p class="ctx">${ctx}</p>
+        <p class="rq-chg"><s>${fmtDate(endPending.oldValue)}</s> &rarr; <b>${fmtDate(endPending.newValue)}</b></p>
+        <p class="rq-reason">&ldquo;${esc(endPending.reason)}&rdquo;</p>
+        <div class="actions"><button type="button" id="ceKeep">Keep</button><button type="button" class="primary" id="ceDelete">Delete request</button></div>`);
+      $('ceKeep').onclick = closeModal2;
+      $('ceDelete').onclick = async () => {
+        try {
+          await api(`/contract-end-change-requests/${endPending.id}`, { method: 'DELETE' });
+          endPending = null; refreshEnd(); closeModal2(); toast('Change request deleted'); refreshReqBadge();
+        } catch (err) { toast(err.message, true); }
+      };
+      return;
+    }
+    openModal2(`<h3>Request change</h3><p class="ctx">${ctx}</p>
+      <div class="mf"><label>Current date</label><input value="${esc(fmtDate(p.contractEnd))}" disabled></div>
+      <div class="mf"><label>Requested date</label><input id="ceVal" type="date"></div>
+      <div class="mf"><label>Reason</label><textarea id="ceReason" placeholder="Why does this date need to change?"></textarea></div>
+      <div class="actions"><button type="button" id="ceCancel">Cancel</button><button type="button" class="primary" id="ceSend">Send for approval</button></div>`);
+    $('ceCancel').onclick = closeModal2;
+    $('ceSend').onclick = async () => {
+      const newValue = $('ceVal').value, reason = $('ceReason').value.trim();
+      try {
+        const { id } = await api(`/projects/${state.project.id}/contract-end/change-requests`, { method: 'POST', body: { newValue, reason } });
+        endPending = { id, requestedBy: state.user.username, oldValue: p.contractEnd, newValue, reason };
+        refreshEnd(); closeModal2(); toast('Change request sent for management approval'); refreshReqBadge();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
   $('edSave').onclick = async () => {
     const budgetRows = Array.from(document.querySelectorAll('#edBud tr')).map((tr) => ({
       category: tr.dataset.cat,
@@ -2192,11 +2389,13 @@ $('addRowBtn').onclick = () => {
 };
 
 async function loadActivityRows(){
-  const [{ activities }, { columns }] = await Promise.all([
+  const [{ activities }, { columns }, milestones] = await Promise.all([
     api(`/projects/${state.activity.projectId}/activities?tab=${state.activity.tab}`),
     api(`/projects/${state.activity.projectId}/column-progress?tab=${state.activity.tab}`),
+    api(`/projects/${state.activity.projectId}/milestones?tab=${state.activity.tab}`),
   ]);
   state.activity.rows = activities;
+  state.activity.milestones = { basis: milestones.basis, milestones: milestones.milestones };
   state.activity.columnProgress = Object.fromEntries(columns.map((c) => [c.name, c.percentComplete]));
   renderActivityGrid();
 }
@@ -2219,16 +2418,17 @@ function columnStatsLine(col){
 // NA cells aren't counted/filterable (cellCategory returns 'NA', which
 // matches no chip).
 const ACTIVITY_CELL_CATEGORIES = [
-  ['SUB', 'Submitted', 'cs-SUB'], ['APP', 'Approved', 'cs-APP'], ['OH', 'Hold', 'cs-OH'],
+  ['SUB', 'Submitted', 'cs-SUB'], ['CC', 'Comment Compliance', 'cs-CC'], ['CCR', 'Comment Compliance Rejected', 'cs-CCR'], ['APP', 'Approved', 'cs-APP'], ['OH', 'Hold', 'cs-OH'],
   ['YTS', 'Yet to Start', ''], ['IP', 'In Progress', 'cs-IP'],
   ['IPB', 'In Progress & Behind Schedule', 'cs-IPB'], ['YTSB', 'Yet to Start & Behind Schedule', 'cs-YTSB'],
 ];
 // Short grid-cell label for the cell's single tentative date -- the full
 // wording (state.meta.tentativeDateLabel) is used in the update modal instead,
 // where there's room for it.
-const TENTATIVE_SHORT_LABEL = { YTS: 'Start', IP: 'Finish', OH: 'Date', SUB: 'Approval', APP: 'Approved' };
-function cellCategory(status, behind){
+const TENTATIVE_SHORT_LABEL = { YTS: 'Start', IP: 'Finish', OH: 'On hold from', SUB: 'Approval', CC: 'Approval', APP: 'Approved' };
+function cellCategory(status, behind, rejected){
   if (status === 'SUB') return 'SUB';
+  if (status === 'CC') return rejected ? 'CCR' : 'CC';
   if (status === 'APP') return 'APP';
   if (status === 'OH') return 'OH';
   if (status === 'NA') return 'NA';
@@ -2250,7 +2450,26 @@ function freezeActivityGridCols(){
     table.querySelectorAll(`.${cls}`).forEach((el) => { el.style.left = left + 'px'; });
     left += head.getBoundingClientRect().width;
   });
+  // With a KD band, the column-header row sticks just below it.
+  // Floored so the two rows overlap by a sub-pixel rather than leave a gap.
+  const band = table.querySelector('thead th.kd');
+  const top = band ? Math.floor(band.getBoundingClientRect().height) + 'px' : '';
+  table.querySelectorAll('thead tr:nth-child(2) th').forEach((th) => { th.style.top = top; });
 }
+// Column wrapping (and so header heights) changes with the window width.
+window.addEventListener('resize', () => { if ($('activityView').classList.contains('on')) freezeActivityGridCols(); });
+
+// Size the grid's scroll box to end at the bottom of the window, so its
+// horizontal scrollbar is always on screen instead of sitting at the end of a
+// tall table. (The old fixed 70vh cap could still push the bar below the fold
+// once the page header above it took its share.)
+function fitActivityGridHeight(){
+  const wrap = document.querySelector('#activityView .agrid-wrap');
+  if (!wrap || !$('activityView').classList.contains('on')) return;
+  const top = wrap.getBoundingClientRect().top + window.scrollY;
+  wrap.style.maxHeight = Math.max(260, window.innerHeight - top - 12) + 'px';
+}
+window.addEventListener('resize', fitActivityGridHeight);
 
 function renderActivityGrid(){
   const cols = state.meta.columnsByTab[state.activity.tab];
@@ -2267,7 +2486,7 @@ function renderActivityGrid(){
 
   const counts = Object.fromEntries(ACTIVITY_CELL_CATEGORIES.map(([k]) => [k, 0]));
   state.activity.rows.forEach((r) => cols.forEach((c) => {
-    const cell = r.cells[c], cat = cellCategory(cell.status, cell.alertState === 'overdue');
+    const cell = r.cells[c], cat = cellCategory(cell.status, cell.alertState === 'overdue', cell.rejectedRevision);
     if (cat !== 'NA') counts[cat]++;
   }));
   $('statusChips').innerHTML = ACTIVITY_CELL_CATEGORIES.map(([k, label, cls]) =>
@@ -2276,14 +2495,46 @@ function renderActivityGrid(){
     state.activity.filter = state.activity.filter === b.dataset.f ? 'all' : b.dataset.f; renderActivityGrid();
   });
 
-  const rowCategory = (r, c) => { const cell = r.cells[c]; return cellCategory(cell.status, cell.alertState === 'overdue'); };
+  const rowCategory = (r, c) => { const cell = r.cells[c]; return cellCategory(cell.status, cell.alertState === 'overdue', cell.rejectedRevision); };
   const rows = f === 'all'
     ? state.activity.rows
     : state.activity.rows.filter((r) => cols.some((c) => rowCategory(r, c) === f));
 
-  let html = '<thead><tr><th class="frz fz-sl">Sl. No</th><th class="frz fz-cor">Corridor</th><th class="frz fz-line">Line</th><th class="frz fz-len">Length (Km)</th><th class="frz fz-resp">Responsible</th><th class="frz fz-pct frz-end">% Complete</th>'
-    + cols.map((c) => `<th style="white-space:normal;min-width:70px">${esc(c)}</th>`).join('')
-    + '<th class="pin">Last updated</th><th></th></tr></thead><tbody>';
+  // Optional payment-milestone (KD) band above the column headers: consecutive
+  // columns under the same KD merge into one labelled, weighted cell. The
+  // corridor-detail headers then span both header rows.
+  const msCfg = state.activity.milestones || { basis: 'column', milestones: [] };
+  const colDetail = (state.meta.columnDetail && state.meta.columnDetail[state.activity.tab]) || [];
+  const msByColId = {};
+  msCfg.milestones.forEach((m) => m.columnIds.forEach((id) => { msByColId[id] = m; }));
+  const msOfCol = (name) => { const d = colDetail.find((c) => c.name === name); return d ? msByColId[d.id] : undefined; };
+  const hasBand = cols.some((c) => msOfCol(c));
+  const rs = hasBand ? ' rowspan="2"' : '';
+  let bandHtml = '';
+  const kdEdge = {}; // column name -> ' kd-l' / ' kd-r' edge classes (header + body cells)
+  if (hasBand) {
+    for (let i = 0; i < cols.length;) {
+      const m = msOfCol(cols[i]);
+      let span = 1; while (i + span < cols.length && msOfCol(cols[i + span]) === m) span++;
+      if (m) {
+        // Left edge on every KD's first column; right edge only where no other KD follows.
+        const next = cols[i + span], last = cols[i + span - 1];
+        const rightEdge = !next || !msOfCol(next);
+        kdEdge[cols[i]] = ' kd-l';
+        if (rightEdge) kdEdge[last] = (kdEdge[last] || '') + ' kd-r';
+        bandHtml += `<th class="kd kd-l${rightEdge ? ' kd-r' : ''}" colspan="${span}">${esc(m.label)}<small>${m.weightage}%</small></th>`;
+      } else {
+        bandHtml += `<th class="kd kd-none" colspan="${span}"></th>`;
+      }
+      i += span;
+    }
+  }
+  const pctSub = msCfg.basis === 'kd' ? '<small class="kd-basis">by KD</small>' : '';
+  const colHeads = cols.map((c) => `<th class="${(kdEdge[c] || '').trim()}" style="white-space:normal;min-width:70px">${esc(c)}</th>`).join('');
+  const fixedHeads = `<th class="frz fz-sl"${rs}>Sl. No</th><th class="frz fz-cor"${rs}>Corridor</th><th class="frz fz-line"${rs}>Line</th><th class="frz fz-len"${rs}>Length (Km)</th><th class="frz fz-resp"${rs}>Responsible</th><th class="frz fz-pct frz-end"${rs}>% Complete${pctSub}</th>`;
+  let html = '<thead>' + (hasBand
+    ? `<tr>${fixedHeads}${bandHtml}<th class="pin"${rs}>Last updated</th><th${rs}></th></tr><tr>${colHeads}</tr>`
+    : `<tr>${fixedHeads}${colHeads}<th class="pin">Last updated</th><th></th></tr>`) + '</thead><tbody>';
   if (!rows.length){
     html += `<tr><td colspan="${cols.length+8}" class="empty">No corridor rows${f==='all'?' yet':' match this filter'}.</td></tr>`;
   } else {
@@ -2304,17 +2555,18 @@ function renderActivityGrid(){
       cols.forEach((c) => {
         const cell = r.cells[c];
         const behind = cell.alertState === 'overdue';
-        const cat = cellCategory(cell.status, behind);
+        const cat = cellCategory(cell.status, behind, cell.rejectedRevision);
         const dim = f !== 'all' && cat !== f ? ' style="opacity:.35"' : '';
         const cellCls = cat === 'NA' ? 'g-NA' : CATEGORY_CLASS[cat];
         // Overdue YTS/IP already get a distinct fill (cellCategory's IPB/
         // YTSB); Submitted has no such variant, so an overdue Submitted cell
         // (past the submission SLA) needs its own ring to stay visible.
         const alertCls = cell.alertState === 'upcoming' ? ' alert-upcoming'
-          : (behind && cell.status === 'SUB') ? ' alert-overdue' : '';
+          : (behind && (cell.status === 'SUB' || cell.status === 'CC')) ? ' alert-overdue' : '';
         const alertTitle = behind ? ' — behind schedule (pending action)' : cell.alertState === 'upcoming' ? ' — tentative date approaching' : '';
         const shortLabel = cell.status && TENTATIVE_SHORT_LABEL[cell.status];
-        const dates = (cell.tentativeDate && shortLabel) ? `<small>${shortLabel}: ${fmtDMY(cell.tentativeDate)}</small>` : '';
+        const dates = ((cell.tentativeDate && shortLabel) ? `<small>${shortLabel}: ${fmtDMY(cell.tentativeDate)}</small>` : '')
+          + ((cell.status === 'YTS' && cell.plannedFinishDate) ? `<small>Plan fin: ${fmtDMY(cell.plannedFinishDate)}</small>` : '');
         // Alerted cells (upcoming or overdue) also get a hover popup -- see
         // the #agrid mouseover/mousemove handler below -- spelling out the
         // alert and its due date (Submitted's tentativeDate is the
@@ -2322,13 +2574,15 @@ function renderActivityGrid(){
         // native `title` tooltip is slow and easy to miss.
         let tipAttrs = '';
         if (cell.alertState) {
-          const due = cell.tentativeDate ? `${shortLabel || 'Due'}: ${fmtDMY(cell.tentativeDate)}` : 'No due date set';
+          const dueLabel = cell.alertKind === 'finish' ? 'Planned finish' : (shortLabel || 'Due');
+          const dueDate = cell.alertDueDate || cell.tentativeDate;
+          const due = dueDate ? `${dueLabel}: ${fmtDMY(dueDate)}` : 'No due date set';
           const tipTitle = behind ? 'Behind schedule' : 'Due soon';
           const tipBody = `${r.corridor} — ${c} · ${due}`;
           tipAttrs = ` data-alert="${cell.alertState}" data-tip-title="${esc(tipTitle)}" data-tip-body="${esc(tipBody)}"`;
         }
-        html += `<td class="cellstat ${cellCls}${alertCls}"${dim} data-activity="${r.id}" data-col="${esc(c)}"${tipAttrs} title="${rowEditable ? 'Click to change status' : 'Click to view history'}${alertTitle}">`
-          + `${cell.status ? statusText(cell.status) : ''}${dates}</td>`;
+        html += `<td class="cellstat ${cellCls}${alertCls}${kdEdge[c] || ''}"${dim} data-activity="${r.id}" data-col="${esc(c)}"${tipAttrs} title="${rowEditable ? 'Click to change status' : 'Click to view history'}${alertTitle}">`
+          + `${cell.status ? statusText(cell.status) : ''}${cell.status === 'CC' && cell.revision ? `<small>Revision ${cell.revision}</small>` : ''}${cell.pendingRevision ? `<small>Rev ${cell.pendingRevision.toRevision} awaiting approval</small>` : ''}${cell.rejectedRevision ? `<small>Rev ${cell.rejectedRevision.toRevision} rejected</small>` : ''}${dates}</td>`;
       });
       html += `<td class="pin">${r.lastUpdated ? esc(r.lastUpdated.by)+'<br>'+esc(fmtDMY(r.lastUpdated.at)) : '&mdash;'}</td>`
         + `<td><button class="iconbtn" data-hist="${r.id}">History</button></td></tr>`;
@@ -2336,6 +2590,8 @@ function renderActivityGrid(){
   }
   $('agrid').innerHTML = html + '</tbody>';
   freezeActivityGridCols();
+  fitActivityGridHeight();
+  requestAnimationFrame(fitActivityGridHeight); // again once the view has finished laying out
 
   document.querySelectorAll('#agrid .cellstat').forEach((el) => el.addEventListener('click', () => {
     const activityId = +el.dataset.activity, col = el.dataset.col;
@@ -2398,27 +2654,65 @@ function openCellModal(row, col){
   const statusOrder = state.meta.statusUpdateOrder;
   const colMeta = ((state.meta.columnDetail && state.meta.columnDetail[state.activity.tab]) || []).find((c) => c.name === col);
   const curPct = state.activity.columnProgress[col] ?? 0;
+  const rej = cell.rejectedRevision;
   openModal(`<h3>Update &mdash; ${esc(col)}</h3><p class="ctx">${esc(row.corridor)} &middot; Weight: <b>${colMeta ? colMeta.weightage : 0}%</b></p>
+    ${rej ? `<p class="cc-rej-note"><b>Revision ${rej.toRevision} request rejected</b> by ${esc(rej.by || 'management')} on ${esc(rej.at || '')}${rej.note ? ` &mdash; ${esc(rej.note)}` : ''}</p>` : ''}
     <div class="mf"><label>Status</label><select id="mStatus">${statusOrder.map((s) => `<option value="${s}" ${s===(cell.status||'YTS')?'selected':''}>${statusLabel[s]}</option>`).join('')}</select></div>
+    <div class="mf" id="mRevisionWrap"><label>Revision *</label><select id="mRevision"></select>
+      <small class="muted" id="mRevisionNote"></small></div>
     <div class="mf"><label id="mTentativeDateLabel">Tentative date</label><input id="mTentativeDate" type="date" value="${cell.tentativeDate||''}"></div>
+    <div class="mf" id="mPlannedFinishWrap"><label>Planned finish date *</label><input id="mPlannedFinish" type="date" required value="${cell.plannedFinishDate||''}"></div>
     <div class="mf"><label>% Complete <small class="muted">(this project's overall progress on this activity &mdash; set automatically for Submitted/Approved and Yet to Start)</small></label><input id="mPct" type="number" min="0" max="100" step="1" value="${curPct}"></div>
     <div class="mf"><label>Remarks</label><textarea id="mRemarks" placeholder="Notes, blockers, or context...">${esc(cell.remarks||'')}</textarea></div>
     <div class="sig"><input type="checkbox" id="mSig"><label for="mSig" style="margin:0;font-weight:400">I verify this update is accurate (digital signature)</label></div>
     <div class="mf"><label>Attach files (PDF, DWG, XLSX, DOCX, Images)</label><input id="mFiles" type="file" multiple accept=".pdf,.dwg,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.gif"></div>
+    <div class="cell-hist"><h4>History</h4><div id="mHistBody"><p class="muted">Loading&hellip;</p></div></div>
     <div class="actions"><button type="button" id="mCancel">Cancel</button><button type="button" class="primary" id="mSave">Save update</button></div>`);
+  // This activity's history (status changes and rejected revision requests),
+  // newest first, shown right in the update popup.
+  api(`/projects/${state.activity.projectId}/activities/${row.id}/history`).then(({ history }) => {
+    const box = $('mHistBody');
+    if (!box) return; // popup closed meanwhile
+    const entries = history.filter((h) => h.columnKey === col);
+    box.innerHTML = entries.length ? entries.map(historyEntryHtml).join('') : '<p class="muted">No changes recorded yet.</p>';
+  }).catch(() => { const box = $('mHistBody'); if (box) box.innerHTML = '<p class="muted">History unavailable.</p>'; });
+  // Comment Compliance revisions: 1..maxFreeRevision are recorded directly,
+  // never below the revision the cell already holds. Past that, the only
+  // extra choice is "next revision", which is raised as a request for
+  // management/admin approval instead of being saved.
+  const maxFree = state.meta.maxFreeRevision || 2;
+  const storedRev = cell.revision || 0;
+  const needsApproval = () => $('mStatus').value === 'CC' && Number($('mRevision').value) > maxFree && Number($('mRevision').value) !== storedRev;
+  const fillRevisions = () => {
+    const opts = [];
+    for (let r = Math.max(1, storedRev); r <= maxFree; r++) opts.push(`<option value="${r}">Revision ${r}</option>`);
+    if (storedRev > maxFree) opts.push(`<option value="${storedRev}">Revision ${storedRev} (current)</option>`);
+    if (storedRev >= maxFree) {
+      const next = storedRev + 1;
+      opts.push(`<option value="${next}" ${cell.pendingRevision ? 'disabled' : ''}>Revision ${next} — needs management/admin approval</option>`);
+    }
+    $('mRevision').innerHTML = opts.join('');
+    $('mRevision').value = String(Math.max(1, storedRev));
+    $('mRevisionNote').textContent = cell.pendingRevision
+      ? `Revision ${cell.pendingRevision.toRevision} is awaiting management/admin approval.` : '';
+  };
+  fillRevisions();
   const syncFields = () => {
     const status = $('mStatus').value;
     const isNA = status === 'NA';
+    $('mRevisionWrap').style.display = status === 'CC' ? '' : 'none';
+    $('mSave').textContent = needsApproval() ? 'Send for approval' : 'Save update';
     // Submitted's deadline defaults to SUB_APPROVAL_DAYS working days after
     // the day it enters Submitted, but stays editable -- prefill it with
     // that suggestion the first time this cell becomes Submitted (nothing
     // stored yet) so there's something sensible to tweak rather than a blank
     // box; once a value exists (from a prior save), leave it alone.
-    const isSUB = status === 'SUB';
+    const isSUB = status === 'SUB' || status === 'CC';
     const dateLabel = state.meta.tentativeDateLabel[status];
     const auto = autoPctForStatus(status);
-    $('mTentativeDateLabel').textContent = (dateLabel || 'Tentative date') + (isSUB ? ' (defaults to 10 working days after submission)' : '');
+    $('mTentativeDateLabel').textContent = (dateLabel || 'Tentative date') + (isNA ? '' : ' *');
     $('mTentativeDate').disabled = isNA || !dateLabel;
+    $('mPlannedFinishWrap').style.display = status === 'YTS' ? '' : 'none';
     $('mRemarks').disabled = isNA;
     $('mFiles').disabled = isNA;
     $('mPct').disabled = isNA || auto != null;
@@ -2431,6 +2725,17 @@ function openCellModal(row, col){
   };
   syncFields();
   $('mStatus').onchange = syncFields;
+  // Moving to a different revision restarts the approval-date clock: the date
+  // refills to SUB_APPROVAL_DAYS working days from today (the day it's updated
+  // to that revision), still editable. Going back to the revision the cell
+  // already holds restores its stored date.
+  $('mRevision').onchange = () => {
+    syncFields();
+    if ($('mStatus').value !== 'CC' || $('mTentativeDate').disabled) return;
+    const fresh = addWorkingDaysISO(new Date().toISOString(), state.meta.subApprovalDays || 10);
+    $('mTentativeDate').value = Number($('mRevision').value) !== storedRev
+      ? fresh : ((cell.status === 'CC' && cell.tentativeDate) || fresh);
+  };
   $('mPct').onchange = () => clampProgressInput($('mPct'));
   $('mCancel').onclick = closeModal;
   $('mSave').onclick = async () => {
@@ -2438,8 +2743,29 @@ function openCellModal(row, col){
     clampProgressInput($('mPct'));
     const status = $('mStatus').value;
     const isNA = status === 'NA';
+    if (!isNA && !$('mTentativeDate').value) {
+      toast(`Please enter the ${(state.meta.tentativeDateLabel[status] || 'date').toLowerCase()}`, true); return;
+    }
+    if (status === 'YTS') {
+      const pf = $('mPlannedFinish').value, start = $('mTentativeDate').value;
+      if (!pf) { toast('Please enter the planned finish date', true); return; }
+      if (start && pf < start) { toast('Planned finish date cannot be before the tentative start date', true); return; }
+    }
     const auto = autoPctForStatus(status);
     const pct = auto != null ? auto : Number($('mPct').value);
+    // A revision past the free limit isn't saved here: it goes to
+    // management/admin as a request, with the remarks as the reason.
+    if (needsApproval()) {
+      const reason = $('mRemarks').value.trim();
+      if (!reason) { toast(`Please give the reason for Revision ${$('mRevision').value} in Remarks`, true); return; }
+      try {
+        await api(`/projects/${state.activity.projectId}/activities/${row.id}/cells/${encodeURIComponent(col)}/revision-requests`, {
+          method: 'POST', body: { approvalDate: $('mTentativeDate').value, reason },
+        });
+        closeModal(); toast('Revision request sent for management/admin approval'); loadActivityRows();
+      } catch (err) { toast(err.message, true); }
+      return;
+    }
     try {
       let attachments = [];
       const files = isNA ? null : $('mFiles').files;
@@ -2453,6 +2779,8 @@ function openCellModal(row, col){
         method: 'PATCH',
         body: {
           status, tentativeDate: $('mTentativeDate').disabled ? null : ($('mTentativeDate').value || null),
+          plannedFinishDate: status === 'YTS' ? ($('mPlannedFinish').value || null) : null,
+          revision: status === 'CC' ? Number($('mRevision').value) : null,
           remarks: isNA ? '' : $('mRemarks').value.trim(), signed: true, attachments,
         },
       });
@@ -2478,11 +2806,24 @@ async function openRowHistory(row){
   renderHistoryModal(esc(row.corridor), history);
 }
 
-function renderHistoryModal(title, entries, extra){
-  const body = entries.length ? entries.map((h) => `
-    <div class="histrow"><b>${esc(h.columnKey)}</b>: ${esc(statusText(h.fromStatus))} &rarr; ${esc(statusText(h.toStatus))}
+// One audit-log entry. A rejected Comment Compliance revision request is logged
+// as to_status 'CCR' -- shown in red as "Revision N request rejected" since the
+// cell's status itself didn't change.
+function historyEntryHtml(h){
+  const change = h.toStatus === 'CCQ'
+    ? `Comment Compliance &mdash; <b>Revision ${h.revision} requested</b> (awaiting management/admin approval)`
+    : h.toStatus === 'CCR'
+    ? `Comment Compliance &mdash; <b>Revision ${h.revision} request rejected</b>`
+    : h.toStatus === 'CCA'
+    ? `Comment Compliance &mdash; <b>Revision ${h.revision} request approved</b>${h.fromStatus && h.fromStatus !== 'CC' ? ` (was ${esc(statusText(h.fromStatus))})` : ''}`
+    : `${esc(statusText(h.fromStatus))} &rarr; ${esc(statusText(h.toStatus))}${h.toStatus === 'CC' && h.revision ? ` (Revision ${h.revision})` : ''}`;
+  return `<div class="histrow${h.toStatus === 'CCR' ? ' rej' : h.toStatus === 'CCA' ? ' ok' : h.toStatus === 'CCQ' ? ' req' : ''}"><b>${esc(h.columnKey)}</b>: ${change}
       <small>By ${esc(h.updatedBy)} on ${esc(h.updatedAt)}${h.remarks?' &middot; '+esc(h.remarks):''}${h.attachments.length?' &middot; files: '+h.attachments.map((f)=>esc(f.originalName)).join(', '):''}</small>
-    </div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+    </div>`;
+}
+
+function renderHistoryModal(title, entries, extra){
+  const body = entries.length ? entries.map(historyEntryHtml).join('') : '<p class="muted">No changes recorded yet.</p>';
   openModal(`<h3>History</h3><p class="ctx">${title}</p>${extra || ''}${body}<div class="actions"><button type="button" id="histClose">Close</button></div>`);
   $('histClose').onclick = closeModal;
 }
@@ -2494,8 +2835,24 @@ async function refreshActivityMeta(){ state.meta = await api('/activity-meta'); 
 // old plain "Add corridor" button.
 let egState = { editingCol: null, editingRow: null, addingRow: false };
 
+// Payment-milestone (KD) draft for the Edit screen, kept in egState.ms until
+// "Save changes": { basis, items: [{ key, label, weightage }], colMs: { colId: key } }.
+// egState.wDraft likewise keeps unsaved column weights across the re-renders
+// that adding/removing a KD triggers.
+function msDraftFromState(){
+  const cfg = state.activity.milestones || { basis: 'column', milestones: [] };
+  const ms = { basis: cfg.basis, items: [], colMs: {}, seq: 0 };
+  cfg.milestones.forEach((m) => {
+    const key = 'k' + (++ms.seq);
+    ms.items.push({ key, label: m.label, weightage: m.weightage });
+    m.columnIds.forEach((id) => { ms.colMs[id] = key; });
+  });
+  return ms;
+}
+
 function openEditGridView(){
-  egState = { editingCol: null, editingRow: null, addingRow: false };
+  egState = { editingCol: null, editingRow: null, addingRow: false, ms: msDraftFromState(), wDraft: {} };
+  $('egContent').innerHTML = '';
   $('egTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${state.activity.tab === 'office' ? 'Office' : 'Field'} Activities`;
   showView('editGridView');
   pmisPush(4);
@@ -2517,10 +2874,33 @@ function rowFormFields(prefix, r){
     <div class="mf"><label>Responsible person</label><input id="${prefix}Resp" type="text" placeholder="optional" value="${esc(r.responsiblePerson || '')}"></div>`;
 }
 
-function renderEditGridView(){
+// Pull whatever is currently typed/selected in the Edit screen's KD and
+// column-weight inputs back into egState, so a re-render doesn't discard it.
+function syncEgDraft(){
+  const ms = egState.ms;
+  document.querySelectorAll('[data-ms-label]').forEach((el) => { const it = ms.items.find((i) => i.key === el.dataset.msLabel); if (it) it.label = el.value; });
+  document.querySelectorAll('[data-ms-weight]').forEach((el) => { const it = ms.items.find((i) => i.key === el.dataset.msWeight); if (it) it.weightage = Number(el.value) || 0; });
+  if ($('egMsBasis')) ms.basis = $('egMsBasis').value;
+  document.querySelectorAll('[data-col-ms]').forEach((el) => {
+    if (el.value) ms.colMs[el.dataset.colMs] = el.value; else delete ms.colMs[el.dataset.colMs];
+  });
+  document.querySelectorAll('.eg-weight').forEach((el) => { egState.wDraft[el.dataset.weightId] = Number(el.value) || 0; });
+}
+
+// skipSync: the caller already synced and then changed the draft itself.
+function renderEditGridView(skipSync){
+  if (egState.rendered && skipSync !== true) syncEgDraft();
+  egState.rendered = true;
   const tab = state.activity.tab;
   const cols = (state.meta.columnDetail && state.meta.columnDetail[tab]) || [];
   const rows = state.activity.rows || [];
+  const ms = egState.ms;
+  const colWeight = (c) => (egState.wDraft[c.id] ?? c.weightage);
+
+  const msSelect = (c) => ms.items.length ? `
+      <select class="eg-col-ms" data-col-ms="${c.id}" title="Payment milestone this column belongs to">
+        <option value="">No KD</option>${ms.items.map((it) => `<option value="${it.key}" ${ms.colMs[c.id] === it.key ? 'selected' : ''}>${esc(it.label)}</option>`).join('')}
+      </select>` : '';
 
   const colsHtml = cols.length ? cols.map((c) => egState.editingCol === c.id ? `
     <div class="eg-col eg-col-form">
@@ -2530,8 +2910,8 @@ function renderEditGridView(){
     <div class="eg-col">
       <span class="eg-col-name">${esc(c.name)}</span>
       <span class="eg-col-weight">
-        <input type="number" class="eg-weight" data-weight-id="${c.id}" min="0" step="0.1" value="${c.weightage}">% weight
-      </span>
+        <input type="number" class="eg-weight" data-weight-id="${c.id}" min="0" step="0.1" value="${colWeight(c)}">% weight
+      </span>${msSelect(c)}
       <div class="eg-col-actions">
         <button type="button" class="iconbtn" data-col-edit="${c.id}">${ic('pencil', 14)}</button>
         <button type="button" class="iconbtn" data-col-del="${c.id}">${ic('trash', 14)}</button>
@@ -2565,6 +2945,22 @@ function renderEditGridView(){
         <button type="button" class="btn-o sm" id="egAddCol">${ic('plus', 14)}Add column</button>
       </div>
     </div>
+    <div class="mf"><label>Payment milestones (KD) &mdash; this project only</label>
+      <p class="ctx" style="margin-top:0">Optional. Adds a KD header band above this tab's columns, each KD carrying the share of the payment claimed at that milestone (must sum to 100%). Put a column under a KD with the dropdown on its card, and keep a KD's columns side by side so the band reads as one block. "% Complete" can then be computed from the column weights above (default) or from the KD weights.</p>
+      ${ms.items.map((it) => `
+      <div class="eg-ms">
+        <input type="text" class="eg-ms-label" data-ms-label="${it.key}" value="${esc(it.label)}" placeholder="KD name">
+        <span class="eg-col-weight"><input type="number" class="eg-ms-weight" data-ms-weight="${it.key}" min="0" step="0.1" value="${it.weightage}">% weight</span>
+        <small class="muted" data-ms-count="${it.key}"></small>
+        <button type="button" class="iconbtn" data-ms-del="${it.key}">${ic('trash', 14)}</button>
+      </div>`).join('')}
+      ${ms.items.length ? `
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap"><span id="egMsTotal"></span></div>
+      <div class="mf" style="margin:12px 0 0;max-width:340px"><label>Compute % Complete from</label>
+        <select id="egMsBasis"><option value="column" ${ms.basis === 'column' ? 'selected' : ''}>Column weightages</option><option value="kd" ${ms.basis === 'kd' ? 'selected' : ''}>KD weightages</option></select>
+      </div>` : ''}
+      <button type="button" class="btn-o sm" id="egAddMs" style="margin-top:10px">${ic('plus', 14)}Add KD</button>
+    </div>
     <div class="mf"><label>Corridor rows</label>
       <ul style="list-style:none;padding:0;margin:0">${rowsHtml}${addRowHtml}</ul>
       ${egState.addingRow ? '' : `<button type="button" class="btn-o sm" id="egAddRowBtn" style="margin-top:10px">${ic('plus', 14)}Add corridor</button>`}
@@ -2593,6 +2989,22 @@ function updateWeightTotalDisplay(){
   el.style.color = ok ? 'var(--success)' : 'var(--danger)';
 }
 
+function updateMsDisplay(){
+  const total = $('egMsTotal');
+  if (total) {
+    const sum = Array.from(document.querySelectorAll('.eg-ms-weight')).reduce((s, el) => s + (Number(el.value) || 0), 0);
+    const ok = Math.abs(sum - 100) < 0.05;
+    total.textContent = `Total KD weightage: ${sum.toFixed(1)}%${ok ? '' : ' (must equal 100%)'}`;
+    total.style.color = ok ? 'var(--success)' : 'var(--danger)';
+  }
+  const counts = {};
+  document.querySelectorAll('[data-col-ms]').forEach((el) => { if (el.value) counts[el.value] = (counts[el.value] || 0) + 1; });
+  document.querySelectorAll('[data-ms-count]').forEach((el) => {
+    const n = counts[el.dataset.msCount] || 0;
+    el.textContent = `${n} column${n === 1 ? '' : 's'}`;
+  });
+}
+
 function clampProgressInput(el){
   const v = Math.max(0, Math.min(100, Math.round(Number(el.value) || 0)));
   el.value = v;
@@ -2611,10 +3023,25 @@ async function saveAllEgChanges(){
   const weightSum = Object.values(weights).reduce((s, w) => s + w, 0);
   if (Math.abs(weightSum - 100) > 0.05) { toast(`Weightage must sum to 100 (currently ${weightSum.toFixed(1)})`, true); return; }
 
+  syncEgDraft();
+  const ms = egState.ms;
+  const colIds = (state.meta.columnDetail[state.activity.tab] || []).map((c) => c.id);
+  const milestones = ms.items.map((it) => ({
+    label: it.label.trim(), weightage: it.weightage,
+    columnIds: colIds.filter((id) => ms.colMs[id] === it.key),
+  }));
+  if (milestones.some((m) => !m.label)) { toast('Every KD needs a name', true); return; }
+  const msSum = milestones.reduce((s, m) => s + m.weightage, 0);
+  if (milestones.length && Math.abs(msSum - 100) > 0.05) { toast(`KD weightage must sum to 100 (currently ${msSum.toFixed(1)})`, true); return; }
+
   try {
     await api('/activity-columns/weights', { method: 'PUT', body: { tab: state.activity.tab, weights } });
+    await api(`/projects/${state.activity.projectId}/milestones`, { method: 'PUT', body: {
+      tab: state.activity.tab, basis: milestones.length ? ms.basis : 'column', milestones,
+    }});
     await refreshActivityMeta(); await loadActivityRows();
-    toast('Changes saved'); renderEditGridView();
+    egState.ms = msDraftFromState(); egState.wDraft = {};
+    toast('Changes saved'); renderEditGridView(true);
   } catch (err) { toast(err.message, true); }
 }
 
@@ -2622,6 +3049,23 @@ function wireEditGridView(){
   updateWeightTotalDisplay();
   document.querySelectorAll('.eg-weight').forEach((el) => el.addEventListener('input', updateWeightTotalDisplay));
   $('egSaveAll').onclick = saveAllEgChanges;
+
+  updateMsDisplay();
+  document.querySelectorAll('.eg-ms-weight').forEach((el) => el.addEventListener('input', updateMsDisplay));
+  document.querySelectorAll('[data-col-ms]').forEach((el) => el.addEventListener('change', updateMsDisplay));
+  $('egAddMs').onclick = () => {
+    syncEgDraft();
+    egState.ms.items.push({ key: 'k' + (++egState.ms.seq), label: `KD ${egState.ms.items.length + 1}`, weightage: 0 });
+    renderEditGridView(true);
+  };
+  document.querySelectorAll('[data-ms-del]').forEach((b) => b.onclick = () => {
+    syncEgDraft();
+    const key = b.dataset.msDel, ms = egState.ms;
+    ms.items = ms.items.filter((it) => it.key !== key);
+    Object.keys(ms.colMs).forEach((id) => { if (ms.colMs[id] === key) delete ms.colMs[id]; });
+    if (!ms.items.length) ms.basis = 'column';
+    renderEditGridView(true);
+  });
 
   $('egAddCol').onclick = async () => {
     const name = $('egNewCol').value.trim();

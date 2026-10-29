@@ -4,8 +4,9 @@ const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess, canAccessCorridor, restrictedCorridors, canEditCorridor } = require('../scope');
 const {
   ACTIVITY_STATUS, ACTIVITY_STATUS_ORDER, ACTIVITY_STATUS_UPDATE_ORDER, ACTIVITY_STATUS_GROUP, TENTATIVE_DATE_LABEL,
-  SUB_APPROVAL_DAYS, addWorkingDaysISO, deriveCellAlert, computeRowPercent,
+  SUB_APPROVAL_DAYS, MAX_FREE_REVISION, deriveCellAlertSummary,
 } = require('../activityConstants');
+const { loadMilestoneConfig, rowPercent } = require('../milestones');
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get('/activity-meta', requireAuth, (req, res) => {
   res.json({
     columnsByTab, columnDetail, status: ACTIVITY_STATUS, statusOrder: ACTIVITY_STATUS_ORDER,
     statusUpdateOrder: ACTIVITY_STATUS_UPDATE_ORDER, statusGroup: ACTIVITY_STATUS_GROUP,
-    tentativeDateLabel: TENTATIVE_DATE_LABEL, subApprovalDays: SUB_APPROVAL_DAYS,
+    tentativeDateLabel: TENTATIVE_DATE_LABEL, subApprovalDays: SUB_APPROVAL_DAYS, maxFreeRevision: MAX_FREE_REVISION,
   });
 });
 
@@ -148,8 +149,16 @@ function loadActivities(projectId, tab) {
   const placeholders = ids.map(() => '?').join(',');
 
   const cellRows = db.prepare(
-    `SELECT activity_id AS activityId, column_key AS columnKey, status, tentative_date AS tentativeDate, remarks, signed, updated_by AS updatedBy, updated_at AS updatedAt
+    `SELECT activity_id AS activityId, column_key AS columnKey, status, tentative_date AS tentativeDate, planned_finish_date AS plannedFinishDate, revision, remarks, signed, updated_by AS updatedBy, updated_at AS updatedAt
      FROM activity_cells WHERE activity_id IN (${placeholders})`
+  ).all(...ids);
+
+  // Every revision request on these rows, oldest first: the pending one and the
+  // latest decided one per cell are derived from it below.
+  const revisionRequestRows = db.prepare(
+    `SELECT id, activity_id AS activityId, column_key AS columnKey, from_revision AS fromRevision, to_revision AS toRevision,
+            status, reason, decided_by AS decidedBy, decided_at AS decidedAt, decision_note AS decisionNote
+     FROM activity_revision_requests WHERE activity_id IN (${placeholders}) ORDER BY id`
   ).all(...ids);
 
   const auditRows = db.prepare(
@@ -181,14 +190,30 @@ function loadActivities(projectId, tab) {
   });
 
   const columnRows = getColumnRows(tab);
+  const milestoneConfig = loadMilestoneConfig(projectId, tab);
   return activities.map((a) => {
     const cellMap = cellsByActivity.get(a.id) || {};
     const cells = {};
     const audit = auditByActivity.get(a.id) || [];
     columnRows.forEach((col) => {
       // status null = never set (rendered blank, like the mockup's empty cells)
-      const cell = cellMap[col.name] || { status: null, tentativeDate: null, remarks: '', signed: 0, updatedBy: null, updatedAt: null };
-      cells[col.name] = { ...cell, alertState: deriveCellAlert(cell) };
+      const cell = cellMap[col.name] || { status: null, tentativeDate: null, plannedFinishDate: null, revision: null, remarks: '', signed: 0, updatedBy: null, updatedAt: null };
+      const alert = deriveCellAlertSummary(cell);
+      const cellRequests = revisionRequestRows.filter((p) => p.activityId === a.id && p.columnKey === col.name);
+      const pendingRev = cellRequests.find((p) => p.status === 'pending');
+      // Flagged while the latest request on a Comment Compliance cell was
+      // rejected and the cell is still on the revision it was requested from;
+      // a new request or revision change clears it.
+      const latest = cellRequests[cellRequests.length - 1];
+      const rejected = latest && latest.status === 'rejected' && cell.status === 'CC' && cell.revision === latest.fromRevision ? latest : null;
+      cells[col.name] = {
+        ...cell, pendingRevision: pendingRev ? { id: pendingRev.id, toRevision: pendingRev.toRevision } : null,
+        rejectedRevision: rejected
+          ? { toRevision: rejected.toRevision, by: rejected.decidedBy, at: rejected.decidedAt, note: rejected.decisionNote, reason: rejected.reason }
+          : null,
+        alertState: alert ? alert.state : null,
+        alertKind: alert ? alert.kind : null, alertDueDate: alert ? alert.dueDate : null,
+      };
     });
     const lastAudit = audit[audit.length - 1];
     // The pinned "Remarks" column should keep showing the latest remark the
@@ -201,7 +226,7 @@ function loadActivities(projectId, tab) {
     return {
       ...a,
       cells,
-      percentComplete: computeRowPercent(cells, columnRows),
+      percentComplete: rowPercent(cells, columnRows, milestoneConfig),
       lastRemark: lastRemarkAudit ? lastRemarkAudit.remarks : '',
       lastUpdated: lastAudit ? { by: lastAudit.updatedBy, at: lastAudit.updatedAt } : null,
       attachments: attachments.map((f) => ({ originalName: f.originalName, storedName: f.storedName })),
@@ -283,7 +308,7 @@ router.get(
     }
 
     const audit = db.prepare(
-      `SELECT id, column_key AS columnKey, from_status AS fromStatus, to_status AS toStatus, remarks, updated_by AS updatedBy, updated_at AS updatedAt
+      `SELECT id, column_key AS columnKey, from_status AS fromStatus, to_status AS toStatus, revision, remarks, updated_by AS updatedBy, updated_at AS updatedAt
        FROM activity_audit_log WHERE activity_id = ? ORDER BY updated_at DESC, id DESC`
     ).all(req.params.activityId);
 
@@ -315,7 +340,7 @@ router.patch(
       return res.status(400).json({ error: 'Unknown activity column for this tab' });
     }
 
-    const { status, tentativeDate, remarks, signed, attachments } = req.body || {};
+    const { status, tentativeDate, plannedFinishDate, remarks, signed, attachments, revision } = req.body || {};
     if (!ACTIVITY_STATUS_ORDER.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
@@ -325,7 +350,7 @@ router.patch(
     }
 
     const existing = db.prepare(
-      'SELECT status, tentative_date AS tentativeDate FROM activity_cells WHERE activity_id = ? AND column_key = ?'
+      'SELECT status, tentative_date AS tentativeDate, revision FROM activity_cells WHERE activity_id = ? AND column_key = ?'
     ).get(req.params.activityId, column);
     const fromStatus = existing ? existing.status : null;
     const now = new Date().toISOString();
@@ -334,16 +359,44 @@ router.patch(
     // on the cell is meaningful, so the date/remarks/attachments are dropped
     // regardless of what the client sent.
     const isNA = status === 'NA';
-    // Submitted's "Expected approval date" defaults to SUB_APPROVAL_DAYS
-    // working days after the day the cell enters Submitted, but is still an
-    // editable field -- an explicit date from the client always wins. A
-    // later save that leaves it Submitted without a date in the request (e.g.
-    // editing remarks only) keeps whatever was already stored instead of
-    // recomputing "now + 10 working days" again.
-    const isSUB = status === 'SUB';
-    const cellTentativeDate = isNA ? null
-      : isSUB ? (tentativeDate || (fromStatus === 'SUB' ? (existing.tentativeDate || null) : addWorkingDaysISO(now, SUB_APPROVAL_DAYS)))
-      : (tentativeDate || null);
+    // The status's date (TENTATIVE_DATE_LABEL: start / finish / approval date
+    // ...) is mandatory for every status except NA, which has no date. The
+    // modal pre-suggests SUB_APPROVAL_DAYS working days for Submitted and
+    // Comment Compliance, but that is only a suggestion the user can change --
+    // the server never fills one in on its own.
+    const cellTentativeDate = isNA ? null : (tentativeDate || null);
+    if (status !== 'NA' && !tentativeDate) {
+      return res.status(400).json({ error: `${TENTATIVE_DATE_LABEL[status]} is required` });
+    }
+    // Planned finish date is mandatory for Yet to Start (and only applies
+    // there); it can't fall before the tentative start date.
+    if (status === 'YTS') {
+      if (!plannedFinishDate) return res.status(400).json({ error: 'Planned finish date is required for Yet to Start' });
+      if (tentativeDate && plannedFinishDate < tentativeDate) {
+        return res.status(400).json({ error: 'Planned finish date cannot be before the tentative start date' });
+      }
+    }
+    const cellPlannedFinish = status === 'YTS' ? (plannedFinishDate || null) : null;
+
+    // Comment Compliance: a revision number is required. Revisions never go
+    // backwards, and anything past MAX_FREE_REVISION (other than staying on the
+    // revision the cell already holds) must go through a revision request that
+    // management/admin approve -- see revisionRequests.routes.js.
+    const storedRevision = (existing && existing.revision) || null;
+    let cellRevision = storedRevision; // retained across other statuses
+    if (status === 'CC') {
+      const rev = Number(revision);
+      if (!Number.isInteger(rev) || rev < 1) return res.status(400).json({ error: 'Revision is required for Comment Compliance' });
+      if (storedRevision && rev < storedRevision) {
+        return res.status(400).json({ error: `Revision cannot go back below the current revision (${storedRevision})` });
+      }
+      if (rev > MAX_FREE_REVISION && rev !== storedRevision) {
+        return res.status(403).json({
+          error: `Revision ${rev} needs management or admin approval — raise a revision request`, needsApproval: true,
+        });
+      }
+      cellRevision = rev;
+    }
     const cellRemarks = isNA ? '' : (remarks || '');
     const cellAttachments = isNA ? [] : (attachments || []);
 
@@ -358,20 +411,21 @@ router.patch(
 
     const txn = db.transaction(() => {
       db.prepare(`
-        INSERT INTO activity_cells (activity_id, column_key, status, tentative_date, remarks, signed, updated_by, updated_at)
-        VALUES (@activityId, @column, @status, @tentativeDate, @remarks, 1, @updatedBy, @updatedAt)
+        INSERT INTO activity_cells (activity_id, column_key, status, tentative_date, planned_finish_date, revision, remarks, signed, updated_by, updated_at)
+        VALUES (@activityId, @column, @status, @tentativeDate, @plannedFinishDate, @revision, @remarks, 1, @updatedBy, @updatedAt)
         ON CONFLICT(activity_id, column_key) DO UPDATE SET
-          status = excluded.status, tentative_date = excluded.tentative_date, remarks = excluded.remarks,
-          signed = 1, updated_by = excluded.updated_by, updated_at = excluded.updated_at
+          status = excluded.status, tentative_date = excluded.tentative_date, planned_finish_date = excluded.planned_finish_date,
+          revision = excluded.revision, remarks = excluded.remarks, signed = 1, updated_by = excluded.updated_by, updated_at = excluded.updated_at
       `).run({
-        activityId: req.params.activityId, column, status, tentativeDate: cellTentativeDate,
+        activityId: req.params.activityId, column, status, tentativeDate: cellTentativeDate, plannedFinishDate: cellPlannedFinish,
+        revision: cellRevision,
         remarks: cellRemarks, updatedBy: req.user.username, updatedAt: now,
       });
 
       const auditInfo = db.prepare(
-        `INSERT INTO activity_audit_log (activity_id, column_key, from_status, to_status, remarks, updated_by, updated_at)
-         VALUES (?,?,?,?,?,?,?)`
-      ).run(req.params.activityId, column, fromStatus, status, cellRemarks, req.user.username, now);
+        `INSERT INTO activity_audit_log (activity_id, column_key, from_status, to_status, revision, remarks, updated_by, updated_at)
+         VALUES (?,?,?,?,?,?,?,?)`
+      ).run(req.params.activityId, column, fromStatus, status, status === 'CC' ? cellRevision : null, cellRemarks, req.user.username, now);
 
       cellAttachments.forEach((f) => {
         if (!f || !f.originalName || !f.storedName) return;

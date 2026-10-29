@@ -116,12 +116,15 @@ function requireApprover(req, res, next) {
   next();
 }
 
-// Pending requests for one project/FY, so the financials modal can flag them.
+// Pending + approved requests for one project/FY, so the financials modal can flag
+// cells awaiting approval (requests) and cells already changed by approval (approved, oldest first).
 router.get('/projects/:id/financials/change-requests', requireAuth, requireProjectAccess(), (req, res) => {
   const fiscalYear = Number(req.query.fiscalYear) || new Date().getFullYear();
   const requests = db.prepare(`${requestSelect} WHERE r.project_id = ? AND r.fiscal_year = ? AND r.status = 'pending'`)
     .all(req.params.id, fiscalYear);
-  res.json({ requests });
+  const approved = db.prepare(`${requestSelect} WHERE r.project_id = ? AND r.fiscal_year = ? AND r.status = 'approved' ORDER BY r.decided_at, r.id`)
+    .all(req.params.id, fiscalYear);
+  res.json({ requests, approved });
 });
 
 router.post(
@@ -205,6 +208,18 @@ function decide(status) {
     res.json({ ok: true });
   };
 }
+// A still-pending request can be withdrawn (e.g. a typo) by whoever raised it, or by an admin.
+// Pending requests have not touched any figure, so a hard delete loses nothing.
+router.delete('/financial-change-requests/:id', requireAuth, (req, res) => {
+  const r = db.prepare('SELECT id, status, requested_by AS requestedBy FROM financial_change_requests WHERE id = ?').get(req.params.id);
+  if (!r) return res.status(404).json({ error: 'Request not found' });
+  if (req.user.role !== 'admin' && r.requestedBy !== req.user.username) {
+    return res.status(403).json({ error: 'Only the person who raised this request (or an admin) can delete it' });
+  }
+  const info = db.prepare("DELETE FROM financial_change_requests WHERE id = ? AND status = 'pending'").run(r.id);
+  if (!info.changes) return res.status(409).json({ error: `Request was already ${r.status} and can no longer be deleted` });
+  res.json({ ok: true });
+});
 router.post('/financial-change-requests/:id/approve', requireAuth, requireApprover, decide('approved'));
 router.post('/financial-change-requests/:id/reject', requireAuth, requireApprover, decide('rejected'));
 

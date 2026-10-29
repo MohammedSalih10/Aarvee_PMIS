@@ -3,15 +3,16 @@ const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
 const { BUDGET_CATEGORIES, DELIVERABLE_STATUS } = require('../dashboardConstants');
-const { computeRowPercent } = require('../activityConstants');
+const { loadMilestoneConfig, rowPercent } = require('../milestones');
 
 // Project dashboard (mockup page 3): header dates/amounts, budget vs
 // expenditure, life cycle totals and the billing/collection deliverables.
 const router = express.Router();
 
 // Overall project "% Complete": the plain average of every corridor row's own
-// % complete (computeRowPercent -- the same weighted-by-column-weightage
-// figure shown per-row on the activity grid), across both Office and Field
+// % complete (rowPercent -- the same figure shown per-row on the activity
+// grid, weighted by column or by payment milestone per the project's setting
+// on that tab), across both Office and Field
 // tabs. Each corridor counts equally regardless of tab, so adding/removing
 // corridors changes the mix, not a fixed Office/Field 50-50 split.
 function computeProjectPercent(projectId) {
@@ -21,6 +22,7 @@ function computeProjectPercent(projectId) {
     if (!columnRows.length) return;
     const activities = db.prepare('SELECT id FROM project_activities WHERE project_id = ? AND tab = ?').all(projectId, tab);
     if (!activities.length) return;
+    const milestoneConfig = loadMilestoneConfig(projectId, tab);
     const ids = activities.map((a) => a.id);
     const placeholders = ids.map(() => '?').join(',');
     const cellRows = db.prepare(
@@ -32,7 +34,7 @@ function computeProjectPercent(projectId) {
       cellsByActivity.get(c.activityId)[c.columnKey] = c;
     });
     activities.forEach((a) => {
-      const pct = computeRowPercent(cellsByActivity.get(a.id) || {}, columnRows);
+      const pct = rowPercent(cellsByActivity.get(a.id) || {}, columnRows, milestoneConfig);
       if (pct != null) { total += pct; count += 1; }
     });
   });
@@ -81,6 +83,13 @@ router.get('/projects/:id/dashboard', requireAuth, requireProjectAccess(), (req,
 
 router.patch('/projects/:id/details', requireAuth, requireProjectAccess(), requireAnyRole('pmo'), (req, res) => {
   const body = req.body || {};
+  // Contractual end date is frozen once set; only an approved change request (or an admin) may alter it.
+  if (body.contractEnd !== undefined && req.user.role !== 'admin') {
+    const current = db.prepare('SELECT contract_end FROM projects WHERE id = ?').get(req.params.id);
+    if (current && current.contract_end && (body.contractEnd || null) !== current.contract_end) {
+      return res.status(409).json({ error: 'Contractual end date is frozen — request a change for management approval', frozen: ['contractEnd'] });
+    }
+  }
   const sets = [];
   const values = [];
   for (const [key, col] of Object.entries(DETAIL_FIELDS)) {

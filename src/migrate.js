@@ -159,6 +159,34 @@ function renameLegacyColumnKeys(db) {
   }
 }
 
+// 'CC' (Comment Compliance) joined the status CHECK; SQLite can't alter one in
+// place, so rebuild the table. Runs after every column above exists, so the
+// copy lists columns explicitly instead of SELECT *.
+function allowCommentComplianceStatus(db) {
+  const { sql } = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='activity_cells'").get();
+  if (sql.includes("'CC'")) return;
+  db.exec(`
+    CREATE TABLE activity_cells_new (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      activity_id INTEGER NOT NULL REFERENCES project_activities(id) ON DELETE CASCADE,
+      column_key TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'YTS' CHECK(status IN ('YTS','IP','OH','SUB','CC','APP','NA')),
+      tentative_date TEXT,
+      planned_finish_date TEXT,
+      revision INTEGER,
+      remarks TEXT,
+      signed INTEGER NOT NULL DEFAULT 0,
+      updated_by TEXT,
+      updated_at TEXT,
+      UNIQUE(activity_id, column_key)
+    );
+    INSERT INTO activity_cells_new (id, activity_id, column_key, status, tentative_date, planned_finish_date, revision, remarks, signed, updated_by, updated_at)
+      SELECT id, activity_id, column_key, status, tentative_date, planned_finish_date, revision, remarks, signed, updated_by, updated_at FROM activity_cells;
+    DROP TABLE activity_cells;
+    ALTER TABLE activity_cells_new RENAME TO activity_cells;
+  `);
+}
+
 function migrate(db) {
   [
     ['contract_start', 'TEXT'], ['contract_end', 'TEXT'], ['forecast_completion', 'TEXT'],
@@ -185,6 +213,53 @@ function migrate(db) {
     renameLegacyColumnKeys(db);
     dropProjectDivision(db);
   })();
+  // After the transaction: the legacy table rebuilds above copy with SELECT *
+  // into a fixed column list, so this column must not exist yet while they run.
+  addColumnIfMissing(db, 'activity_cells', 'planned_finish_date', 'TEXT');
+  addColumnIfMissing(db, 'activity_cells', 'revision', 'INTEGER');
+  addColumnIfMissing(db, 'activity_audit_log', 'revision', 'INTEGER');
+  db.transaction(() => allowCommentComplianceStatus(db))();
+  // Every request (whatever its outcome) gets a 'CCQ' "requested" entry at the
+  // time it was raised, same match rule as the rejections below.
+  db.exec(`
+    INSERT INTO activity_audit_log (activity_id, column_key, from_status, to_status, revision, remarks, updated_by, updated_at)
+    SELECT r.activity_id, r.column_key,
+           (SELECT status FROM activity_cells c WHERE c.activity_id = r.activity_id AND c.column_key = r.column_key),
+           'CCQ', r.to_revision,
+           'Revision ' || r.to_revision || ' requested — approval date ' || r.approval_date || ': ' || r.reason,
+           r.requested_by, REPLACE(r.requested_at, ' ', 'T') || '.000Z'
+    FROM activity_revision_requests r
+    WHERE NOT EXISTS (
+      SELECT 1 FROM activity_audit_log a
+      WHERE a.activity_id = r.activity_id AND a.column_key = r.column_key AND a.to_status = 'CCQ'
+        AND a.revision = r.to_revision
+        AND ABS(strftime('%s', REPLACE(SUBSTR(a.updated_at, 1, 19), 'T', ' ')) - strftime('%s', r.requested_at)) <= 5
+    )`);
+  // Rejections decided before rejections were logged get their history entry
+  // now. A request already has one if a 'CCR' entry for the same cell/revision
+  // exists within a few seconds of its decision (the live insert and the
+  // request's decided_at are stamped together), which also keeps this idempotent.
+  db.exec(`
+    INSERT INTO activity_audit_log (activity_id, column_key, from_status, to_status, revision, remarks, updated_by, updated_at)
+    SELECT r.activity_id, r.column_key,
+           (SELECT status FROM activity_cells c WHERE c.activity_id = r.activity_id AND c.column_key = r.column_key),
+           'CCR', r.to_revision,
+           'Revision ' || r.to_revision || ' request rejected by ' || COALESCE(r.decided_by, 'management')
+             || ' (requested by ' || r.requested_by || ': ' || r.reason || ')'
+             || CASE WHEN r.decision_note IS NOT NULL THEN ' — ' || r.decision_note ELSE '' END,
+           COALESCE(r.decided_by, 'management'),
+           REPLACE(COALESCE(r.decided_at, r.requested_at), ' ', 'T') || '.000Z'
+    FROM activity_revision_requests r
+    WHERE r.status = 'rejected'
+      AND NOT EXISTS (
+        SELECT 1 FROM activity_audit_log a
+        WHERE a.activity_id = r.activity_id AND a.column_key = r.column_key AND a.to_status = 'CCR'
+          AND a.revision = r.to_revision
+          AND ABS(strftime('%s', REPLACE(SUBSTR(a.updated_at, 1, 19), 'T', ' ')) - strftime('%s', COALESCE(r.decided_at, r.requested_at))) <= 5
+      )`);
+  // Approvals recorded before they got their own history marker ('CCA').
+  db.exec(`UPDATE activity_audit_log SET to_status = 'CCA'
+           WHERE to_status = 'CC' AND remarks LIKE 'Revision % approved (requested by %'`);
 }
 
 module.exports = migrate;
