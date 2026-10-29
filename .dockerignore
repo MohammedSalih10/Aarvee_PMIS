@@ -1,0 +1,11 @@
+node_modules
+data
+.env
+.git
+.vscode
+deploy
+certs
+*.xlsx
+README.md
+Dockerfile
+docker-compose.yml

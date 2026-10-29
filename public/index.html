@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aarvee PMIS</title>
+<link rel="icon" type="image/svg+xml" href="/aarvee-logo.svg">
+<link rel="preconnect" href="https://cdn.prod.website-files.com" crossorigin>
+<style>
+@font-face{font-family:"Golos";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27b92b170757a5c1b85de_Golos-Text_Regular-BF63e4626498574.woff") format("woff");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Golos";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27b923f3fcf9332b2cc7a_Golos-Text_Medium-BF63e462647de8d.woff") format("woff");font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:"Golos";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27b9295011aafe5879c8d_Golos-Text_DemiBold-BF63e4626470f30.woff") format("woff");font-style:normal;font-weight:600;font-display:swap}
+@font-face{font-family:"Golos";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27b925cc734c7d41582bb_Golos-Text_Bold-BF63e4626390d32.woff") format("woff");font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:"Ivy Ora Display";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27ae0fd87ea67a211e2f3_IvyOraDisplay-Regular.woff2") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Ivy Ora Display";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27afa2244158c8d9075b8_IvyOraDisplay-Medium.woff2") format("woff2");font-style:normal;font-weight:500 600;font-display:swap}
+@font-face{font-family:"Ivy Ora Display";src:url("https://cdn.prod.website-files.com/68d276adf6c9fda4f364643e/68d27afa2244158c8d9075b4_IvyOraDisplay-Bold.woff2") format("woff2");font-style:normal;font-weight:700;font-display:swap}
+:root{
+  --canvas:#F4F7FA;--surface:#FFFFFF;--ink:#0F2233;--muted:#5D7387;--subtle:#8A9BAB;--border:#E3EAF0;--border-strong:#D5DEE6;
+  --primary:#0A78AD;--primary-h:#09689A;--on-primary:#FFFFFF;--brand:#1BA0DA;--primary-soft:#E8F5FC;
+  --head:#F8FAFC;--row-sel:#F5FAFD;--row-hover:#F9FBFD;
+  --success:#1E8E5A;--success-soft:#E6F5EE;--warning:#B76E00;--warning-soft:#FFF4E0;--amber-ink:#9A5B00;
+  --danger:#C62828;--danger-soft:#FDECEC;--violet:#4B4FC4;--violet-soft:#EEF0FF;--ring:rgba(27,160,218,.25);
+  --bill-pl:#BFE3F5;--bill-ac:#0A78AD;--col-pl:#C9EBD9;--col-ac:#1E8E5A;
+  --pl:#0A78AD;--ac:#F59E0B;--fc:#E5484D;--mo:#BFE3F5;
+  --auth-panel:#F2F9FD;--auth-glow:#CDEBFA;--eyebrow-line:#D4ECF8;
+  --shadow-sm:0 1px 2px rgba(15,34,51,.08);--shadow-pop:0 16px 40px -12px rgba(15,34,51,.28);
+  --line:var(--border);--bg:var(--canvas);--card:var(--surface);
+  /* Activity matrix cell legend (Submitted/Approved/Hold/In Progress split from behind-schedule) */
+  --act-sub:#C6EFCE;--act-sub-ink:#1E6B33;--act-app:#70AD47;--act-app-ink:#FFFFFF;
+  --act-hold:#a19f9f;--act-hold-ink:#5D7387;--act-ip:#FFCC80;--act-ip-ink:#7A4A00;
+  --act-ipb:#FFF200;--act-ipb-ink:#5C5400;--act-ytsb:#f86d7d;--act-ytsb-ink:#9C1F28;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --canvas:#0B1620;--surface:#102030;--ink:#E6EFF6;--muted:#93A9BC;--subtle:#6F879B;--border:#1F364A;--border-strong:#2A465D;
+    --primary:#3BB0E6;--primary-h:#5CC0EE;--on-primary:#06202F;--primary-soft:#123047;
+    --head:#0E1C29;--row-sel:#12283A;--row-hover:#11233A;
+    --success:#4CC38A;--success-soft:#11301F;--warning:#F0B44C;--warning-soft:#33260E;--amber-ink:#F0B44C;
+    --danger:#FF6B6B;--danger-soft:#3A1717;--violet:#A5A8FF;--violet-soft:#1E2150;--ring:rgba(59,176,230,.35);
+    --bill-pl:#1E4A66;--bill-ac:#3BB0E6;--col-pl:#1B4733;--col-ac:#4CC38A;--pl:#3BB0E6;--mo:#1E4A66;
+    --auth-panel:#0D1B27;--auth-glow:#123A55;--eyebrow-line:#1F364A;--shadow-pop:0 16px 40px -12px rgba(0,0,0,.65);
+    --act-sub:#1B3A26;--act-sub-ink:#8FD4A5;--act-app:#2F6B32;--act-app-ink:#D8F5DB;
+    --act-hold:#334455;--act-hold-ink:#A9BBCB;--act-ip:#5C3A14;--act-ip-ink:#FFC98A;
+    --act-ipb:#5A5212;--act-ipb-ink:#FFF29E;--act-ytsb:#4A1E22;--act-ytsb-ink:#FF9AA2;
+    color-scheme:dark;
+  }
+  :root:not([data-theme="light"]) .auth-msg h2,
+  :root:not([data-theme="light"]) .auth-head h1{font-weight:600}
+}
+:root[data-theme="dark"]{
+  --canvas:#0B1620;--surface:#102030;--ink:#E6EFF6;--muted:#93A9BC;--subtle:#6F879B;--border:#1F364A;--border-strong:#2A465D;
+  --primary:#3BB0E6;--primary-h:#5CC0EE;--on-primary:#06202F;--primary-soft:#123047;
+  --head:#0E1C29;--row-sel:#12283A;--row-hover:#11233A;
+  --success:#4CC38A;--success-soft:#11301F;--warning:#F0B44C;--warning-soft:#33260E;--amber-ink:#F0B44C;
+  --danger:#FF6B6B;--danger-soft:#3A1717;--violet:#A5A8FF;--violet-soft:#1E2150;--ring:rgba(59,176,230,.35);
+  --bill-pl:#1E4A66;--bill-ac:#3BB0E6;--col-pl:#1B4733;--col-ac:#4CC38A;--pl:#3BB0E6;--mo:#1E4A66;
+  --auth-panel:#0D1B27;--auth-glow:#123A55;--eyebrow-line:#1F364A;--shadow-pop:0 16px 40px -12px rgba(0,0,0,.65);
+  --act-sub:#1B3A26;--act-sub-ink:#8FD4A5;--act-app:#2F6B32;--act-app-ink:#D8F5DB;
+  --act-hold:#334455;--act-hold-ink:#A9BBCB;--act-ip:#5C3A14;--act-ip-ink:#FFC98A;
+  --act-ipb:#5A5212;--act-ipb-ink:#FFF29E;--act-ytsb:#4A1E22;--act-ytsb-ink:#FF9AA2;
+  color-scheme:dark;
+}
+:root[data-theme="dark"] .auth-msg h2,
+:root[data-theme="dark"] .auth-head h1{font-weight:600}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;font-family:"Golos",system-ui,sans-serif;font-size:15.5px;color:var(--ink);background:var(--canvas);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6{font-family:"Ivy Ora Display",Arial,sans-serif}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+select option{background:var(--surface);color:var(--ink)}
+[hidden]{display:none!important}
+[data-ic]{display:inline-flex;align-items:center;flex-shrink:0}
+.ic{display:block;flex-shrink:0}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.muted{color:var(--muted)}
+.up{color:var(--success)}.dn{color:var(--danger)}
+
+/* BUTTONS */
+.btn-o,.btn-p{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:15px;font-weight:500;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn-o:hover{background:var(--head);border-color:var(--border-strong)}
+.btn-o [data-ic]{color:var(--muted)}
+.btn-p{background:var(--primary);color:var(--on-primary);border-color:transparent;font-weight:600}
+.btn-p:hover{background:var(--primary-h)}
+.btn-o.sm,.btn-p.sm{height:34px;padding:0 13px;font-size:14px;gap:6px}
+.icon-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);flex-shrink:0}
+.icon-btn:hover{color:var(--ink);background:var(--head)}
+.icon-btn.sm{width:34px;height:34px;border-radius:7px;color:var(--primary)}
+.icon-btn .dot{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:var(--danger);border:1.5px solid var(--surface);color:#fff;font-size:11px;font-weight:700;line-height:13px;text-align:center}
+.icon-btn .dot::after{content:'';position:absolute;inset:-1.5px;z-index:-1;border-radius:inherit;background:var(--danger);opacity:.55;animation:dot-pulse 1.6s ease-out infinite}
+@keyframes dot-pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(2);opacity:0}}
+@keyframes bell-shake{0%,100%{transform:rotate(0)}15%{transform:rotate(13deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}90%{transform:rotate(-2deg)}}
+.icon-btn.has-alert{color:var(--danger)}
+.icon-btn.has-alert span[data-ic="bell"]{display:inline-flex;transform-origin:50% 0;animation:bell-shake 1.8s ease-in-out infinite}
+.link{border:0;background:none;padding:0;color:var(--primary);font-size:15px;font-weight:600}
+.link:hover{text-decoration:underline}
+.sel-btn{position:relative;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted)}
+.sel-btn select{appearance:none;-webkit-appearance:none;height:100%;min-width:0;padding:0 24px 0 0;border:0;background:none;font-size:15px;font-weight:500;cursor:pointer;outline:none}
+.sel-btn:has(#fFY),.sel-btn:has(#pdFY){width:190px}
+.sel-btn:has(#fQ){width:180px}
+.sel-btn:has(#fFY) select,.sel-btn:has(#pdFY) select,.sel-btn:has(#fQ) select{flex:1;width:100%}
+.sel-btn select{text-align:center;text-align-last:center}
+.sel-btn select option{text-align:center;padding:6px 14px}
+.sel-btn .chev-dn{position:absolute;right:12px;pointer-events:none}
+.sel-btn:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:8px;background:var(--canvas)}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:6px;font-size:14.5px;font-weight:500;color:var(--muted);white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button.on,.seg button.active{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow-sm)}
+.seg.sm button{padding:4px 10px;font-size:13px}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--eyebrow-line);background:var(--surface);color:var(--primary);font-size:14px;font-weight:600;white-space:nowrap}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+
+/* LOGIN */
+#loginView{display:flex;min-height:100vh;background:var(--surface)}
+#loginView.hidden{display:none}
+.auth-brand{flex:0 0 640px;max-width:45%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;padding:56px;border-right:1px solid var(--border);
+  background:radial-gradient(ellipse 70% 55% at 90% 10%,var(--auth-glow) 0%,transparent 100%) no-repeat,var(--auth-panel)}
+.auth-msg{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px}
+.auth-logo-link{display:block;width:254px;height:83px}
+.auth-logo{display:block;width:100%;height:100%;object-fit:cover;object-position:68% 50%}
+.auth-msg h2{margin:0;max-width:520px;font-size:40px;font-weight:700;letter-spacing:-.8px;line-height:1.15}
+.auth-msg p{margin:0;max-width:520px;font-size:16px;line-height:25px;color:var(--muted)}
+.contact-link{color:inherit;text-decoration:none}
+.contact-link:hover{text-decoration:underline}
+.auth-copy{font-size:12.5px;line-height:16px;color:var(--subtle)}
+.auth-copy a{color:inherit;text-decoration:none}
+.auth-copy a:hover{text-decoration:underline}
+.auth-foot-brand{position:absolute;right:56px;bottom:56px;font-size:12.5px;line-height:16px;color:var(--subtle);white-space:nowrap}
+.auth-main{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:96px 56px}
+.auth-main > .theme-btn{position:absolute;top:28px;right:40px;width:40px;height:40px;border-radius:9px}
+.auth-form{width:100%;max-width:400px;display:flex;flex-direction:column;gap:28px}
+.auth-mobile-logo-link{display:none;width:190px}
+.auth-mobile-logo{display:block;width:100%;height:auto}
+.auth-head h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.5px}
+.auth-head p{margin:8px 0 0;font-size:14.5px;line-height:22px;color:var(--muted)}
+.fields{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:13.5px;font-weight:600}
+.input{display:flex;align-items:center;gap:10px;height:46px;padding:0 6px 0 14px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);color:var(--subtle);transition:border-color .15s,box-shadow .15s}
+.input:focus-within{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary),0 0 6px var(--ring);color:var(--primary)}
+.input input{flex:1;min-width:0;height:100%;border:0;background:none;font-size:15px;outline:none}
+.input input::placeholder{color:var(--subtle)}
+.input input:-webkit-autofill,.input input:-webkit-autofill:hover,.input input:-webkit-autofill:focus{-webkit-text-fill-color:var(--ink);box-shadow:0 0 0 1000px var(--surface) inset;transition:background-color 9999s ease-in-out 0s}
+.pw-toggle{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 8px;border:0;border-radius:6px;background:none;color:var(--muted);font-size:13px;font-weight:500}
+.pw-toggle:hover{color:var(--ink);background:var(--head)}
+.opts{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.check{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.check input{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin:0;border:1.5px solid var(--border-strong);border-radius:5px;background:var(--surface) center/12px no-repeat;cursor:pointer}
+.check input:checked{background-color:var(--primary);border-color:var(--primary);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")}
+.btn-signin{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border:0;border-radius:9px;background:var(--primary);color:var(--on-primary);font-size:15.5px;font-weight:600;box-shadow:0 4px 12px rgba(10,120,173,.2);transition:background .15s}
+.btn-signin:hover{background:var(--primary-h)}
+.btn-signin[disabled]{opacity:.7;cursor:progress}
+.err{margin:-16px 0 0;font-size:13px;color:var(--danger)}
+.err:empty{display:none}
+.note{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:9px;background:var(--head);font-size:12.5px;line-height:19px;color:var(--muted)}
+.note [data-ic]{margin-top:2px}
+@media (max-width:960px){
+  .auth-brand{display:none}
+  .auth-mobile-logo-link{display:block}
+  .auth-main{padding:80px 16px 96px}
+  .auth-main > .theme-btn{top:16px;right:16px}
+  .auth-foot-brand{right:16px;bottom:24px}
+}
+
+/* TOP NAV */
+.topnav{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:16px;height:70px;padding:0 36px;background:var(--surface);border-bottom:1px solid var(--border)}
+.tn-brand{display:flex;align-items:center;gap:12px;padding:0;border:0;background:none;flex-shrink:0}
+.tn-brand img{height:36px;width:auto;display:block}
+.tn-div{width:1px;height:20px;background:var(--border)}
+.tn-product{color:var(--muted);font-size:16.5px;font-weight:600;letter-spacing:1px}
+.tn-links{display:flex;gap:4px;height:100%;margin-left:24px}
+.tn-link{height:100%;padding:0 14px;border:0;border-bottom:2px solid var(--ring);background:none;font-size:15.5px;font-weight:600;color:var(--ink);white-space:nowrap;transition:border-color .15s,color .15s}
+.tn-link:hover{color:var(--primary);border-bottom-color:var(--primary)}
+.tn-link.on{color:var(--primary);border-bottom-color:var(--primary)}
+.tn-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.tn-search{display:flex;align-items:center;gap:8px;width:280px;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--canvas);color:var(--subtle)}
+.tn-search input{flex:1;min-width:0;border:0;background:none;font-size:14.5px;outline:none}
+.tn-search input::placeholder{color:var(--subtle)}
+.tn-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+.tn-vdiv{width:1px;height:28px;background:var(--border)}
+.user-menu{position:relative}
+.um-btn{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 4px;border:0;border-radius:10px;background:none;color:var(--muted)}
+.um-btn:hover{background:var(--head)}
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-size:14.5px;font-weight:600}
+.um-text{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.um-text strong{font-size:14.5px;font-weight:600;color:var(--ink)}
+.um-text small{font-size:12.5px;color:var(--muted)}
+.um-pop{position:absolute;right:0;top:calc(100% + 8px);min-width:210px;display:flex;flex-direction:column;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-pop)}
+.um-pop button{display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border:0;border-radius:7px;background:none;font-size:15px;text-align:left}
+.um-pop button:hover{background:var(--head)}
+.um-pop [data-ic]{color:var(--muted)}
+@media (max-width:1200px){.tn-search{width:200px}.tn-links{margin-left:8px}}
+@media (max-width:1040px){.um-text,.tn-div,.tn-product,.tn-search{display:none}}
+@media (max-width:760px){
+  .topnav{flex-wrap:wrap;height:auto;padding:10px 16px 0;row-gap:4px}
+  .tn-links{order:3;width:100%;height:42px;margin:0 -16px;padding:0 6px;overflow-x:auto;border-top:1px solid var(--border)}
+  .tn-right{gap:8px}
+  .tn-vdiv{display:none}
+}
+
+/* PAGE */
+.view{display:none;flex-direction:column}
+.view.on{display:flex;flex:1}
+.page{display:flex;flex-direction:column;gap:26px;width:100%;max-width:2080px;margin:0 auto;padding:32px 40px 36px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ph-title{display:flex;flex-direction:column;gap:6px;min-width:0}
+.crumbs{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--subtle)}
+.crumbs button{border:0;background:none;padding:0;font-size:14px;color:var(--subtle)}
+.crumbs button:hover{color:var(--primary);text-decoration:underline}
+.crumbs .cur{color:var(--muted)}
+.title{margin:0;font-size:31px;font-weight:600;letter-spacing:-.4px;line-height:1.2}
+.ph-sub{margin:0;font-size:15.5px;color:var(--muted)}
+.ph-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;flex-wrap:wrap}
+.ch-title{display:flex;align-items:center;gap:8px}
+.ch-title h2,.ch-title h3{margin:0;font-size:18.5px;font-weight:600}
+.count{display:inline-flex;padding:2px 8px;border-radius:10px;background:var(--canvas);color:var(--muted);font-size:13px;font-weight:600}
+.ch-hint{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.ch-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--border);border-radius:0 0 12px 12px;background:var(--head);font-size:14px;color:var(--muted)}
+.card-foot strong{color:var(--ink);font-weight:600}
+.cf-legend{display:inline-flex;align-items:center;gap:8px}
+.cf-legend [data-ic]{color:var(--primary)}
+.table-wrap{overflow-x:auto}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 32px;border-top:1px solid var(--border);background:var(--surface);font-size:14px;color:var(--subtle)}
+.foot-brand{margin-left:auto;text-align:right;font:inherit;color:inherit}
+.foot a{color:inherit;text-decoration:none}
+.foot a:hover{text-decoration:underline}
+@media (max-width:760px){.page{padding:20px 16px 24px;gap:18px}.foot{padding:14px 16px}.title{font-size:26.5px}}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+.kpi{display:flex;flex-direction:column;gap:14px;min-width:0;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.kpi-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14.5px;font-weight:500;color:var(--muted)}
+.kpi-ic{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--primary-soft);color:var(--primary)}
+.kpi-ic.green{background:var(--success-soft);color:var(--success)}
+.kpi-ic.amber{background:var(--warning-soft);color:var(--warning)}
+.kpi-val{display:flex;align-items:flex-end;gap:6px;line-height:1;white-space:nowrap}
+.kpi-val .cur{padding-bottom:3px;font-size:20px;font-weight:500;color:var(--muted)}
+.kpi-val b{font-size:31px;font-weight:600;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+.kpi-val .unit{padding-bottom:2px;font-size:15.5px;color:var(--muted)}
+.kpi-cap{font-size:14px;color:var(--subtle)}
+@media (max-width:1240px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.kpis{grid-template-columns:1fr}}
+
+/* PROJECTS TABLE (summary) */
+.tbl{width:100%;min-width:1000px;border-collapse:collapse;font-size:15px}
+.tbl th{padding:10px 16px;background:var(--head);border-top:1px solid var(--border);border-bottom:1px solid var(--border);color:var(--muted);font-family:"Golos",system-ui,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;text-align:left;white-space:nowrap}
+.tbl td{height:56px;padding:0 16px;border-bottom:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{padding-left:20px}
+.tbl th:last-child,.tbl td:last-child{padding-right:20px}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tbody tr[data-id]{cursor:pointer}
+.tbl tbody tr[data-id]:hover td{background:var(--row-hover)}
+.tbl tbody tr.sel td{background:var(--row-sel)}
+.tbl tr.sel .pname{color:var(--primary)}
+.tbl td.strong{color:var(--ink);font-weight:600}
+.num{text-align:right!important;font-variant-numeric:tabular-nums}
+.tbl th.num,.tbl td.num{text-align:center!important}
+.tbl th.type,.tbl td.type{text-align:center}
+.proj{display:flex;align-items:center;gap:10px}
+.pbadge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 5px;border-radius:7px;background:var(--primary-soft);color:var(--primary);font-size:11.5px;font-weight:700}
+.pname{color:var(--ink);font-size:15.5px;font-weight:500;text-decoration:none}
+.pname:hover{color:var(--primary);text-decoration:underline}
+.tbadge{display:inline-flex;padding:3px 8px;border-radius:5px;background:var(--canvas);color:var(--muted);font-size:12.5px;font-weight:600}
+.tbadge.t-DPR{background:var(--violet-soft);color:var(--violet)}
+.tbadge.t-FLS{background:var(--warning-soft);color:var(--amber-ink)}
+.pill{display:inline-flex;padding:3px 8px;border-radius:10px;background:var(--canvas);color:var(--muted);font-size:13px;font-weight:600}
+.trend{margin-right:4px;font-size:11px;color:var(--subtle)}
+.trend.up{color:var(--success)}.trend.dn{color:var(--danger)}
+td.act{text-align:right}
+td.act .icon-btn{vertical-align:middle}
+.chev{display:inline-flex;align-items:center;justify-content:center;width:28px;height:32px;margin-left:4px;padding:0;border:0;border-radius:6px;background:none;color:var(--subtle);vertical-align:middle;text-decoration:none}
+.chev:hover,tr.sel .chev{color:var(--primary)}
+.chev:hover{background:var(--primary-soft)}
+.empty{height:auto!important;padding:32px!important;text-align:center!important;white-space:normal!important;color:var(--muted)}
+
+/* MIS TABLE (detailed) */
+table.grid{width:100%;min-width:1500px;border-collapse:collapse;font-size:14px}
+table.grid th{padding:8px;background:var(--head);border-top:1px solid var(--border);border-bottom:1px solid var(--border);color:var(--muted);font-size:12.5px;font-weight:600;text-align:center;white-space:nowrap}
+table.grid th.grp{background:var(--canvas);color:var(--ink);font-weight:600}
+table.grid th.lb{min-width:56px;white-space:normal}
+table.grid td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+table.grid td.num{color:var(--muted)}
+table.grid td:first-child,table.grid th:first-child{padding-left:20px}
+table.grid .sep{border-left:1px dashed var(--border-strong)}
+table.grid td.name{min-width:170px;font-weight:500}
+table.grid tbody tr[data-id]{cursor:pointer}
+table.grid tbody tr[data-id]:hover td{background:var(--row-hover)}
+table.grid tr.sel td{background:var(--row-sel)}
+table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
+.op{margin-left:4px;color:var(--primary);font-weight:700;text-decoration:none}
+.iconbtn{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--primary);font-size:13px;font-weight:500;white-space:nowrap}
+.iconbtn:hover{background:var(--primary-soft)}
+
+/* CHARTS & SIDE PANELS */
+.insights{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(300px,380px);gap:16px;align-items:stretch}
+.chart-card{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px}
+.cc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.cc-head h3{margin:0;font-size:17.5px;font-weight:600}
+.cc-sub{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend button{display:inline-flex;align-items:center;gap:6px;padding:2px 4px;border:0;border-radius:6px;background:none;color:var(--muted);font-size:14px}
+.legend button:hover{background:var(--head)}
+.legend button.off{opacity:.45;text-decoration:line-through}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px}
+.chart-card svg,.cc svg{display:block;width:100%;height:auto}
+.chart-card text,.cc text{fill:var(--subtle);font-size:12px;font-family:inherit}
+.tip{position:absolute;z-index:5;display:none;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.55;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-pop)}
+.cell-tip{position:fixed;z-index:70;display:none;max-width:260px;padding:9px 12px;border-radius:9px;background:var(--ink);color:var(--surface);font-size:14px;line-height:1.55;pointer-events:none;box-shadow:var(--shadow-pop)}
+.cell-tip.on{display:block}
+.cell-tip b{display:block;margin-bottom:2px}
+/* Behind-schedule vs approaching-deadline popups get their own shade,
+   matching the warning/danger ring already used on the grid cell itself. */
+.cell-tip.sev-overdue{background:#F8D7DA;color:#842029}
+.cell-tip.sev-upcoming{background:#FFF3CD;color:#664D03}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{display:flex;flex-direction:column;gap:14px;padding:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-head h3{display:flex;align-items:center;gap:8px;margin:0;font-size:17.5px;font-weight:600}
+.panel-head h3 [data-ic]{color:var(--muted)}
+.ph-right{display:inline-flex;align-items:center;gap:8px}
+.panel-head h3.pop{cursor:pointer;border-radius:6px}
+.panel-head h3.pop:hover{color:var(--primary)}
+.panel-head h3.pop:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
+.plist.plist-full{max-height:none;overflow:visible}
+#pendingCard .panel-head h3 .pending-icons [data-ic],#pdPendingCard .panel-head h3 .pending-icons [data-ic]{color:var(--ink)}
+.pending-icons{position:relative;display:inline-flex;align-items:center;color:var(--ink)}
+.pending-mark{position:absolute;right:-5px;bottom:-3px;display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;border:1.5px solid var(--surface);border-radius:50%;background:var(--danger);color:#fff;font-size:9px;font-weight:800;line-height:1}
+.plist{display:flex;flex-direction:column;gap:8px;max-height:280px;margin:0;padding:0;overflow:auto;list-style:none}
+.plist li{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--head);font-size:14.5px}
+.plist .li-txt{flex:1;min-width:0;line-height:1.4}
+.plist small{display:block;margin-top:2px;color:var(--muted);font-size:13px}
+.plist small.activity-next{color:var(--ink)}
+.li-ic{display:inline-flex;margin-top:1px;color:var(--warning)}
+.li-ic.warning{color:var(--danger)}
+.li-ic.warning.pending-icons [data-ic]{color:var(--ink)}
+.link-btn{padding:1px 0;border:0;background:none;color:var(--primary);font-size:14px;font-weight:600;white-space:nowrap}
+.link-btn:hover{text-decoration:underline}
+.plist li.es{align-items:center;gap:12px;padding:14px 16px;border-color:transparent}
+.es-ic{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--success-soft);color:var(--success);flex-shrink:0}
+.plist li.es strong{display:block;font-size:15px;font-weight:600}
+.addrow{display:flex;gap:8px}
+.addrow input{flex:1;min-width:0;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:14.5px}
+.addrow input::placeholder{color:var(--subtle)}
+.addrow input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+#pendAdd,#pdPendAdd,#alertAdd,#pdAlertAdd{flex-wrap:wrap}
+#pendTitle,#pdPendTitle,#alertMsg,#pdAlertMsg{flex:1 1 100%}
+.addrow input[type=date]{flex:1 1 auto;padding:0 10px}
+/* Wide layout: the charts set the row height; Alerts / Pending shrink to it and their lists scroll. */
+@media (min-width:1281px){.insights>.side{contain:size}.insights>.side>.panel{flex:1 1 0;min-height:0}.insights>.side .plist{flex:1 1 auto;min-height:0;max-height:none}}
+@media (max-width:1280px){.insights{grid-template-columns:1fr 1fr}.side{grid-column:1/-1;flex-direction:row}.side>*{flex:1;min-width:0}}
+@media (max-width:820px){.insights{grid-template-columns:1fr}.side{flex-direction:column}}
+
+/* PROJECT DASHBOARD */
+.ptabs{align-self:flex-start;max-width:100%;overflow-x:auto;margin-top:-10px}
+.ptabs button{display:inline-flex;align-items:center;gap:6px}
+/* Active tab: shadow on left/right/bottom only — clip-path cuts anything above the top edge. */
+.ptabs button.active{box-shadow:0 1px 2px rgba(15,34,51,.08),1px 0 1px rgba(15,34,51,.08),-1px 0 1px rgba(15,34,51,.08);clip-path:inset(0 -4px -4px -4px)}
+.pd-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(300px,380px);gap:16px}
+.pd-top > .side{grid-column:3;grid-row:1 / span 2;align-self:start}
+.cc{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px}
+.cc h3{margin:0;font-size:17.5px;font-weight:600}
+.kvs{display:grid;grid-template-columns:1fr auto;align-content:start}
+.kl{padding:11px 12px 11px 0;border-bottom:1px solid var(--border);font-size:14.5px;color:var(--muted)}
+.kv{padding:11px 0;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kvs > :nth-last-child(-n+2){border-bottom:0}
+.bud-wrap{display:flex;align-items:center;gap:12px}
+.bud-legend{display:flex;flex:1;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
+.bud-legend i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:3px;vertical-align:-1px}
+.pd-charts,.pd-tables{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pd-tbar{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:14px;color:var(--muted)}
+.pd-tbar input{height:38px;padding:0 10px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font-size:14.5px}
+/* Fixed layout + shared <colgroup> so the Billing and Collection tables line up column-for-column. */
+.dl{width:100%;min-width:620px;border-collapse:collapse;table-layout:fixed;font-size:14.5px}
+.dl th{height:48px;padding:6px 8px;background:var(--head);border-top:1px solid var(--border);border-bottom:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;line-height:1.3;letter-spacing:.4px;text-align:center;vertical-align:middle}
+.dl td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:center;font-variant-numeric:tabular-nums}
+.dl tr:last-child td{border-bottom:0}
+.dl td.l{text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dl td.st{cursor:pointer}
+.sbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.s-completed{background:var(--success-soft);color:var(--success)}
+.s-in_progress{background:var(--warning-soft);color:var(--amber-ink)}
+.s-pending{background:var(--danger-soft);color:var(--danger)}
+@media (max-width:1300px){.pd-top{grid-template-columns:1fr 1fr}.pd-top > .side{grid-column:1/-1;grid-row:auto}}
+@media (max-width:900px){.pd-top,.pd-charts,.pd-tables{grid-template-columns:1fr}}
+
+/* ACTIVITY VIEW */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);font-size:14px;font-weight:600}
+.chip.on{box-shadow:0 0 0 2px var(--ink)}
+/* Bounded height + its own scrollbars, so the horizontal scrollbar sits right
+   below the visible rows instead of at the bottom of a page-long table. */
+.agrid-wrap{max-height:70vh;overflow:auto}
+table.agrid,table.sgrid{width:100%;border-collapse:collapse;font-size:14px}
+table.agrid th,table.sgrid th{padding:10px 8px;background:var(--head);border-top:1px solid var(--border);border-bottom:1px solid var(--border);color:var(--muted);font-size:12.5px;font-weight:600;white-space:nowrap;text-align:center}
+table.agrid thead th{position:sticky;top:0;z-index:3}
+table.agrid td{padding:8px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
+table.agrid td.n{text-align:left;font-weight:600}
+table.agrid td.pin{max-width:180px;background:var(--head);color:var(--muted);text-align:left;white-space:normal;overflow:hidden;text-overflow:ellipsis}
+table.agrid td.cellstat{cursor:pointer;font-weight:500;box-shadow:inset 0 0 0 2px var(--surface);border-radius:8px}
+table.agrid td.cellstat:hover{filter:brightness(.97)}
+table.agrid td.cellstat small{display:block;font-size:11.5px;opacity:.8}
+table.agrid td.line{background:var(--primary-soft);color:var(--primary);font-weight:600}
+table.agrid td.pct{font-weight:400}
+table.agrid th.frz,table.agrid td.frz{position:sticky;background:var(--surface);z-index:2}
+table.agrid thead th.frz{background:var(--head);z-index:4}
+table.agrid td.frz.line{background:var(--primary-soft)}
+table.agrid td.frz.pin{background:var(--head)}
+table.agrid th.frz.frz-end,table.agrid td.frz.frz-end{box-shadow:inset -1px 0 var(--border-strong)}
+.g-YTS{background:var(--danger-soft);color:var(--danger)}
+.g-IP{background:var(--warning-soft);color:var(--amber-ink)}
+.g-OH{background:var(--primary-soft);color:var(--primary)}
+.g-C{background:var(--success-soft);color:var(--success)}
+.g-NA{color:var(--subtle)}
+.g-BEHIND{background:var(--danger);color:#fff}
+.chip.g-C,.chip.g-IP,.chip.g-OH,.chip.g-YTS,.chip.g-BEHIND,
+.chip.cs-SUB,.chip.cs-APP,.chip.cs-OH,.chip.cs-IP,.chip.cs-IPB,.chip.cs-YTSB{border-color:transparent}
+/* Activity matrix cell colors -- Submitted/Approved/Hold/In Progress kept
+   distinct, and "behind schedule" (deriveCellAlert's 'overdue') folds into
+   the fill itself instead of only a border, per the activity-matrix legend. */
+.cs-SUB{background:var(--act-sub);color:var(--act-sub-ink)}
+.cs-APP{background:var(--act-app);color:var(--act-app-ink)}
+.cs-OH{background:var(--act-hold);color:var(--act-hold-ink)}
+.cs-IP{background:var(--act-ip);color:var(--act-ip-ink)}
+.cs-IPB{background:var(--act-ipb);color:var(--act-ipb-ink)}
+.cs-YTSB{background:var(--act-ytsb);color:var(--act-ytsb-ink)}
+table.agrid td.cellstat.alert-upcoming{box-shadow:inset 0 0 0 2px #FFB74D}
+table.agrid td.cellstat.alert-overdue{box-shadow:inset 0 0 0 2px #E57373}
+table.agrid td.cellstat.cell-flash{animation:cellFlash 1.1s ease-in-out 2}
+@keyframes cellFlash{0%,100%{box-shadow:inset 0 0 0 2px var(--surface)}50%{box-shadow:inset 0 0 0 3px var(--primary)}}
+.plist li[data-nav-project],.plist li[data-nav-tab]{cursor:pointer}
+.plist li[data-nav-project]:hover,.plist li[data-nav-tab]:hover{background:var(--head)}
+
+/* SCHEDULE VIEW */
+table.sgrid td{padding:8px;border-bottom:1px solid var(--border);white-space:nowrap}
+table.sgrid td.stretch{background:var(--head);font-weight:600}
+table.sgrid td.n{min-width:160px;text-align:left;white-space:normal}
+
+/* MODAL */
+#modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,34,51,.45);backdrop-filter:blur(2px)}
+#modal.on{display:flex}
+#modal .box{width:100%;max-width:820px;max-height:88vh;overflow:auto;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-pop)}
+#modal h3{margin:0 0 4px;font-size:20px;font-weight:600}
+#modal .ctx{margin:0 0 18px;font-size:14.5px;color:var(--muted)}
+.mf{margin-bottom:14px}
+.mf label{display:block;margin-bottom:6px;font-size:14.5px;font-weight:600}
+.mf input,.mf select,.mf textarea{width:100%;padding:0 12px;border:1px solid var(--border-strong);border-radius:9px;background:var(--surface);font-size:15.5px}
+.mf input,.mf select{height:42px}
+.mf input[type=file]{height:auto;padding:9px 12px}
+.mf textarea{height:80px;padding:10px 12px;resize:vertical}
+.mf input:focus,.mf select:focus,.mf textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--ring)}
+.sig{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:15px}
+.sig input{width:16px;height:16px;accent-color:var(--primary)}
+.histrow{padding:10px 0;border-bottom:1px solid var(--border);font-size:14.5px}
+.histrow small{display:block;margin-top:2px;color:var(--muted)}
+.eg-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.eg-row>span:first-child{flex:1}
+.eg-row-form{flex-direction:column;align-items:stretch}
+.eg-row-form .mf{margin-bottom:10px}
+.eg-col-grid{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;padding-bottom:8px}
+.eg-col{display:flex;flex-direction:column;align-items:center;gap:6px;width:130px;flex:0 0 auto;padding:10px 8px;border:1px solid var(--border);border-radius:9px;text-align:center}
+.eg-col-name{font-weight:600;font-size:15px;word-break:break-word}
+.eg-col .eg-weight{width:64px;height:32px;padding:0 6px}
+.eg-col-weight{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:14px}
+.eg-col-actions{display:flex;gap:4px}
+.eg-col-form{width:160px;align-items:stretch}
+.eg-col-form input{margin-bottom:8px}
+.eg-col-form .actions{justify-content:center;margin-top:0;gap:6px}
+.eg-col-form .actions button{height:32px;padding:0 10px;font-size:14.5px}
+table.mtbl{width:100%;margin-top:6px;border-collapse:collapse;font-size:14.5px}
+table.mtbl th{padding:6px 4px;color:var(--muted);font-size:12.5px;font-weight:600;text-align:left}
+table.mtbl td{padding:3px 4px}
+table.mtbl input{width:84px;height:32px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);font-size:14.5px}
+table.mtbl input:disabled{background:var(--head);color:var(--muted)}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.actions button{height:40px;padding:0 18px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-size:15.5px;font-weight:600}
+.actions button:hover{background:var(--head)}
+.actions .primary{background:var(--primary);color:var(--on-primary);border-color:transparent}
+.actions .primary:hover{background:var(--primary-h)}
+.role{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12.5px;font-weight:600}
+.role.pmo{background:var(--success-soft);color:var(--success)}
+.role.mgmt{background:var(--warning-soft);color:var(--amber-ink)}
+.role.admin{background:var(--violet-soft);color:var(--violet)}
+.role.member{background:var(--border);color:var(--muted)}
+.prole{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12.5px;font-weight:600}
+.prole.lead{background:var(--primary-soft);color:var(--primary)}
+.prole.coordinator{background:var(--success-soft);color:var(--success)}
+#toast{position:fixed;bottom:24px;left:50%;z-index:100;padding:12px 18px;border-radius:10px;background:#1E8E5A;color:#fff;font-size:15px;font-weight:500;opacity:0;pointer-events:none;transform:translateX(-50%) translateY(80px);transition:.25s;box-shadow:var(--shadow-pop)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <aside class="auth-brand">
+    <div class="auth-msg">
+      <a class="auth-logo-link" href="https://aarvee.com/" target="_blank" rel="noopener noreferrer"><img class="auth-logo" src="/aarvee-mark.png" alt="Aarvee"></a>
+      <h2>Powering infrastructure that connects nations, communities, and futures.</h2>
+      <p>Email : <a class="contact-link" href="mailto:aarvee@aarvee.net">aarvee@aarvee.net</a><br>Phone : <a class="contact-link" href="tel:+9148483456">+91-40-48483456</a></p>
+    </div>
+    <div class="auth-copy">&copy; <span class="yr">2026</span> <a href="https://aarvee.com/" target="_blank" rel="noopener noreferrer">Aarvee Engineering Consultants Limited</a></div>
+  </aside>
+  <main class="auth-main">
+    <button class="icon-btn theme-btn" type="button" title="Toggle dark mode" aria-label="Toggle dark mode"><span data-ic="moon" data-s="18"></span></button>
+    <div class="auth-foot-brand">aarvee PMIS</div>
+    <form id="loginForm" class="auth-form" autocomplete="off">
+      <a class="auth-mobile-logo-link" href="https://aarvee.com/" target="_blank" rel="noopener noreferrer"><img class="auth-mobile-logo" src="/aarvee-mark.png" alt="Aarvee"></a>
+      <div class="auth-head">
+        <h1>Sign in</h1>
+        <p>Welcome back. Use the credentials issued by your administrator.</p>
+      </div>
+      <div class="fields">
+        <div class="field">
+          <label for="u">Username</label>
+          <div class="input"><span data-ic="user-round" data-s="18"></span><input id="u" type="text" placeholder="e.g. pmo.demo" required></div>
+        </div>
+        <div class="field">
+          <label for="p">Password</label>
+          <div class="input"><span data-ic="lock-keyhole" data-s="18"></span><input id="p" type="password" placeholder="Enter password" required>
+            <button class="pw-toggle" id="togglePw" type="button" aria-label="Show password"><span data-ic="eye"></span><span id="togglePwLbl">Show</span></button></div>
+        </div>
+      </div>
+      <div class="opts">
+        <label class="check"><input type="checkbox" id="remember" checked>Keep me signed in</label>
+        <button type="button" class="link" id="troubleBtn">Trouble signing in?</button>
+      </div>
+      <button class="btn-signin" id="loginBtn" type="submit"><span id="loginLbl">Sign in</span><span data-ic="arrow-right" data-s="17"></span></button>
+      <p class="err" id="loginErr" role="alert"></p>
+      <div class="note"><span data-ic="info"></span><span>Accounts are provisioned by your administrator &mdash; there is no self-registration. Contact the admin team for access or a password reset.</span></div>
+    </form>
+  </main>
+</div>
+
+<header class="topnav" id="appTop" hidden>
+  <a class="tn-brand" href="https://aarvee.com/" target="_blank" rel="noopener noreferrer" aria-label="Aarvee website"><img src="/aarvee-logo.svg" alt="Aarvee"></a>
+  <nav class="tn-links">
+    <button type="button" class="tn-link on" data-nav="dashView" title="Go to Overview">Overview</button>
+  </nav>
+  <div class="tn-right">
+    <label class="tn-search"><span data-ic="search"></span><input id="searchBox" type="search" placeholder="Search projects, codes..." aria-label="Search projects"></label>
+    <button class="icon-btn theme-btn" type="button" title="Toggle dark mode" aria-label="Toggle dark mode"><span data-ic="moon" data-s="18"></span></button>
+    <button class="icon-btn" id="bellBtn" type="button" title="Alerts" aria-label="Alerts"><span data-ic="bell" data-s="18"></span><b class="dot" id="bellDot" hidden></b></button>
+    <span class="tn-vdiv"></span>
+    <div class="user-menu" id="userMenu">
+      <button type="button" class="um-btn" id="umBtn" aria-haspopup="menu"><span class="avatar" id="avatar">&ndash;</span><span class="um-text"><strong id="whoami">&mdash;</strong></span><span data-ic="chevron-down"></span></button>
+      <div class="um-pop" id="umPop" role="menu" hidden>
+        <button type="button" id="manageUsersBtn" style="display:none"><span data-ic="users"></span>Manage users</button>
+        <button type="button" id="changePwBtn"><span data-ic="key"></span>Change password</button>
+        <button type="button" id="signout"><span data-ic="log-out"></span>Sign out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="dashView" class="view">
+  <div class="page">
+    <div class="page-head">
+      <div class="ph-title">
+        <h1 class="title">Overview</h1>
+        <p class="ph-sub" id="dashSub">Portfolio overview</p>
+      </div>
+      <div class="ph-actions">
+        <label class="sel-btn" title="Fiscal year"><span data-ic="calendar"></span><select id="fFY" aria-label="Fiscal year"></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
+        <label class="sel-btn" title="Figures up to quarter"><select id="fQ" aria-label="Quarter"><option value="1">Up to Q1</option><option value="2">Up to Q2</option><option value="3">Up to Q3</option><option value="4" selected>Up to Q4</option></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
+        <button class="btn-o" id="exportBtn" type="button"><span data-ic="download"></span>Export</button>
+        <button class="btn-p" id="addProjectBtn" type="button" style="display:none"><span data-ic="plus"></span>Add project</button>
+      </div>
+    </div>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="ch-title"><h2>Projects</h2><span class="count" id="projCount">0</span></div>
+          <p class="ch-hint" id="modeHint"></p>
+        </div>
+        <div class="ch-tools">
+          <div class="seg" id="viewSeg"><button type="button" data-v="summary" class="on">Summary</button><button type="button" data-v="detailed">Detailed MIS</button></div>
+          <div class="seg" id="typeSeg"><button type="button" data-t="" class="on">All</button><button type="button" data-t="DPR">DPR</button><button type="button" data-t="FLS">FLS</button></div>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="tbl" id="tbl"></table></div>
+      <div class="card-foot"><span class="cf-legend"><span data-ic="rupee" data-s="14"></span><span id="footLegend">Edit monthly planned / actual figures</span></span><span id="footTotal"></span></div>
+    </section>
+
+    <section class="insights">
+      <div class="card chart-card">
+        <div class="cc-head">
+          <div><h3>Billing</h3><p class="cc-sub" id="s1"></p></div>
+          <div class="seg sm chart-seg"><button type="button" data-m="monthly" class="on">Monthly</button><button type="button" data-m="cumulative">Cumulative</button></div>
+        </div>
+        <div class="legend" id="lg1"></div>
+        <svg id="ch1" viewBox="0 0 760 300"></svg>
+        <div class="tip" id="tp1"></div>
+      </div>
+      <div class="card chart-card">
+        <div class="cc-head">
+          <div><h3>Collection</h3><p class="cc-sub" id="s2"></p></div>
+          <div class="seg sm chart-seg"><button type="button" data-m="monthly" class="on">Monthly</button><button type="button" data-m="cumulative">Cumulative</button></div>
+        </div>
+        <div class="legend" id="lg2"></div>
+        <svg id="ch2" viewBox="0 0 760 300"></svg>
+        <div class="tip" id="tp2"></div>
+      </div>
+      <div class="side">
+        <div class="card panel" id="alertsCard">
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span data-ic="triangle-alert" data-s="18"></span>Alerts</h3><span class="ph-right"><button type="button" class="iconbtn" id="alertToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="alertCount">0</span></span></div>
+          <ul class="plist" id="alertsList"></ul>
+          <div class="addrow" id="alertAdd" style="display:none">
+            <input id="alertMsg" placeholder="New alert message...">
+            <input id="alertDue" type="date" aria-label="Due date">
+            <button type="button" class="btn-p" id="alertAddBtn"><span data-ic="plus"></span>Add</button>
+          </div>
+        </div>
+        <div class="card panel" id="pendingCard">
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span class="pending-icons"><span data-ic="clock" data-s="18"></span><span class="pending-mark" aria-hidden="true">!</span></span>Pending actions</h3><span class="ph-right"><button type="button" class="iconbtn" id="pendToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pendCount">0</span></span></div>
+          <ul class="plist" id="pendList"></ul>
+          <div class="addrow" id="pendAdd" style="display:none">
+            <input id="pendTitle" placeholder="New pending action...">
+            <input id="pendDue" type="date" aria-label="Due date">
+            <button type="button" class="btn-p" id="pendAddBtn"><span data-ic="plus"></span>Add</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="projectView" class="view">
+  <div class="page">
+    <div class="page-head">
+      <div class="ph-title">
+        <div class="crumbs"><button type="button" id="pdBack">Overview</button></div>
+        <h1 class="title" id="pdTitle">&mdash;</h1>
+        <p class="ph-sub" id="pdSub"></p>
+      </div>
+      <div class="ph-actions">
+        <label class="sel-btn" title="Fiscal year"><span data-ic="calendar"></span><select id="pdFY" aria-label="Fiscal year"></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
+        <button class="btn-o" id="pdAccess" type="button" style="display:none"><span data-ic="users"></span>Manage access</button>
+        <button class="btn-o" id="pdEdit" type="button" style="display:none"><span data-ic="pencil"></span>Edit details</button>
+      </div>
+    </div>
+    <div class="seg ptabs">
+      <button class="tab active" type="button"><span data-ic="briefcase" data-s="14"></span>Project</button>
+      <button class="tab" id="pdOffice" type="button"><span data-ic="building" data-s="14"></span>Office activities</button>
+      <button class="tab" id="pdField" type="button"><span data-ic="hard-hat" data-s="14"></span>Field activities</button>
+      <button class="tab" id="pdSchedule" type="button"><span data-ic="calendar" data-s="14"></span>Schedule</button>
+    </div>
+    <div class="pd-top">
+      <div class="side">
+        <div class="card panel" id="pdAlertsCard">
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span data-ic="triangle-alert" data-s="18"></span>Alerts</h3><span class="ph-right"><button type="button" class="iconbtn" id="pdAlertToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdAlertCount">0</span></span></div>
+          <ul class="plist" id="pdAlertsList"></ul>
+          <div class="addrow" id="pdAlertAdd" style="display:none">
+            <input id="pdAlertMsg" placeholder="New alert message...">
+            <input id="pdAlertDue" type="date" aria-label="Due date">
+            <button type="button" class="btn-p" id="pdAlertAddBtn"><span data-ic="plus"></span>Add</button>
+          </div>
+        </div>
+        <div class="card panel" id="pdPendingCard">
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span class="pending-icons"><span data-ic="clock" data-s="18"></span><span class="pending-mark" aria-hidden="true">!</span></span>Pending actions</h3><span class="ph-right"><button type="button" class="iconbtn" id="pdPendToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdPendCount">0</span></span></div>
+          <ul class="plist" id="pdPendList"></ul>
+          <div class="addrow" id="pdPendAdd" style="display:none">
+            <input id="pdPendTitle" placeholder="New pending action...">
+            <input id="pdPendDue" type="date" aria-label="Due date">
+            <button type="button" class="btn-p" id="pdPendAddBtn"><span data-ic="plus"></span>Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="card cc"><h3>Contract timeline</h3><div class="kvs" id="pdKl"></div></div>
+      <div class="card cc"><h3>Financial position</h3><div class="kvs" id="pdKr"></div></div>
+      <div class="card cc"><h3>Budget vs expenditure</h3><p class="cc-sub" style="margin:-8px 0 0">&#8377; Crore, by category</p>
+        <div class="bud-wrap"><ul class="bud-legend" id="pdBudLegend"></ul><svg id="pdBud" viewBox="0 0 270 240" style="flex:1.2"></svg></div></div>
+      <div class="card cc"><h3>Project life cycle</h3><p class="cc-sub" style="margin:-8px 0 0">Billing and collection against work order value</p>
+        <svg id="pdLife" viewBox="0 0 400 230"></svg><div class="legend" id="pdLifeLegend" style="justify-content:center"></div></div>
+    </div>
+    <div class="pd-charts">
+      <div class="card chart-card"><div class="cc-head"><div><h3>Billing</h3><p class="cc-sub">Plan vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgB"></div><svg id="pdCB" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpB"></div></div>
+      <div class="card chart-card"><div class="cc-head"><div><h3>Collection</h3><p class="cc-sub">Plan vs actual &middot; &#8377; Cr</p></div></div><div class="legend" id="pdLgC"></div><svg id="pdCC" viewBox="0 0 900 340"></svg><div class="tip" id="pdTpC"></div></div>
+    </div>
+    <div class="pd-tbar"><label for="pdTgtMonth">Targets for month</label><input type="month" id="pdTgtMonth"></div>
+    <div class="pd-tables">
+      <div class="card"><div class="card-head"><div class="ch-title"><h3>Billing targets</h3></div><button class="btn-o sm" id="pdAddB" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlB"></table></div></div>
+      <div class="card"><div class="card-head"><div class="ch-title"><h3>Collection targets</h3></div><button class="btn-o sm" id="pdAddC" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlC"></table></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="activityView" class="view">
+  <div class="page">
+    <div class="page-head">
+      <div class="ph-title">
+        <div class="crumbs"><button type="button" class="crumb-home">Overview</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="actBack">Project</button><span data-ic="chevron-right" data-s="12"></span><span class="cur">Activities</span></div>
+        <h1 class="title" id="actTitle">&mdash;</h1>
+        <p class="ph-sub" id="actHint"></p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-o" id="addRowBtn" type="button" style="display:none"><span data-ic="plus"></span>Add corridor</button>
+        <button class="btn-p" id="tabEdit" type="button" style="display:none"><span data-ic="pencil"></span>Edit</button>
+      </div>
+    </div>
+    <div class="seg ptabs">
+      <button class="tab" id="actTabProject" type="button"><span data-ic="briefcase" data-s="14"></span>Project</button>
+      <button class="tab active" id="tabOffice" type="button" data-tab="office"><span data-ic="building" data-s="14"></span>Office activities</button>
+      <button class="tab" id="tabField" type="button" data-tab="field"><span data-ic="hard-hat" data-s="14"></span>Field activities</button>
+      <button class="tab" id="tabSchedule" type="button"><span data-ic="calendar" data-s="14"></span>Schedule</button>
+    </div>
+    <section class="card">
+      <div class="card-head">
+        <div class="chips" id="statusChips"></div>
+      </div>
+      <div class="table-wrap agrid-wrap"><table class="agrid" id="agrid"></table></div>
+    </section>
+  </div>
+</div>
+
+<div id="editGridView" class="view">
+  <div class="page">
+    <div class="page-head">
+      <div class="ph-title">
+        <div class="crumbs"><button type="button" class="crumb-home">Overview</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="egProjBack">Project</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="egActBack">Activities</button><span data-ic="chevron-right" data-s="12"></span><span class="cur">Edit grid</span></div>
+        <h1 class="title" id="egTitle">&mdash;</h1>
+        <p class="ph-sub">Add, rename, or remove columns and corridor rows. Column changes apply across every project; corridor rows apply to this project only.</p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-p" id="egSaveAll" type="button">Save changes</button>
+        <button class="btn-o" id="egBackBtn" type="button">Back to grid</button>
+      </div>
+    </div>
+    <section class="card" style="padding:20px">
+      <div id="egContent"></div>
+    </section>
+  </div>
+</div>
+
+<div id="scheduleView" class="view">
+  <div class="page">
+    <div class="page-head">
+      <div class="ph-title">
+        <div class="crumbs"><button type="button" class="crumb-home">Overview</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="schBack">Project</button><span data-ic="chevron-right" data-s="12"></span><span class="cur">Schedule</span></div>
+        <h1 class="title" id="schTitle">&mdash;</h1>
+        <p class="ph-sub">Work plan per stretch from the project's schedule file &mdash; planned dates and resourcing. Status is derived from today's date vs. the plan.</p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-o" id="schRatesBtn" type="button" style="display:none"><span data-ic="rupee"></span>Resource rates</button>
+        <button class="btn-o" id="schHolidaysBtn" type="button"><span data-ic="calendar"></span>Holiday calendar</button>
+      </div>
+    </div>
+    <div class="seg ptabs">
+      <button class="tab" id="schTabProject" type="button"><span data-ic="briefcase" data-s="14"></span>Project</button>
+      <button class="tab" id="schTabOffice" type="button"><span data-ic="building" data-s="14"></span>Office activities</button>
+      <button class="tab" id="schTabField" type="button"><span data-ic="hard-hat" data-s="14"></span>Field activities</button>
+      <button class="tab active" type="button"><span data-ic="calendar" data-s="14"></span>Schedule</button>
+    </div>
+    <section class="card"><div class="table-wrap"><table class="sgrid" id="sgrid"></table></div></section>
+  </div>
+</div>
+
+<footer class="foot" id="appFoot" hidden><span>&copy; <span class="yr">2026</span> <a href="https://aarvee.com/" target="_blank" rel="noopener noreferrer">Aarvee Engineering Consultants Limited</a></span><span class="foot-brand">aarvee PMIS</span></footer>
+
+<div id="modal"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+<div id="cellTip" class="cell-tip"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ICONS = {
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  'user-round': '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+  'lock-keyhole': '<circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  'eye-off': '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="M2 2l20 20"/>',
+  'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',  calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  briefcase: '<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  receipt: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/>',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  'trending-down': '<path d="m22 17-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/>',
+  percent: '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+  rupee: '<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3M9 13c6.67 0 6.67-10 0-10"/>',
+  'triangle-alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+  'list-checks': '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/>',
+  'shield-check': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  plus: '<path d="M5 12h14M12 5v14"/>',
+  'log-out': '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+  key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M16 7l3 3"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  pencil: '<path d="M21.17 6.81a1 1 0 0 0-3.99-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  building: '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/>',
+  'hard-hat': '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6M14 6a6 6 0 0 1 6 6v3"/>',
+};
+const ic = (n, s = 16) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+function hydrateIcons(scope = document){ scope.querySelectorAll('[data-ic]').forEach((el) => { el.innerHTML = ic(el.dataset.ic, +el.dataset.s || 16); }); }
+hydrateIcons();
+document.querySelectorAll('.yr').forEach((el) => { el.textContent = new Date().getFullYear(); });
+const initials = (n) => String(n || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+
+const canEdit = () => state.user && (state.user.role === 'pmo' || state.user.role === 'admin');
+const canManageAccess = () => state.user && (state.user.role === 'pmo' || state.user.role === 'admin');
+// Granting a Lead/Coordinator per-corridor edit access is admin-only -- pmo
+// keeps every other assignment-management capability, but not this one.
+const canGrantEditAccess = () => state.user && state.user.role === 'admin';
+
+const state = {
+  user: null, projects: [], fiscalYear: null, quarter: 4, type: '',
+  meta: null, search: '', tableMode: 'summary', chartMode: 'monthly',
+  selP: null, // MIS row selected to filter the charts
+  hidden: { ch1: new Set(), ch2: new Set(), pdCB: new Set(), pdCC: new Set() }, // series toggled off per chart
+  project: { id: null, code: null, name: null, fiscalYear: null, data: null, months: null },
+  activity: { projectId: null, code: null, name: null, tab: 'office', filter: 'all', rows: [], columnProgress: {} },
+};
+const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+
+async function api(path, opts = {}) {
+  const res = await fetch('/api' + path, {
+    method: opts.method || 'GET',
+    headers: opts.isForm ? undefined : { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: opts.isForm ? opts.body : (opts.body ? JSON.stringify(opts.body) : undefined),
+  });
+  let data = null;
+  try { data = await res.json(); } catch {}
+  if (!res.ok) throw new Error((data && data.error) || ('Request failed (' + res.status + ')'));
+  return data;
+}
+
+/* ---------- Theme ---------- */
+const root = document.documentElement;
+try { const t = localStorage.getItem('pmis-theme'); if (t) root.dataset.theme = t; } catch {}
+function isDark(){ const t = root.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches; }
+function paintTheme(){
+  document.querySelectorAll('.theme-btn [data-ic]').forEach((el) => { el.dataset.ic = isDark() ? 'sun' : 'moon'; el.innerHTML = ic(el.dataset.ic, +el.dataset.s || 16); });
+  document.querySelectorAll('.theme-btn').forEach((b) => { b.title = isDark() ? 'Switch to light mode' : 'Switch to dark mode'; });
+}
+document.querySelectorAll('.theme-btn').forEach((b) => b.onclick = () => {
+  root.dataset.theme = isDark() ? 'light' : 'dark';
+  try { localStorage.setItem('pmis-theme', root.dataset.theme); } catch {}
+  paintTheme();
+});
+paintTheme();
+
+/* ---------- Toast / modal ---------- */
+let toastT;
+function toast(msg, isErr){
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.background = isErr ? '#C62828' : '#1E8E5A';
+  el.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('on'), 2400);
+}
+function openModal(html){ $('modalBox').innerHTML = html; $('modal').classList.add('on'); }
+function closeModal(){ $('modal').classList.remove('on'); }
+$('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
+
+function showView(id){
+  document.querySelectorAll('.view').forEach((v) => v.classList.remove('on'));
+  $(id).classList.add('on');
+  document.querySelectorAll('.tn-link').forEach((b) => b.classList.toggle('on', b.dataset.nav === id));
+}
+
+/* ---------- Login ---------- */
+$('togglePw').onclick = () => {
+  const inp = $('p'); const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  $('togglePwLbl').textContent = show ? 'Hide' : 'Show';
+  $('togglePw').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  $('togglePw').firstElementChild.innerHTML = ic(show ? 'eye-off' : 'eye');
+};
+$('troubleBtn').onclick = () => {
+  openModal(`<h3>Trouble signing in?</h3><p class="ctx">Accounts are provisioned by your administrator &mdash; there is no self-registration.</p>
+    <p style="margin:0;font-size:14px;line-height:1.6">Contact the admin team for access or a password reset:<br>
+    <b>Email:</b> <a class="contact-link" href="mailto:aarvee@aarvee.net">aarvee@aarvee.net</a><br><b>Phone:</b> <a class="contact-link" href="tel:+9148483456">+91-40-48483456</a></p>
+    <div class="actions"><button type="button" id="tsClose">Close</button></div>`);
+  $('tsClose').onclick = closeModal;
+};
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('loginBtn'); btn.disabled = true; $('loginLbl').textContent = 'Signing in...';
+  $('loginErr').textContent = '';
+  try {
+    const { user } = await api('/auth/login', { method: 'POST', body: { username: $('u').value.trim(), password: $('p').value, remember: $('remember').checked } });
+    await enter(user);
+  } catch (err) {
+    $('loginErr').textContent = err.message;
+  } finally {
+    btn.disabled = false; $('loginLbl').textContent = 'Sign in';
+  }
+});
+async function doSignOut(){
+  await api('/auth/logout', { method: 'POST' });
+  state.user = null;
+  state.project.id = null; state.selP = null;
+  $('umPop').hidden = true;
+  $('appTop').hidden = true; $('appFoot').hidden = true;
+  $('loginView').classList.remove('hidden');
+  document.querySelectorAll('.view').forEach((v) => v.classList.remove('on'));
+  $('u').value=''; $('p').value='';
+  if (pmisDepth > 0) { pmisSuppress = true; history.go(-pmisDepth); pmisDepth = 0; }
+}
+$('signout').onclick = doSignOut;
+
+/* ---------- App chrome: user menu, nav, search, alerts bell ---------- */
+$('umBtn').onclick = (e) => { e.stopPropagation(); $('umPop').hidden = !$('umPop').hidden; };
+$('umPop').addEventListener('click', () => { $('umPop').hidden = true; });
+document.addEventListener('click', (e) => { if (!e.target.closest('#userMenu')) $('umPop').hidden = true; });
+
+async function goDash(){
+  if (pmisDepth > 1) { pmisSuppress = true; history.go(-(pmisDepth - 1)); pmisDepth = 1; }
+  showView('dashView'); await loadAll();
+}
+document.querySelectorAll('.crumb-home').forEach((b) => b.onclick = goDash);
+// Activities / Schedule need a project context; fall back to the selected (or first) MIS row.
+function ensureProject(){
+  if (state.project.id) return true;
+  const p = state.projects.find((x) => x.id === state.selP) || state.projects[0];
+  if (!p) { toast('No project available', true); return false; }
+  Object.assign(state.project, { id: p.id, code: p.code, name: p.name, fiscalYear: state.fiscalYear });
+  return true;
+}
+document.querySelectorAll('.tn-link').forEach((b) => b.onclick = () => {
+  const v = b.dataset.nav;
+  if (v === 'dashView') return goDash();
+  if (!ensureProject()) return;
+  if (v === 'projectView') openProjectView(state.project.id);
+  else if (v === 'activityView') openActivityView(state.activity.projectId === state.project.id ? state.activity.tab : 'office');
+  else openScheduleView();
+});
+$('searchBox').addEventListener('input', () => {
+  state.search = $('searchBox').value.trim().toLowerCase();
+  if ($('dashView').classList.contains('on')) renderTable(); else goDash();
+});
+$('bellBtn').onclick = async () => {
+  if (!$('dashView').classList.contains('on')) await goDash();
+  $('alertsCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+async function enter(user){
+  state.user = user;
+  $('whoami').textContent = user.displayName;
+  $('avatar').textContent = initials(user.displayName);
+  $('modeHint').textContent = canEdit()
+    ? 'Select a row to filter the charts · ₹ edits monthly figures · › opens the project dashboard'
+    : 'Review-only · select a row to filter the charts · › opens the project dashboard';
+  $('footLegend').textContent = canEdit() ? 'Edit monthly planned / actual figures' : 'View monthly planned / actual figures';
+  $('addProjectBtn').style.display = (user.role === 'pmo' || user.role === 'admin') ? '' : 'none';
+  $('manageUsersBtn').style.display = (user.role === 'admin') ? '' : 'none';
+  $('exportBtn').style.display = canEdit() ? '' : 'none';
+  $('loginView').classList.add('hidden');
+  $('appTop').hidden = false; $('appFoot').hidden = false;
+  showView('dashView');
+  pmisPush(1);
+  setupFYOptions();
+  if (!state.meta) state.meta = await api('/activity-meta');
+  loadAll();
+}
+
+function setupFYOptions(){
+  const now = new Date();
+  const currentFY = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1; // FY starts April
+  state.fiscalYear = currentFY;
+  const sel = $('fFY');
+  sel.innerHTML = [currentFY, currentFY - 1, currentFY - 2]
+    .map((y) => `<option value="${y}">FY ${y}-${String((y+1)%100).padStart(2,'0')}</option>`).join('');
+}
+
+async function tryResume(){
+  try {
+    const { user } = await api('/auth/me');
+    await enter(user);
+  } catch {}
+}
+tryResume();
+
+/* ---------- Filters ---------- */
+const segOn = (segEl, attr, val) => segEl.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.dataset[attr] === val));
+['fFY','fQ'].forEach((id) => $(id).addEventListener('change', () => {
+  state.fiscalYear = Number($('fFY').value); state.quarter = Number($('fQ').value);
+  loadAll();
+}));
+document.querySelectorAll('#typeSeg button').forEach((b) => b.onclick = () => {
+  state.type = b.dataset.t; segOn($('typeSeg'), 't', state.type); loadAll();
+});
+document.querySelectorAll('#viewSeg button').forEach((b) => b.onclick = () => {
+  state.tableMode = b.dataset.v; segOn($('viewSeg'), 'v', state.tableMode); renderTable();
+});
+document.querySelectorAll('.chart-seg button').forEach((b) => b.onclick = () => {
+  state.chartMode = b.dataset.m;
+  document.querySelectorAll('.chart-seg').forEach((s) => segOn(s, 'm', state.chartMode));
+  renderCharts();
+});
+
+/* ---------- Load + render dashboard ---------- */
+async function loadAll(){
+  const qs = new URLSearchParams({ fiscalYear: state.fiscalYear, quarter: state.quarter });
+  if (state.type) qs.set('type', state.type);
+  const [mis, alertsRes, pendRes] = await Promise.all([
+    api('/mis?' + qs.toString()),
+    api('/alerts'),
+    api('/pending'),
+  ]);
+  state.projects = mis.projects;
+  $('dashSub').innerHTML = `Portfolio overview for ${fyLabel(state.fiscalYear).replace('-', '–')} &middot; up to Q${state.quarter} &middot; figures in &#8377; Crore`;
+  renderKpis();
+  renderTable();
+  renderCharts();
+  renderAlerts(alertsRes.alerts);
+  renderPending(pendRes.pending);
+  updateBell(alertsRes.alerts.length + pendRes.pending.length);
+}
+
+function updateBell(count){
+  const dot = $('bellDot');
+  const btn = $('bellBtn');
+  dot.hidden = !count;
+  dot.textContent = count > 9 ? '9+' : String(count);
+  btn.classList.toggle('has-alert', !!count);
+  btn.title = count ? `${count} item${count === 1 ? '' : 's'} need attention` : 'Alerts';
+}
+
+function fmt(n){ return (Number(n) || 0).toFixed(2); }
+function pct(n){ return isFinite(n) ? Math.round(n * 100) + '%' : '-'; }
+const div = (a, b) => (b ? a / b : NaN);
+const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// ISO YYYY-MM-DD -> 19-Jan-2025 (project dates) / 19-01-2025 (cell & due dates)
+function fmtDate(iso){ if (!iso) return '&mdash;'; const [y,m,d] = iso.split('-'); return `${d}-${MON3[+m-1]}-${y}`; }
+function fmtDMY(iso){ if (!iso) return ''; const [y,m,d] = iso.slice(0,10).split('-'); return `${d}-${m}-${y}`; }
+// Mirrors activityConstants.js's addWorkingDaysISO -- used only to preview
+// Submitted's suggested "Expected approval date" before the first save (the
+// server computes the authoritative value the same way).
+function addWorkingDaysISO(fromISO, days){
+  const msPerDay = 86400000;
+  const [y, m, d] = fromISO.slice(0,10).split('-').map(Number);
+  let cur = Date.UTC(y, m-1, d);
+  const dir = days < 0 ? -1 : 1;
+  let remaining = Math.abs(days);
+  while (remaining > 0) {
+    cur += dir * msPerDay;
+    const day = new Date(cur).getUTCDay();
+    if (day !== 0 && day !== 6) remaining -= 1;
+  }
+  return new Date(cur).toISOString().slice(0,10);
+}
+const fyLabel = (fy) => `FY ${fy}-${String((fy+1)%100).padStart(2,'0')}`;
+const monLabel = (fy, i) => `${MONTHS[i]}-${String((i < 9 ? fy : fy + 1) % 100).padStart(2,'0')}`;
+const abbr = (name) => name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map((w) => w[0]).join('');
+// Last month index (0=Apr) with actual figures: completed months only, capped at `cutoff`.
+function lastActualIdx(fy, cutoff){
+  const now = new Date(), curFY = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+  if (fy < curFY) return cutoff;
+  if (fy > curFY) return -1;
+  return Math.min(cutoff, (now.getMonth() + 9) % 12 - 1);
+}
+function sumMonths(projects){
+  const keys = ['planBilling','actualBilling','planCollection','actualCollection','expenditure','forecastBilling','forecastCollection'];
+  return MONTHS.map((_, i) => {
+    const m = {}; keys.forEach((k) => { m[k] = projects.reduce((a, p) => a + (p.months[i][k] || 0), 0); }); return m;
+  });
+}
+
+function renderKpis(){
+  const P = state.projects, s = (f) => P.reduce((a, p) => a + f(p), 0);
+  const wo = s((p) => p.woValueCr), b = s((p) => p.ytd.actualBilling), pb = s((p) => p.ytd.planBilling);
+  const c = s((p) => p.ytd.actualCollection), e = s((p) => p.ytd.expenditure), m = b - e;
+  const ratio = (a, d) => (d ? Math.round(a / d * 100) + '%' : '0%');
+  const items = [
+    ['Work Order Value', wo, 'briefcase', '', `${P.length} active project${P.length === 1 ? '' : 's'}`],
+    ['Billing (YTD)', b, 'receipt', '', `${ratio(b, pb)} of planned`],
+    ['Collection (YTD)', c, 'wallet', 'green', `${ratio(c, b)} of billed`],
+    ['Expenditure (YTD)', e, 'trending-down', 'amber', b ? `${ratio(e, b)} of billing` : 'Fiscal year to date'],
+    ['Net Margin', m, 'percent', 'green', `${(b ? m / b * 100 : 0).toFixed(1)}% margin`],
+  ];
+  $('kpis').innerHTML = items.map(([label, v, icon, tone, cap]) => `<div class="kpi">
+    <div class="kpi-top"><span>${label}</span><span class="kpi-ic ${tone}">${ic(icon)}</span></div>
+    <div class="kpi-val"><span class="cur">&#8377;</span><b>${fmt(v)}</b><span class="unit">Cr</span></div>
+    <div class="kpi-cap">${cap}</div></div>`).join('');
+}
+
+const visibleProjects = () => {
+  const q = state.search;
+  if (!q) return state.projects;
+  return state.projects.filter((p) => String(p.code).includes(q) || p.name.toLowerCase().includes(q) || abbr(p.name).toLowerCase() === q);
+};
+
+function renderTable(){
+  const rows = visibleProjects();
+  if (state.selP && !state.projects.some((p) => p.id === state.selP)) state.selP = null;
+  $('projCount').textContent = rows.length;
+  $('footTotal').innerHTML = `Total WO Value&nbsp; <strong>&#8377; ${fmt(rows.reduce((a, p) => a + p.woValueCr, 0))} Cr</strong>`;
+  const detailed = state.tableMode === 'detailed';
+  $('tbl').className = detailed ? 'grid' : 'tbl';
+  $('tbl').innerHTML = detailed ? misTableHtml(rows) : summaryTableHtml(rows);
+  document.querySelectorAll('#tbl tbody tr[data-id]').forEach((tr) => tr.addEventListener('click', (e) => {
+    if (e.target.closest('[data-fin],[data-open]')) return;
+    state.selP = state.selP === +tr.dataset.id ? null : +tr.dataset.id;
+    renderTable(); renderCharts();
+  }));
+  document.querySelectorAll('#tbl [data-open]').forEach((a) => a.addEventListener('click', (e) => {
+    e.preventDefault(); openProjectView(+a.dataset.open);
+  }));
+  document.querySelectorAll('#tbl [data-fin]').forEach((b) => {
+    b.addEventListener('click', (e) => { e.stopPropagation(); openFinancialsModal(+b.dataset.fin); });
+  });
+}
+
+function summaryTableHtml(rows){
+  const ed = canEdit();
+  let html = '<thead><tr><th>Code</th><th>Project</th><th class="type">Type</th><th class="num">WO Value</th><th class="num">Billing (YTD)</th>'
+    + '<th class="num">Collection (YTD)</th><th class="num">Expenditure (YTD)</th><th class="num">Margin</th><th class="num">Margin %</th><th></th></tr></thead><tbody>';
+  if (!rows.length) {
+    html += `<tr><td colspan="10" class="empty">${state.search ? 'No projects match your search.' : 'No projects assigned to you yet.'}</td></tr>`;
+  }
+  rows.forEach((p) => {
+    const y = p.ytd, mg = y.margin, dir = mg > 0 ? 'up' : mg < 0 ? 'dn' : '';
+    html += `<tr data-id="${p.id}" class="${state.selP === p.id ? 'sel' : ''}"><td>${p.code}</td>`
+      + `<td><div class="proj"><span class="pbadge">${esc(abbr(p.name))}</span><a href="#" class="pname" data-open="${p.id}" title="Open project dashboard">${esc(p.name)}</a></div></td>`
+      + `<td class="type"><span class="tbadge t-${esc(p.type)}">${esc(p.type)}</span></td>`
+      + `<td class="num strong">${fmt(p.woValueCr)}</td><td class="num">${fmt(y.actualBilling)}</td>`
+      + `<td class="num">${fmt(y.actualCollection)}</td><td class="num">${fmt(y.expenditure)}</td>`
+      + `<td class="num"><span class="trend ${dir}">${dir === 'up' ? '&#9650;' : dir === 'dn' ? '&#9660;' : '&mdash;'}</span>${fmt(mg)}</td>`
+      + `<td class="num"><span class="pill">${(y.marginPct * 100).toFixed(1)}%</span></td>`
+      + `<td class="act"><button type="button" class="icon-btn sm" data-fin="${p.id}" title="${ed ? 'Edit' : 'View'} monthly figures">${ic('rupee', 15)}</button></td></tr>`;
+  });
+  return html + '</tbody>';
+}
+
+$('exportBtn').onclick = () => {
+  const rows = visibleProjects();
+  if (!rows.length) { toast('Nothing to export', true); return; }
+  const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return `"${s.replace(/"/g, '""')}"`; };
+  const head = ['Code','Project','Type','WO Value (Cr)','Billing YTD (Cr)','Collection YTD (Cr)','Expenditure YTD (Cr)','Margin (Cr)','Margin %'];
+  const body = rows.map((p) => [p.code, p.name, p.type, fmt(p.woValueCr), fmt(p.ytd.actualBilling), fmt(p.ytd.actualCollection),
+    fmt(p.ytd.expenditure), fmt(p.ytd.margin), (p.ytd.marginPct * 100).toFixed(1)]);
+  const csv = [head, ...body].map((r) => r.map(cell).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `aarvee-mis-FY${state.fiscalYear}-Q${state.quarter}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* Detailed MIS table — column layout follows the mockup (lifecycle, ABP YTD,
+   first two months of the quarter, quarter totals). */
+function misTableHtml(rows){
+  const q = state.quarter, fy = state.fiscalYear, cutoff = q * 3 - 1;
+  const iA = (q - 1) * 3, iB = iA + 1, qIdx = [iA, iA + 1, iA + 2];
+  const calc = (p) => {
+    const L = p.lifetime, mg = L.billing - L.expenditure, A = p.months[iA], B = p.months[iB];
+    return {
+      wo: p.woValueCr, tb: L.billing, tc: L.collection, ex: L.expenditure, mg,
+      abpB: p.ytd.planBilling, abpC: p.ytd.planCollection, yb: p.ytd.actualBilling, yc: p.ytd.actualCollection,
+      aPB: A.planBilling, aAB: A.actualBilling, aPC: A.planCollection, aAC: A.actualCollection,
+      bAB: B.actualBilling, bPB: B.planBilling, bAC: B.actualCollection, bPC: B.planCollection,
+      qb: qIdx.reduce((s, i) => s + p.months[i].actualBilling, 0), qc: qIdx.reduce((s, i) => s + p.months[i].actualCollection, 0),
+    };
+  };
+  const cells = (x) => [
+    fmt(x.wo), fmt(x.tb), fmt(x.tc), fmt(x.ex),
+    `<span class="${x.mg>=0?'up':'dn'}">${x.mg>=0?'&#9650;':'&#9660;'} ${fmt(x.mg)}</span>`, pct(div(x.mg, x.tb)),
+    fmt(x.abpB), fmt(x.abpC), fmt(x.yb), pct(div(x.yb, x.abpB)), fmt(x.yc), pct(div(x.yc, x.abpC)),
+    fmt(x.aPB), fmt(x.aAB), fmt(x.aPC), fmt(x.aAC),
+    fmt(x.bAB), pct(div(x.bAB, x.bPB)), fmt(x.bAC), pct(div(x.bAC, x.bPC)),
+    fmt(x.qb), fmt(x.qc),
+  ];
+  const SEP = [6, 12, 16, 20]; // first column of each dashed group (index into cells())
+  const td = (v, i) => `<td class="num${SEP.includes(i)?' sep':''}">${v}</td>`;
+  let html = `<thead><tr><th class="grp" colspan="2" rowspan="2">Railways<br>(Till ${monLabel(fy, cutoff)})</th><th class="grp" colspan="6" rowspan="2">&#10227; Lifecycle</th>
+    <th class="grp sep" colspan="6">ABP ${fy%100}-${(fy+1)%100} YTD</th><th class="grp sep" colspan="4">${monLabel(fy, iA)}</th>
+    <th class="grp sep" colspan="4">${monLabel(fy, iB)}</th><th class="grp sep" colspan="2">Q${q}</th><th class="grp" rowspan="3"></th></tr>
+    <tr><th class="grp sep" colspan="2">ABP</th><th class="grp" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
+    <th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th><th class="grp sep" colspan="2">Billing</th><th class="grp" colspan="2">Collection</th>
+    <th class="grp sep"></th><th class="grp"></th></tr><tr>`
+    + ['Project code','Project name','Work Order Value','Total billing (Inc GST)','Total collection (Inc GST)','Expenditure (Inc GST)','Margin','Margin %',
+       'Billing','Collection','Total','%','Total','%','Plan','Actual','Plan','Actual','Total','Work %','Total','Work %','Billing','Collection']
+      .map((x, i) => `<th class="lb${SEP.includes(i-2)?' sep':''}">${x}</th>`).join('')
+    + '</tr></thead><tbody>';
+  if (!rows.length){
+    html += `<tr><td colspan="25" class="empty">${state.search ? 'No projects match your search.' : 'No projects assigned to you yet.'}</td></tr>`;
+  } else {
+    const data = rows.map(calc);
+    rows.forEach((p, r) => {
+      html += `<tr data-id="${p.id}" class="${state.selP===p.id?'sel':''}"><td><b>${p.code}</b></td>`
+        + `<td class="name"><a href="#" class="pname" data-open="${p.id}" title="Open project dashboard">${esc(p.name)}</a></td>`
+        + cells(data[r]).map(td).join('')
+        + `<td><button class="iconbtn" data-fin="${p.id}" title="Monthly financials">${ic('rupee', 14)}</button></td></tr>`;
+    });
+    const T = {}; Object.keys(data[0]).forEach((k) => { T[k] = data.reduce((a, x) => a + x[k], 0); });
+    const tot = cells(T); [17, 19].forEach((i) => { tot[i] = ''; }); // work % totals aren't meaningful
+    html += `<tr class="tot"><td colspan="2">Total</td>${tot.map(td).join('')}<td></td></tr>`;
+  }
+  return html + '</tbody>';
+}
+
+function renderCharts(){
+  const sel = state.selP ? state.projects.filter((p) => p.id === state.selP) : state.projects;
+  const name = state.selP ? sel[0].name : 'All projects';
+  const months = sumMonths(sel), last = lastActualIdx(state.fiscalYear, state.quarter * 3 - 1);
+  const cum = state.chartMode === 'cumulative';
+  if (cum) {
+    cumChart('ch1','lg1','tp1', months, 'Billing', last);
+    cumChart('ch2','lg2','tp2', months, 'Collection', last);
+  } else {
+    barChart('ch1','lg1','tp1', months, 'Billing', last, ['var(--bill-pl)', 'var(--bill-ac)']);
+    barChart('ch2','lg2','tp2', months, 'Collection', last, ['var(--col-pl)', 'var(--col-ac)']);
+  }
+  const sub = `${cum ? 'Cumulative' : 'Planned vs actual'} &middot; &#8377; Cr &middot; ${esc(name)}`;
+  $('s1').innerHTML = sub; $('s2').innerHTML = sub;
+}
+
+// Draw charts in real pixels so axis text stays legible instead of shrinking with a fixed viewBox.
+const svgWidth = (svgId, fallback = 760) => Math.max(300, Math.round($(svgId).getBoundingClientRect().width) || fallback);
+let resizeT;
+addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    if ($('dashView').classList.contains('on') && state.projects.length) renderCharts();
+    if ($('projectView').classList.contains('on') && state.project.data) renderProjectView();
+    if ($('activityView').classList.contains('on') && state.activity.rows.length) freezeActivityGridCols();
+  }, 150);
+});
+
+function niceMax(v){
+  if (!(v > 0)) return 1;
+  const raw = v / 4, mag = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].find((s) => s * mag >= raw) * mag * 4;
+}
+
+// Monthly planned vs actual bars (redesign MIS charts).
+function barChart(svgId, legendId, tipId, months, kind, last, [cPl, cAc]){
+  const W=svgWidth(svgId),H=340,L=44,R=8,T=12,B=28,iw=W-L-R,ih=H-T-B, hid = state.hidden[svgId], fy = state.fiscalYear;
+  const pl = months.map((m) => m['plan' + kind]);
+  const ac = months.map((m, i) => (i <= last ? m['actual' + kind] : null));
+  const maxV = niceMax(Math.max(0, ...pl, ...ac.filter((v) => v != null)));
+  const x = (i) => L + iw*(i+.5)/12, y = (v) => T + ih*(1 - v/maxV), base = T + ih;
+  const bw = Math.min(12, iw/12*.3);
+  const bar = (v, bx, c) => {
+    if (v == null || v <= 0) return '';
+    const h = Math.max(2, base - y(v)), r = Math.min(3, h/2, bw/2);
+    return `<path d="M${bx},${base}V${base-h+r}q0,-${r} ${r},-${r}h${bw-2*r}q${r},0 ${r},${r}V${base}Z" fill="${c}"/>`;
+  };
+  let g = '';
+  for (let k = 0; k <= 4; k++){
+    const v = maxV*k/4;
+    g += `<text x="${L-10}" y="${y(v)+4}" text-anchor="end">${+v.toFixed(2)}</text>`;
+    if (k) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--border)" stroke-dasharray="2 4"/>`;
+  }
+  g += `<line x1="${L}" x2="${W-R}" y1="${base}" y2="${base}" stroke="var(--border-strong)"/>`;
+  MONTHS.forEach((m, i) => { g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle">${m}</text>`; });
+  months.forEach((_, i) => {
+    if (!hid.has('pl')) g += bar(pl[i], x(i)-bw-1.5, cPl);
+    if (!hid.has('ac')) g += bar(ac[i], x(i)+1.5, cAc);
+  });
+  const svg = $(svgId);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = g + `<line id="${svgId}v" y1="${T}" y2="${base}" stroke="var(--subtle)" stroke-dasharray="3 3" style="display:none"/><rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  legendToggles(legendId, hid, [['pl','Planned',cPl,1],['ac','Actual',cAc,1]], renderCharts);
+  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(fy, i)}</b><br>Planned: ${pl[i].toFixed(2)}`
+    + (i <= last ? `<br>Actual: ${ac[i].toFixed(2)}` : ''));
+}
+
+// Cumulative planned / actual / forecast lines + "actual in month" bars (mockup MIS charts).
+function cumChart(svgId, legendId, tipId, months, kind, last){
+  const W=svgWidth(svgId),H=340,L=50,R=14,T=14,B=30,iw=W-L-R,ih=H-T-B, hid = state.hidden[svgId];
+  $(svgId).setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const cum = (arr) => { let a = 0; return arr.map((v) => (a += v)); };
+  const pl = cum(months.map((m) => m['plan' + kind]));
+  const acAll = cum(months.map((m) => m['actual' + kind]));
+  const ac = acAll.map((v, i) => (i <= last ? v : null));
+  const mo = months.map((m, i) => (i <= last ? m['actual' + kind] : null));
+  let run = last >= 0 ? acAll[last] : 0;
+  const fc = months.map((m, i) => (i < last ? null : i === last ? run : (run += m['forecast' + kind] || m['plan' + kind])));
+  const maxV = Math.max(1, ...pl, ...acAll, ...fc.filter((v) => v != null));
+  const x = (i) => L + iw*(i+.5)/12, y = (v) => T + ih*(1 - v/maxV);
+  let g = '';
+  for (let k=0;k<=6;k++){ const v = maxV*k/6; g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="3 4"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v.toFixed(2)}</text>`; }
+  MONTHS.forEach((m,i) => g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle">${m}</text>`);
+  if (!hid.has('mo')) g += mo.map((v,i) => v == null ? '' : `<rect x="${x(i)-7}" y="${y(v)}" width="14" height="${T+ih-y(v)}" rx="2" fill="var(--mo)"/>`).join('');
+  const path = (arr, key, dash) => hid.has(key) ? '' : `<path d="${arr.map((v,i) => v == null ? null : x(i)+','+y(v)).filter(Boolean).map((pt,i) => (i?'L':'M')+pt).join('')}" fill="none" stroke="var(--${key})" stroke-width="2.5" ${dash?'stroke-dasharray="6 5"':''}/>`;
+  g += path(pl,'pl') + path(ac,'ac') + path(fc,'fc',1);
+  $(svgId).innerHTML = g + `<line id="${svgId}v" y1="${T}" y2="${T+ih}" stroke="var(--muted)" style="display:none"/><rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  legendToggles(legendId, hid, [['pl','Planned','var(--pl)'],['ac','Actual','var(--ac)'],['fc','Forecast','var(--fc)'],['mo','Actual in month','var(--mo)']], renderCharts);
+  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(state.fiscalYear, i)}</b><br>Planned: ${pl[i].toFixed(2)}`
+    + (i <= last ? `<br>Actual: ${ac[i].toFixed(2)}<br>In month: ${mo[i].toFixed(2)}` : fc[i] != null ? `<br>Forecast: ${fc[i].toFixed(2)}` : ''));
+}
+
+function legendToggles(legendId, hid, items, rerender){
+  $(legendId).innerHTML = items.map(([k, n, c, square]) => `<button type="button" class="${hid.has(k)?'off':''}" data-k="${k}"><i style="background:${c};border-radius:${square?'3px':'50%'}"></i>${n}</button>`).join('');
+  $(legendId).querySelectorAll('button').forEach((b) => b.onclick = () => {
+    hid.has(b.dataset.k) ? hid.delete(b.dataset.k) : hid.add(b.dataset.k); rerender();
+  });
+}
+function chartTip(svgId, tipId, W, L, iw, x, html){
+  const el = $(svgId), tip = $(tipId), vl = $(svgId + 'v');
+  el.onmousemove = (e) => {
+    const r = el.getBoundingClientRect(), cr = el.parentNode.getBoundingClientRect();
+    const i = Math.max(0, Math.min(11, Math.round(((e.clientX - r.left) / r.width * W - L) / iw * 12 - .5)));
+    vl.style.display = ''; vl.setAttribute('x1', x(i)); vl.setAttribute('x2', x(i));
+    tip.innerHTML = html(i); tip.style.display = 'block';
+    tip.style.left = Math.min(e.clientX - cr.left + 14, cr.width - 230) + 'px'; tip.style.top = (e.clientY - cr.top + 14) + 'px';
+  };
+  el.onmouseleave = () => { tip.style.display = 'none'; vl.style.display = 'none'; };
+}
+
+/* ---------- Project create (pmo/admin only) ---------- */
+$('addProjectBtn').onclick = () => {
+  openModal(`<h3>Add project</h3>
+    <div class="mf"><label>Project code</label><input id="npCode" type="number"></div>
+    <div class="mf"><label>Name</label><input id="npName" type="text"></div>
+    <div class="mf"><label>Type</label><select id="npType"><option value="FLS">FLS</option><option value="DPR">DPR</option></select></div>
+    <div class="mf"><label>Work order value (&#8377; Cr)</label><input id="npWo" type="number" step="0.01"></div>
+    <div class="mf"><label>Division</label><input id="npDiv" type="text"></div>
+    <div class="mf"><label>Responsible person</label><input id="npResp" type="text"></div>
+    <div class="mf"><label>Stage</label><input id="npStage" type="text"></div>
+    <div class="actions"><button type="button" id="npCancel">Cancel</button><button type="button" class="primary" id="npSave">Save</button></div>`);
+  $('npCancel').onclick = closeModal;
+  $('npSave').onclick = async () => {
+    try {
+      await api('/projects', { method: 'POST', body: {
+        code: Number($('npCode').value), name: $('npName').value.trim(), type: $('npType').value, woValueCr: Number($('npWo').value) || 0,
+        division: $('npDiv').value.trim() || null, responsiblePerson: $('npResp').value.trim() || null, stage: $('npStage').value.trim() || null,
+      }});
+      closeModal(); toast('Project added'); loadAll();
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+/* ---------- Financials modal ---------- */
+async function openFinancialsModal(projectId){
+  const p = state.projects.find((x) => x.id === projectId);
+  const { months } = await api(`/projects/${projectId}/financials?fiscalYear=${state.fiscalYear}`);
+  const ro = !canEdit();
+  const rowHtml = (m) => `<tr><td>${MONTHS[m.monthIndex]}</td>
+    <td><input data-k="planBilling" value="${m.planBilling}" ${ro?'disabled':''}></td>
+    <td><input data-k="actualBilling" value="${m.actualBilling}" ${ro?'disabled':''}></td>
+    <td><input data-k="planCollection" value="${m.planCollection}" ${ro?'disabled':''}></td>
+    <td><input data-k="actualCollection" value="${m.actualCollection}" ${ro?'disabled':''}></td>
+    <td><input data-k="expenditure" value="${m.expenditure}" ${ro?'disabled':''}></td>
+    <td><input data-k="forecastBilling" value="${m.forecastBilling}" ${ro?'disabled':''}></td>
+    <td><input data-k="forecastCollection" value="${m.forecastCollection}" ${ro?'disabled':''}></td></tr>`;
+  openModal(`<h3>${esc(p.name)} (${p.code})</h3><p class="ctx">FY ${state.fiscalYear}-${String((state.fiscalYear+1)%100).padStart(2,'0')} monthly figures, &#8377; Cr${ro?' &middot; read-only':''}</p>
+    <table class="mtbl"><thead><tr><th>Month</th><th>Plan billing</th><th>Actual billing</th><th>Plan collection</th><th>Actual collection</th><th>Expenditure</th><th>Forecast billing</th><th>Forecast collection</th></tr></thead>
+    <tbody id="finRows">${months.map(rowHtml).join('')}</tbody></table>
+    <div class="actions"><button type="button" id="finClose">${ro?'Close':'Cancel'}</button>${ro?'':'<button type=\"button\" class=\"primary\" id=\"finSave\">Save all</button>'}</div>`);
+  $('finClose').onclick = closeModal;
+  if (!ro) {
+    $('finSave').onclick = async () => {
+      const rows = Array.from(document.querySelectorAll('#finRows tr'));
+      try {
+        await Promise.all(rows.map((tr, i) => {
+          const body = {};
+          tr.querySelectorAll('input').forEach((inp) => { body[inp.dataset.k] = Number(inp.value) || 0; });
+          return api(`/projects/${projectId}/financials/${state.fiscalYear}/${i}`, { method: 'PUT', body });
+        }));
+        closeModal(); toast('Financials saved'); loadAll();
+      } catch (err) { toast(err.message, true); }
+    };
+  }
+}
+
+/* ---------- Alerts ---------- */
+const emptyState = (icon, title, sub) => `<li class="es"><span class="es-ic">${ic(icon, 18)}</span><span><strong>${title}</strong><small>${sub}</small></span></li>`;
+
+// Alert/pending rows that reference a project (and, for the derived ones, a
+// specific activity cell) are clickable -- jump to the project and, if
+// known, the corridor/column cell that raised them.
+function alertNavAttrs(a){
+  if (!a.project_id) return '';
+  let attrs = `class="nav-target" data-nav-project="${a.project_id}"`;
+  if (a.tab && a.corridor && a.column) {
+    attrs += ` data-nav-tab="${esc(a.tab)}" data-nav-corridor="${esc(a.corridor)}" data-nav-col="${esc(a.column)}"`;
+  }
+  return attrs;
+}
+function bindAlertNav(listSelector){
+  document.querySelectorAll(`${listSelector} li[data-nav-project]`).forEach((li) => li.onclick = () => {
+    goToAlertTarget({
+      projectId: Number(li.dataset.navProject), tab: li.dataset.navTab,
+      corridor: li.dataset.navCorridor, column: li.dataset.navCol,
+    });
+  });
+}
+async function goToAlertTarget(target){
+  await openProjectView(target.projectId);
+  if (target.tab && target.corridor && target.column) {
+    await openActivityView(target.tab);
+    highlightActivityCell(target.corridor, target.column);
+  }
+}
+function activityReason(item){
+  return item.reason
+    ? `<small class="activity-next">${esc(item.reason)}</small>`
+    : '';
+}
+function highlightActivityCell(corridor, column){
+  const cells = document.querySelectorAll(`#agrid td.cellstat[data-col="${CSS.escape(column)}"]`);
+  for (const cell of cells) {
+    const nameCell = cell.closest('tr')?.querySelector('td.n');
+    if (nameCell && nameCell.textContent.trim() === corridor) {
+      cell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      cell.classList.add('cell-flash');
+      setTimeout(() => cell.classList.remove('cell-flash'), 2200);
+      break;
+    }
+  }
+}
+
+function renderAlerts(alerts){
+  const editable = canEdit();
+  $('alertCount').textContent = alerts.length;
+  $('alertsList').innerHTML = alerts.length
+    ? alerts.map((a) => `<li ${alertNavAttrs(a)}><span class="li-ic">${ic('triangle-alert', 15)}</span><span class="li-txt">${esc(a.message)}${a.due_date?`<small>Due ${fmtDMY(a.due_date)}</small>`:''}${activityReason(a)}</span>${editable&&!a.derived?`<button type="button" class="link-btn" data-id="${a.id}">Dismiss</button>`:''}</li>`).join('')
+    : emptyState('shield-check', 'No alerts', 'Nothing needs your attention right now.');
+  if (editable) document.querySelectorAll('#alertsList button[data-id]').forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await api(`/alerts/${b.dataset.id}/dismiss`, { method: 'PATCH' }); loadAll();
+  });
+  bindAlertNav('#alertsList');
+  $('alertToggle').style.display = editable ? '' : 'none';
+  if (!editable) setAddOpen('alertAdd', 'alertToggle', false);
+}
+// Add rows stay collapsed until the panel's Add button is clicked.
+function setAddOpen(rowId, btnId, open){
+  $(rowId).style.display = open ? 'flex' : 'none';
+  $(btnId).setAttribute('aria-expanded', open);
+  $(btnId).innerHTML = open ? 'Cancel' : `${ic('plus', 14)}Add`;
+  if (open) $(rowId).querySelector('input').focus();
+}
+// Clicking a panel heading pops the whole list up in the modal. Pop-up rows and
+// their Dismiss / Mark done buttons forward clicks to the panel's own row, so
+// navigation and API behaviour stay defined in one place.
+function bindListPopup(cardId, context){
+  const h3 = document.querySelector(`#${cardId} .panel-head h3`);
+  const open = () => openListPopup(cardId, context());
+  h3.onclick = open;
+  h3.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } };
+}
+function openListPopup(cardId, context){
+  const card = $(cardId), src = card.querySelector('.plist');
+  const title = [...card.querySelector('.panel-head h3').childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+  const n = card.querySelector('.count').textContent;
+  openModal(`<h3>${title}</h3><p class="ctx">${context} &middot; ${n} item${n === '1' ? '' : 's'}</p>
+    <ul class="plist plist-full" id="popList">${src.innerHTML}</ul>
+    <div class="actions"><button type="button" id="popClose">Close</button></div>`);
+  $('popClose').onclick = closeModal;
+  const rows = [...src.children];
+  [...$('popList').children].forEach((li, i) => {
+    const orig = rows[i];
+    if (orig.onclick) li.onclick = () => { closeModal(); orig.click(); };
+    li.querySelectorAll('button[data-id]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      orig.querySelector(`button[data-id="${b.dataset.id}"]`).click();
+      li.remove();
+    });
+  });
+}
+['alertsCard', 'pendingCard'].forEach((id) => bindListPopup(id, () => 'All projects'));
+$('alertToggle').onclick = () => setAddOpen('alertAdd', 'alertToggle', $('alertAdd').style.display === 'none');
+$('alertAddBtn').onclick = async () => {
+  const msg = $('alertMsg').value.trim();
+  if (!msg) return;
+  await api('/alerts', { method: 'POST', body: { message: msg, dueDate: $('alertDue').value || null } });
+  $('alertMsg').value=''; $('alertDue').value=''; setAddOpen('alertAdd', 'alertToggle', false); loadAll();
+};
+
+/* ---------- Pending actions ---------- */
+function renderPending(items){
+  const editable = canEdit();
+  $('pendCount').textContent = items.length;
+  $('pendList').innerHTML = items.length
+    ? items.map((a) => `<li ${alertNavAttrs(a)}><span class="li-ic warning pending-icons">${ic('clock', 15)}<span class="pending-mark" aria-hidden="true">!</span></span><span class="li-txt">${esc(a.title)}${a.due_date?`<small>Due ${fmtDMY(a.due_date)}</small>`:''}${activityReason(a)}</span>${editable&&!a.derived?`<button type="button" class="link-btn" data-id="${a.id}">Mark done</button>`:''}</li>`).join('')
+    : emptyState('check', 'You\'re all caught up', 'No pending actions across projects.');
+  if (editable) document.querySelectorAll('#pendList button[data-id]').forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await api(`/pending/${b.dataset.id}/done`, { method: 'PATCH' }); loadAll();
+  });
+  bindAlertNav('#pendList');
+  $('pendToggle').style.display = editable ? '' : 'none';
+  if (!editable) setAddOpen('pendAdd', 'pendToggle', false);
+}
+$('pendToggle').onclick = () => setAddOpen('pendAdd', 'pendToggle', $('pendAdd').style.display === 'none');
+$('pendAddBtn').onclick = async () => {
+  const title = $('pendTitle').value.trim();
+  if (!title) return;
+  await api('/pending', { method: 'POST', body: { title, dueDate: $('pendDue').value || null } });
+  $('pendTitle').value=''; $('pendDue').value=''; setAddOpen('pendAdd', 'pendToggle', false); loadAll();
+};
+
+/* =====================================================================
+   Project dashboard (mockup page 3)
+   ===================================================================== */
+const DL_STATUS = { completed: ['Completed', 1], in_progress: ['In Progress', .5], pending: ['Pending', 0] };
+const BUD_COLORS = ['#0A4F73','#0A78AD','#1BA0DA','#7CC4E8','#BFE3F5'];
+
+async function openProjectView(projectId){
+  state.project.id = projectId;
+  const sel = $('pdFY');
+  sel.innerHTML = $('fFY').innerHTML;
+  sel.value = String(state.fiscalYear);
+  state.project.fiscalYear = state.fiscalYear;
+  state.project.targetMonth = null; // picked in loadProjectView once the targets are known
+  ['pdEdit','pdAddB','pdAddC'].forEach((id) => { $(id).style.display = canEdit() ? '' : 'none'; });
+  $('pdAccess').style.display = canManageAccess() ? '' : 'none';
+  showView('projectView');
+  pmisPush(2);
+  scrollTo(0, 0);
+  await loadProjectView();
+}
+$('pdFY').onchange = () => { state.project.fiscalYear = Number($('pdFY').value); loadProjectView(); };
+$('pdBack').onclick = () => { history.back(); };
+$('pdField').onclick = () => openActivityView('field');
+$('pdOffice').onclick = () => openActivityView('office');
+$('pdSchedule').onclick = () => openScheduleView();
+
+async function loadProjectView(){
+  const id = state.project.id, fy = state.project.fiscalYear;
+  const [dash, fin] = await Promise.all([
+    api(`/projects/${id}/dashboard`),
+    api(`/projects/${id}/financials?fiscalYear=${fy}`),
+  ]);
+  state.project.data = dash; state.project.months = fin.months;
+  if (!state.project.targetMonth) state.project.targetMonth = defaultTargetMonth(dash.deliverables);
+  $('pdTgtMonth').value = state.project.targetMonth;
+  const p = dash.project;
+  state.project.code = p.code; state.project.name = p.name;
+  $('pdTitle').textContent = p.name;
+  $('pdSub').innerHTML = `Project code: ${esc(p.code)} &middot; ${esc(p.type)} &middot; Work order &#8377; ${fmt(p.woValueCr)} Cr &middot; ${fyLabel(state.project.fiscalYear)}`;
+  renderProjectView();
+  loadProjectAlertsPending();
+}
+
+// Alerts / pending actions scoped to this project only (company-wide items
+// stay on the Overview page) -- re-fetched after dismiss/done/add so the
+// panels update without reloading the whole project dashboard.
+async function loadProjectAlertsPending(){
+  const id = state.project.id;
+  const [alertsRes, pendRes] = await Promise.all([api('/alerts'), api('/pending')]);
+  updateBell(alertsRes.alerts.length + pendRes.pending.length);
+  if (state.project.id !== id) return; // user navigated away while this was in flight
+  renderProjectAlerts(alertsRes.alerts.filter((a) => a.project_id === id));
+  renderProjectPending(pendRes.pending.filter((a) => a.project_id === id));
+}
+// Derived items are titled "<name> (<code>) — ..." for the portfolio view; drop that prefix here.
+function stripProjectPrefix(text){
+  const prefix = `${state.project.name} (${state.project.code}) — `;
+  return text.startsWith(prefix) ? text.slice(prefix.length) : text;
+}
+function projectAlertNavAttrs(a){
+  if (!(a.tab && a.corridor && a.column)) return '';
+  return `class="nav-target" data-nav-tab="${esc(a.tab)}" data-nav-corridor="${esc(a.corridor)}" data-nav-col="${esc(a.column)}"`;
+}
+function bindProjectAlertNav(listSelector){
+  document.querySelectorAll(`${listSelector} li[data-nav-tab]`).forEach((li) => li.onclick = async () => {
+    await openActivityView(li.dataset.navTab);
+    highlightActivityCell(li.dataset.navCorridor, li.dataset.navCol);
+  });
+}
+function renderProjectAlerts(alerts){
+  const editable = canEdit();
+  $('pdAlertCount').textContent = alerts.length;
+  $('pdAlertsList').innerHTML = alerts.length
+    ? alerts.map((a) => `<li ${projectAlertNavAttrs(a)}><span class="li-ic">${ic('triangle-alert', 15)}</span><span class="li-txt">${esc(stripProjectPrefix(a.message))}${a.due_date?`<small>Due ${fmtDMY(a.due_date)}</small>`:''}${activityReason(a)}</span>${editable&&!a.derived?`<button type="button" class="link-btn" data-id="${a.id}">Dismiss</button>`:''}</li>`).join('')
+    : emptyState('shield-check', 'No alerts', 'Nothing needs attention on this project.');
+  if (editable) document.querySelectorAll('#pdAlertsList button[data-id]').forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await api(`/alerts/${b.dataset.id}/dismiss`, { method: 'PATCH' }); loadProjectAlertsPending();
+  });
+  bindProjectAlertNav('#pdAlertsList');
+  $('pdAlertToggle').style.display = editable ? '' : 'none';
+  if (!editable) setAddOpen('pdAlertAdd', 'pdAlertToggle', false);
+}
+function renderProjectPending(items){
+  const editable = canEdit();
+  $('pdPendCount').textContent = items.length;
+  $('pdPendList').innerHTML = items.length
+    ? items.map((a) => `<li ${projectAlertNavAttrs(a)}><span class="li-ic warning pending-icons">${ic('clock', 15)}<span class="pending-mark" aria-hidden="true">!</span></span><span class="li-txt">${esc(stripProjectPrefix(a.title))}${a.due_date?`<small>Due ${fmtDMY(a.due_date)}</small>`:''}${activityReason(a)}</span>${editable&&!a.derived?`<button type="button" class="link-btn" data-id="${a.id}">Mark done</button>`:''}</li>`).join('')
+    : emptyState('check', 'All caught up', 'No pending actions on this project.');
+  if (editable) document.querySelectorAll('#pdPendList button[data-id]').forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await api(`/pending/${b.dataset.id}/done`, { method: 'PATCH' }); loadProjectAlertsPending();
+  });
+  bindProjectAlertNav('#pdPendList');
+  $('pdPendToggle').style.display = editable ? '' : 'none';
+  if (!editable) setAddOpen('pdPendAdd', 'pdPendToggle', false);
+}
+$('pdAlertToggle').onclick = () => setAddOpen('pdAlertAdd', 'pdAlertToggle', $('pdAlertAdd').style.display === 'none');
+$('pdPendToggle').onclick = () => setAddOpen('pdPendAdd', 'pdPendToggle', $('pdPendAdd').style.display === 'none');
+$('pdAlertAddBtn').onclick = async () => {
+  const msg = $('pdAlertMsg').value.trim();
+  if (!msg) return;
+  await api('/alerts', { method: 'POST', body: { message: msg, dueDate: $('pdAlertDue').value || null, projectId: state.project.id } });
+  $('pdAlertMsg').value=''; $('pdAlertDue').value=''; setAddOpen('pdAlertAdd', 'pdAlertToggle', false); loadProjectAlertsPending();
+};
+$('pdPendAddBtn').onclick = async () => {
+  const title = $('pdPendTitle').value.trim();
+  if (!title) return;
+  await api('/pending', { method: 'POST', body: { title, dueDate: $('pdPendDue').value || null, projectId: state.project.id } });
+  $('pdPendTitle').value=''; $('pdPendDue').value=''; setAddOpen('pdPendAdd', 'pdPendToggle', false); loadProjectAlertsPending();
+};
+['pdAlertsCard', 'pdPendingCard'].forEach((id) => bindListPopup(id, () => `${esc(state.project.name)} (${esc(state.project.code)})`));
+
+function renderProjectView(){
+  const { project: p, percentComplete, budget, lifetime, deliverables } = state.project.data;
+  const kv = (rows) => rows.map(([l, v]) => `<div class="kl">${l}</div><div class="kv">${v}</div>`).join('');
+  $('pdKl').innerHTML = kv([['Contractual Start date', fmtDate(p.contractStart)], ['Contractual End Date', fmtDate(p.contractEnd)],
+    ['Forecast Project Completion', fmtDate(p.forecastCompletion)], ['EOT received up to', fmtDate(p.eotUpto)],
+    ['Overall % Complete', percentComplete == null ? '&mdash;' : Math.round(percentComplete) + '%']]);
+  $('pdKr').innerHTML = kv([['O/S', fmt(lifetime.billing - lifetime.collection) + ' Cr'], ['Unbilled Revenue', fmt(p.unbilledRevenueCr) + ' Cr'],
+    ['Retention', fmt(p.retentionCr) + ' Cr'], ['Bank Guarantee', fmt(p.bankGuaranteeCr) + ' Cr'], ['PBG Valid up to', fmtDate(p.pbgValidUpto)]]);
+  renderBudgetChart(budget);
+  renderLifeCycle(p.woValueCr, lifetime);
+  const months = state.project.months, last = lastActualIdx(state.project.fiscalYear, 11);
+  comboChart('pdCB','pdLgB','pdTpB', months, 'Billing', last, '#5D7387');
+  comboChart('pdCC','pdLgC','pdTpC', months, 'Collection', last, '#7C5CC4');
+  const tm = state.project.targetMonth, inMonth = (d) => (d.dueDate || '').slice(0, 7) === tm;
+  renderDeliverables('pdDlB', 'billing', 'Billing', deliverables.billing.filter(inMonth));
+  renderDeliverables('pdDlC', 'collection', 'Collection', deliverables.collection.filter(inMonth));
+}
+
+// Current month if it has any target; otherwise the latest month that does; otherwise the current month.
+function defaultTargetMonth({ billing, collection }){
+  const cur = new Date().toISOString().slice(0, 7);
+  const months = [...billing, ...collection].map((d) => (d.dueDate || '').slice(0, 7)).filter(Boolean).sort();
+  return months.includes(cur) || !months.length ? cur : months[months.length - 1];
+}
+$('pdTgtMonth').onchange = () => {
+  if (!$('pdTgtMonth').value) { $('pdTgtMonth').value = state.project.targetMonth; return; }
+  state.project.targetMonth = $('pdTgtMonth').value;
+  renderProjectView();
+};
+
+function renderBudgetChart(budget){
+  const bud = budget.map((b) => b.budgetCr), ex = budget.map((b) => b.expenditureCr);
+  const top = Math.max(.5, Math.ceil(Math.max(bud.reduce((a, b) => a + b, 0), ex.reduce((a, b) => a + b, 0)) * 2) / 2);
+  const L = 40, T = 10, ih = 200, Y = (v) => T + ih * (1 - v / top);
+  $('pdBudLegend').innerHTML = budget.map((b, i) => `<li><i style="background:${BUD_COLORS[i]}"></i>${esc(b.category)}</li>`).join('');
+  let g = '';
+  for (let i = 0; i <= 5; i++){ const v = top * i / 5; g += `<line x1="${L}" x2="265" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" ${i ? 'stroke-dasharray="2 4"' : ''}/><text x="${L-4}" y="${Y(v)+4}" text-anchor="end" font-size="10">${v.toFixed(2)}</text>`; }
+  [[bud, 'Budget', 70], [ex, 'Expenditure', 170]].forEach(([arr, name, x]) => {
+    let acc = 0;
+    arr.forEach((v, i) => {
+      g += `<rect x="${x}" y="${Y(acc + v)}" width="60" height="${Y(acc) - Y(acc + v)}" fill="${BUD_COLORS[i]}"><title>${name} - ${esc(budget[i].category)}: ${fmt(v)} Cr</title></rect>`;
+      acc += v;
+    });
+    g += `<text x="${x+30}" y="228" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--ink)">${name}</text>`;
+  });
+  $('pdBud').innerHTML = g;
+}
+
+function renderLifeCycle(wo, lifetime){
+  const arc = (rd, fr) => { fr = Math.max(0, Math.min(.999, fr)); const a = Math.PI * (1 - fr); return `M${200-rd},210 A${rd},${rd} 0 0 1 ${200+rd*Math.cos(a)},${210-rd*Math.sin(a)}`; };
+  const arcs = [['WO value', wo, '#F5B544', 150, 1], ['Billing', lifetime.billing, '#0A78AD', 115, div(lifetime.billing, wo) || 0],
+    ['Collection', lifetime.collection, '#1E8E5A', 80, div(lifetime.collection, wo) || 0]];
+  $('pdLife').innerHTML = arcs.map((a) => `<path d="${arc(a[3], 1)}" fill="none" stroke="var(--border)" stroke-width="26"/>`
+    + `<path d="${arc(a[3], a[4])}" fill="none" stroke="${a[2]}" stroke-width="26"><title>${a[0]}: ${fmt(a[1])} Cr</title></path>`).join('');
+  $('pdLifeLegend').innerHTML = arcs.map((a) => `<span><i style="background:${a[2]}"></i>${a[0]} ${fmt(a[1])} Cr</span>`).join('');
+}
+
+// Monthly ABP / actual / forecast bars (left axis) + cumulative lines (right axis), as in the mockup.
+function comboChart(svgId, legendId, tipId, months, kind, last, cumColor){
+  const W=svgWidth(svgId, 900),H=300,L=46,R=46,T=14,B=30,iw=W-L-R,ih=H-T-B, fy = state.project.fiscalYear, hid = state.hidden[svgId];
+  $(svgId).setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const abp = months.map((m) => m['plan' + kind]);
+  const act = months.map((m, i) => (i <= last ? m['actual' + kind] : null));
+  const fc = months.map((m, i) => (i > last ? m['forecast' + kind] || m['plan' + kind] : null));
+  let a = 0, b = 0; const ca = abp.map((v) => (a += v)), cc = act.map((v) => (v == null ? null : (b += v)));
+  let e = last >= 0 ? cc[last] : 0;
+  const cf = fc.map((v, i) => (i < last ? null : i === last ? e : (e += v)));
+  const vals = (arr) => arr.filter((v) => v != null);
+  const lm = Math.max(.5, Math.ceil(Math.max(...abp, ...vals(act), ...vals(fc)) * 2) / 2);
+  const rm = Math.max(1, Math.ceil(Math.max(...ca, ...vals(cc), ...vals(cf)) / 2) * 2);
+  const x = (i) => L + iw*(i+.5)/12, yl = (v) => T + ih*(1 - v/lm), yr = (v) => T + ih*(1 - v/rm);
+  const cols = ['#9DD3EE', '#0A78AD', '#6FB7DC', cumColor, '#F59E0B', '#1E8E5A'];
+  const names = [`ABP ${kind}`, `Actual ${kind}`, `Forecast ${kind}`, `Cumm ABP ${kind}`, `Cumm Actual ${kind}`, `Cumm Forecast ${kind}`];
+  let g = '';
+  for (let i=0;i<=6;i++){ g += `<line x1="${L}" x2="${W-R}" y1="${T+ih*i/6}" y2="${T+ih*i/6}" stroke="var(--line)" stroke-dasharray="3 4"/><text x="${L-6}" y="${T+ih*(1-i/6)+4}" text-anchor="end">${(lm*i/6).toFixed(1)}</text><text x="${W-R+6}" y="${T+ih*(1-i/6)+4}">${(rm*i/6).toFixed(1)}</text>`; }
+  MONTHS.forEach((m, i) => g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle">${monLabel(fy, i)}</text>`);
+  const bw = iw/12*.26, bar = (v, xx, k) => (v == null || hid.has(String(k)) ? '' : `<rect x="${xx}" y="${yl(v)}" width="${bw}" height="${T+ih-yl(v)}" fill="${cols[k]}"/>`);
+  abp.forEach((v, i) => { g += bar(v, x(i)-bw-1, 0) + bar(act[i], x(i)+1, 1) + bar(fc[i], x(i)+1, 2); });
+  const ln = (arr, k, dash) => (hid.has(String(k)) ? '' : `<path d="${arr.map((v,i) => v == null ? null : x(i)+','+yr(v)).filter(Boolean).map((q,i) => (i?'L':'M')+q).join('')}" fill="none" stroke="${cols[k]}" stroke-width="2.5" ${dash?'stroke-dasharray="7 5"':''}/>`);
+  g += ln(ca, 3) + ln(cc, 4) + ln(cf, 5, 1);
+  $(svgId).innerHTML = g + `<line id="${svgId}v" y1="${T}" y2="${T+ih}" stroke="var(--muted)" style="display:none"/><rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  legendToggles(legendId, hid, names.map((n, i) => [String(i), n, cols[i], i < 3]), renderProjectView);
+  const fx = (v) => (v == null ? '&ndash;' : v.toFixed(2));
+  chartTip(svgId, tipId, W, L, iw, x, (i) => `<b>${monLabel(fy, i)}</b><br>${names[0]}: ${fx(abp[i])}<br>`
+    + (i <= last ? `${names[1]}: ${fx(act[i])}` : `${names[2]}: ${fx(fc[i])}`)
+    + `<br>${names[3]}: ${fx(ca[i])}<br>` + (i <= last ? `${names[4]}: ${fx(cc[i])}` : `${names[5]}: ${fx(cf[i])}`));
+}
+
+function renderDeliverables(tableId, kind, label, items){
+  const ed = canEdit();
+  $(tableId).innerHTML = `<colgroup><col style="width:8%"><col style="width:30%"><col style="width:17%"><col style="width:14%"><col style="width:14%"><col style="width:17%"></colgroup>`
+    + `<tr><th>S.NO</th><th>${label.toUpperCase()} TARGET</th><th>TARGET STATUS</th><th>${label.toUpperCase()} VALUE</th><th>${label.toUpperCase()} DATE</th><th>% OF WORK COMPLETED</th></tr>`
+    + (items.length ? items.map((d, i) => `<tr><td>${i+1}</td><td class="l" title="${esc(d.name)}">${esc(d.name)}</td>
+      <td class="st" data-dl="${d.id}" title="${ed ? 'Click to update status' : 'Click to view history'}"><span class="sbadge s-${d.status}">${DL_STATUS[d.status][0]}${d.historyCount ? ic('clock', 12) : ''}</span></td>
+      <td>${fmt(d.valueCr)}</td><td>${fmtDMY(d.dueDate)}</td><td>${Math.round(DL_STATUS[d.status][1] * 100)}%</td></tr>`).join('')
+      : '<tr><td colspan="6" class="empty">No targets for this month.</td></tr>');
+  $(tableId).querySelectorAll('[data-dl]').forEach((td) => td.onclick = () => {
+    const d = items.find((x) => x.id === +td.dataset.dl);
+    ed ? openDeliverableModal(d, label) : openDeliverableHistory(d, label);
+  });
+}
+
+async function openDeliverableHistory(d, label){
+  const { history } = await api(`/projects/${state.project.id}/deliverables/${d.id}/history`);
+  const body = history.length ? history.map((h) => `<div class="histrow">${DL_STATUS[h.fromStatus][0]} &rarr; ${DL_STATUS[h.toStatus][0]}
+    <small>By ${esc(h.updatedBy)} on ${esc(h.updatedAt)}${h.remarks ? ' &middot; ' + esc(h.remarks) : ''}</small></div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+  openModal(`<h3>${label} status &mdash; history</h3><p class="ctx">${esc(d.name)}</p>${body}<div class="actions"><button type="button" id="dlClose">Close</button></div>`);
+  $('dlClose').onclick = closeModal;
+}
+
+function openDeliverableModal(d, label){
+  openModal(`<h3>Update ${label} status</h3><p class="ctx">${esc(d.name)}</p>
+    <div class="mf"><label>Status</label><select id="dlStatus">${Object.entries(DL_STATUS).map(([k, v]) => `<option value="${k}" ${k===d.status?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+    <div class="mf"><label>Remarks</label><textarea id="dlRemarks" placeholder="Add status notes, blockers, or context...">${esc(d.remarks || '')}</textarea></div>
+    <div class="sig"><input type="checkbox" id="dlSig"><label for="dlSig" style="margin:0;font-weight:400">I verify this update is accurate (digital signature)</label></div>
+    <div class="actions"><button type="button" id="dlHist">History</button><button type="button" id="dlCancel">Cancel</button><button type="button" class="primary" id="dlSave">Save update</button></div>`);
+  $('dlCancel').onclick = closeModal;
+  $('dlHist').onclick = () => openDeliverableHistory(d, label);
+  $('dlSave').onclick = async () => {
+    if (!$('dlSig').checked) { toast('Please tick the verification checkbox', true); return; }
+    try {
+      await api(`/projects/${state.project.id}/deliverables/${d.id}`, { method: 'PATCH',
+        body: { status: $('dlStatus').value, remarks: $('dlRemarks').value.trim(), signed: true } });
+      closeModal(); toast('Status updated & logged'); loadProjectView();
+    } catch (err) { toast(err.message, true); }
+  };
+}
+
+function openAddDeliverable(kind, label){
+  openModal(`<h3>Add ${label.toLowerCase()} target</h3><p class="ctx">${esc(state.project.name)} (${state.project.code})</p>
+    <div class="mf"><label>Target</label><input id="ndName" type="text"></div>
+    <div class="mf"><label>${label} value (&#8377; Cr)</label><input id="ndValue" type="number" step="0.01"></div>
+    <div class="mf"><label>${label} date</label><input id="ndDate" type="date" value="${state.project.targetMonth}-01"></div>
+    <div class="actions"><button type="button" id="ndCancel">Cancel</button><button type="button" class="primary" id="ndSave">Save</button></div>`);
+  $('ndCancel').onclick = closeModal;
+  $('ndSave').onclick = async () => {
+    try {
+      await api(`/projects/${state.project.id}/deliverables`, { method: 'POST',
+        body: { kind, name: $('ndName').value.trim(), valueCr: Number($('ndValue').value) || 0, dueDate: $('ndDate').value || null } });
+      closeModal(); toast('Target added'); loadProjectView();
+    } catch (err) { toast(err.message, true); }
+  };
+}
+$('pdAddB').onclick = () => openAddDeliverable('billing', 'Billing');
+$('pdAddC').onclick = () => openAddDeliverable('collection', 'Collection');
+
+$('pdEdit').onclick = () => {
+  const { project: p, budget } = state.project.data;
+  const dateF = (id, label, v) => `<div class="mf"><label>${label}</label><input id="${id}" type="date" value="${v || ''}"></div>`;
+  const numF = (id, label, v) => `<div class="mf"><label>${label} (&#8377; Cr)</label><input id="${id}" type="number" step="0.01" value="${v}"></div>`;
+  openModal(`<h3>Project details</h3><p class="ctx">${esc(p.name)} (${p.code})</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+      ${dateF('edStart','Contractual start date',p.contractStart)}${dateF('edEnd','Contractual end date',p.contractEnd)}
+      ${dateF('edFc','Forecast project completion',p.forecastCompletion)}${dateF('edEot','EOT received up to',p.eotUpto)}
+      ${dateF('edPbg','PBG valid up to',p.pbgValidUpto)}${numF('edUnb','Unbilled revenue',p.unbilledRevenueCr)}
+      ${numF('edRet','Retention',p.retentionCr)}${numF('edBg','Bank guarantee',p.bankGuaranteeCr)}
+    </div>
+    <table class="mtbl"><thead><tr><th>Budget category</th><th>Budget</th><th>Expenditure</th></tr></thead><tbody id="edBud">
+      ${budget.map((b) => `<tr data-cat="${esc(b.category)}"><td>${esc(b.category)}</td><td><input data-k="budgetCr" value="${b.budgetCr}"></td><td><input data-k="expenditureCr" value="${b.expenditureCr}"></td></tr>`).join('')}
+    </tbody></table>
+    <div class="actions"><button type="button" id="edCancel">Cancel</button><button type="button" class="primary" id="edSave">Save</button></div>`);
+  $('edCancel').onclick = closeModal;
+  $('edSave').onclick = async () => {
+    const budgetRows = Array.from(document.querySelectorAll('#edBud tr')).map((tr) => ({
+      category: tr.dataset.cat,
+      budgetCr: Number(tr.querySelector('[data-k=budgetCr]').value) || 0,
+      expenditureCr: Number(tr.querySelector('[data-k=expenditureCr]').value) || 0,
+    }));
+    try {
+      await api(`/projects/${state.project.id}/details`, { method: 'PATCH', body: {
+        contractStart: $('edStart').value, contractEnd: $('edEnd').value, forecastCompletion: $('edFc').value,
+        eotUpto: $('edEot').value, pbgValidUpto: $('edPbg').value, unbilledRevenueCr: $('edUnb').value,
+        retentionCr: $('edRet').value, bankGuaranteeCr: $('edBg').value, budget: budgetRows,
+      }});
+      closeModal(); toast('Project details saved'); loadProjectView();
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+/* ---------- Project access management (PMO: lead/coordinator + members) ---------- */
+
+$('pdAccess').onclick = async () => {
+  const projectId = state.project.id;
+  const [{ assignments }, { users }] = await Promise.all([
+    api(`/projects/${projectId}/assignments`),
+    api('/users'),
+  ]);
+  const lead = assignments.find((a) => a.projectRole === 'lead');
+  const coordinator = assignments.find((a) => a.projectRole === 'coordinator');
+  // pmo/admin/mgmt already see and can act on every project, so they're never
+  // "assigned" -- only 'member' accounts (Project Lead/Coordinator/site
+  // reviewers) show up here to pick or add.
+  const assignable = users.filter((u) => u.role === 'member');
+  const roleOptions = (current) => '<option value="">&mdash; None &mdash;</option>' + assignable.map((u) =>
+    `<option value="${esc(u.username)}" ${current === u.username ? 'selected' : ''}>${esc(u.displayName)}</option>`).join('');
+  const notAssigned = assignable.filter((u) => !assignments.some((a) => a.username === u.username));
+
+  async function applyRole(role, username, prevHolder) {
+    if (!username) {
+      if (prevHolder) await api(`/projects/${projectId}/assignments/${encodeURIComponent(prevHolder.username)}`, { method: 'PATCH', body: { projectRole: null } });
+      return;
+    }
+    if (prevHolder && prevHolder.username === username) return;
+    const endpoint = assignments.some((a) => a.username === username)
+      ? api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}`, { method: 'PATCH', body: { projectRole: role } })
+      : api(`/projects/${projectId}/assignments`, { method: 'POST', body: { username, projectRole: role } });
+    await endpoint;
+  }
+
+  openModal(`<h3>Manage access</h3><p class="ctx">${esc(state.project.name)} (${state.project.code})</p>
+    <h3 style="font-size:1rem">Project roles</h3>
+    <div class="mf"><label>Project Lead</label><select id="paLead">${roleOptions(lead && lead.username)}</select></div>
+    <div class="mf"><label>Project Coordinator</label><select id="paCoord">${roleOptions(coordinator && coordinator.username)}</select></div>
+    <div class="actions" style="margin-bottom:18px"><button type="button" class="primary" id="paSaveRoles">Save roles</button></div>
+    <h3 style="font-size:1rem">Project members</h3>
+    <ul style="list-style:none;padding:0;margin:0 0 14px" id="paList">
+      ${assignments.length ? assignments.map((a) => `<li style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
+        <span>${esc(a.displayName)}</span>
+        <span style="display:flex;gap:6px"><button class="iconbtn" data-corridors="${esc(a.username)}">Corridors</button>${(a.projectRole && canGrantEditAccess()) ? `<button class="iconbtn" data-edit-corridors="${esc(a.username)}">Edit access</button>` : ''}<button class="iconbtn" data-rm="${esc(a.username)}">Remove</button></span></li>`).join('') : '<li class="muted">No one assigned yet.</li>'}
+    </ul>
+    <div class="mf"><label>Add a member</label><select id="paPick">${notAssigned.length ? notAssigned.map((u) => `<option value="${esc(u.username)}">${esc(u.displayName)}</option>`).join('') : '<option value="">No available users</option>'}</select></div>
+    <div class="actions"><button type="button" id="paClose">Close</button><button type="button" class="primary" id="paAdd">Add member</button></div>`);
+
+  $('paClose').onclick = closeModal;
+
+  $('paSaveRoles').onclick = async () => {
+    const leadU = $('paLead').value, coordU = $('paCoord').value;
+    if (leadU && coordU && leadU === coordU) { toast('Project Lead and Project Coordinator must be different people', true); return; }
+    try {
+      await applyRole('lead', leadU, lead);
+      await applyRole('coordinator', coordU, coordinator);
+      toast('Roles updated'); closeModal(); $('pdAccess').click();
+    } catch (err) { toast(err.message, true); }
+  };
+
+  $('paAdd').onclick = async () => {
+    const username = $('paPick').value;
+    if (!username) return;
+    try {
+      await api(`/projects/${projectId}/assignments`, { method: 'POST', body: { username } });
+      toast('Member added'); closeModal(); $('pdAccess').click();
+    } catch (err) { toast(err.message, true); }
+  };
+
+  document.querySelectorAll('#paList [data-rm]').forEach((b) => b.onclick = async () => {
+    try {
+      await api(`/projects/${projectId}/assignments/${encodeURIComponent(b.dataset.rm)}`, { method: 'DELETE' });
+      toast('Removed'); closeModal(); $('pdAccess').click();
+    } catch (err) { toast(err.message, true); }
+  });
+
+  document.querySelectorAll('#paList [data-corridors]').forEach((b) => b.onclick = async () => {
+    const username = b.dataset.corridors;
+    const member = assignments.find((a) => a.username === username);
+    const [{ corridors: allCorridors }, { corridors: current }] = await Promise.all([
+      api(`/projects/${projectId}/corridors`),
+      api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}/corridors`),
+    ]);
+    const unrestricted = current.length === 0;
+    openModal(`<h3>Corridors &mdash; ${esc(member.displayName)}</h3>
+      <p class="ctx">${esc(state.project.name)} (${state.project.code})</p>
+      <div class="mf"><label style="display:flex;align-items:center;gap:8px;font-weight:400"><input type="checkbox" id="pcAll" ${unrestricted ? 'checked' : ''} style="width:auto;height:auto">All corridors (unrestricted)</label></div>
+      <div id="pcList" style="${unrestricted ? 'display:none' : ''};max-height:260px;overflow:auto">
+        ${allCorridors.length ? allCorridors.map((c) => `<label style="display:block;padding:4px 0;font-weight:400"><input type="checkbox" class="pc-corridor" value="${esc(c)}" ${current.includes(c) ? 'checked' : ''} style="width:auto;height:auto;margin-right:8px">${esc(c)}</label>`).join('') : '<p class="muted">No corridors in this project yet.</p>'}
+      </div>
+      <div class="actions"><button type="button" id="pcCancel">Cancel</button><button type="button" class="primary" id="pcSave">Save</button></div>`);
+    $('pcAll').onchange = () => { $('pcList').style.display = $('pcAll').checked ? 'none' : ''; };
+    $('pcCancel').onclick = () => { closeModal(); $('pdAccess').click(); };
+    $('pcSave').onclick = async () => {
+      const corridors = $('pcAll').checked ? [] : Array.from(document.querySelectorAll('.pc-corridor:checked')).map((el) => el.value);
+      try {
+        await api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}/corridors`, { method: 'PUT', body: { corridors } });
+        toast('Corridor access saved'); closeModal(); $('pdAccess').click();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
+
+  document.querySelectorAll('#paList [data-edit-corridors]').forEach((b) => b.onclick = async () => {
+    const username = b.dataset.editCorridors;
+    const member = assignments.find((a) => a.username === username);
+    const [{ corridors: allCorridors }, { corridors: viewRestricted }, { corridors: current }] = await Promise.all([
+      api(`/projects/${projectId}/corridors`),
+      api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}/corridors`),
+      api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}/edit-corridors`),
+    ]);
+    // Only offer corridors this member can actually see (their view
+    // restriction, if any) -- granting edit on a corridor they can't view
+    // would have no effect.
+    const viewable = viewRestricted.length === 0 ? allCorridors : allCorridors.filter((c) => viewRestricted.includes(c));
+    openModal(`<h3>Edit access &mdash; ${esc(member.displayName)}</h3>
+      <p class="ctx">${esc(state.project.name)} (${state.project.code}) &middot; ${member.projectRole === 'lead' ? 'Project Lead' : 'Project Coordinator'}</p>
+      <p class="ctx">Pick which corridors ${esc(member.displayName)} may edit (update activity status cells). Unchecked corridors stay read-only for them.</p>
+      <div id="ecList" style="max-height:260px;overflow:auto">
+        ${viewable.length ? viewable.map((c) => `<label style="display:block;padding:4px 0;font-weight:400"><input type="checkbox" class="ec-corridor" value="${esc(c)}" ${current.includes(c) ? 'checked' : ''} style="width:auto;height:auto;margin-right:8px">${esc(c)}</label>`).join('') : '<p class="muted">No corridors this member can view yet.</p>'}
+      </div>
+      <div class="actions"><button type="button" id="ecCancel">Cancel</button><button type="button" class="primary" id="ecSave">Save</button></div>`);
+    $('ecCancel').onclick = () => { closeModal(); $('pdAccess').click(); };
+    $('ecSave').onclick = async () => {
+      const corridors = Array.from(document.querySelectorAll('.ec-corridor:checked')).map((el) => el.value);
+      try {
+        await api(`/projects/${projectId}/assignments/${encodeURIComponent(username)}/edit-corridors`, { method: 'PUT', body: { corridors } });
+        toast('Edit access saved'); closeModal(); $('pdAccess').click();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
+};
+
+/* =====================================================================
+   Schedule / resource-planning module (from "NR schedule stage 1 -Final.xlsx")
+   A flat task list per stretch with planned dates + resourcing — distinct
+   from the Office/Field status grid below. Status is derived client-side-
+   adjacent (the server computes it) from today vs. plan.
+   ===================================================================== */
+const SCHEDULE_STATUS_LABEL = { C: 'Completed', YTS: 'Yet to Start', IP: 'In Progress', BEHIND: 'Behind Schedule' };
+let scheduleItems = [];
+
+async function openScheduleView(){
+  $('schTitle').textContent = `${state.project.code}: ${abbr(state.project.name)} Schedule`;
+  $('schBack').textContent = `${abbr(state.project.name)} ${state.project.code}`;
+  $('schRatesBtn').style.display = (state.user.role === 'mgmt' || state.user.role === 'pmo' || state.user.role === 'admin') ? '' : 'none';
+  showView('scheduleView');
+  pmisPush(3);
+  scrollTo(0, 0);
+  await loadScheduleRows();
+}
+$('schBack').onclick = backToProject;
+$('schTabProject').onclick = backToProject;
+$('schTabOffice').onclick = () => openActivityView('office');
+$('schTabField').onclick = () => openActivityView('field');
+
+async function loadScheduleRows(){
+  const { items } = await api(`/projects/${state.project.id}/schedule`);
+  scheduleItems = items;
+  renderScheduleGrid();
+}
+
+function renderScheduleGrid(){
+  const ed = canEdit();
+  let html = '<thead><tr><th>Stretch</th><th>Length (Km)</th><th>Work item</th><th>Predecessor</th><th>Qty</th><th>Resources</th>'
+    + '<th>Productivity</th><th>Days reqd</th><th>Planned start</th><th>Lead/Lag</th><th>Planned finish</th>'
+    + '<th>Design exp. (&#8377; Cr)</th><th>Status</th><th>Actual completion</th><th>Remarks</th><th></th></tr></thead><tbody>';
+  if (!scheduleItems.length){
+    html += '<tr><td colspan="16" class="empty">No schedule items for this project yet.</td></tr>';
+  } else {
+    scheduleItems.forEach((it, i) => {
+      let stretchCell = '';
+      if (i === 0 || scheduleItems[i-1].stretch !== it.stretch) {
+        let span = 1; while (scheduleItems[i+span] && scheduleItems[i+span].stretch === it.stretch) span++;
+        stretchCell = `<td class="stretch" rowspan="${span}">${esc(it.stretch)}</td><td class="stretch" rowspan="${span}">${it.routeLengthKm ?? ''}</td>`;
+      }
+      html += `<tr>${stretchCell}<td class="n">${esc(it.workItem)}</td><td class="n">${esc(it.predecessor || '')}</td><td>${it.quantity ?? ''}</td><td>${it.resources ?? ''}</td>`
+        + `<td>${it.productivity ?? ''}</td><td>${it.daysRequired ?? ''}</td><td>${fmtDMY(it.plannedStart)}</td>`
+        + `<td>${it.leadLagDays || 0}</td><td>${fmtDMY(it.plannedFinish)}</td><td>${it.designExpenditureCr ? fmt(it.designExpenditureCr) : ''}</td>`
+        + `<td><span class="sbadge g-${it.status}">${SCHEDULE_STATUS_LABEL[it.status]}</span></td>`
+        + `<td>${fmtDMY(it.actualCompletion) || '&mdash;'}</td><td class="n">${esc(it.remarks || '')}</td>`
+        + `<td>${ed ? `<button class="iconbtn" data-edit="${it.id}">Update</button>` : ''}</td></tr>`;
+    });
+  }
+  $('sgrid').innerHTML = html + '</tbody>';
+  document.querySelectorAll('#sgrid [data-edit]').forEach((b) => b.onclick = () => openScheduleItemModal(+b.dataset.edit));
+}
+
+function openScheduleItemModal(id){
+  const it = scheduleItems.find((x) => x.id === id);
+  openModal(`<h3>Update schedule item</h3><p class="ctx">${esc(it.stretch)} &mdash; ${esc(it.workItem)}</p>
+    <div class="mf"><label>Actual completion date</label><input id="siDate" type="date" value="${it.actualCompletion || ''}"></div>
+    <div class="mf"><label>Remarks</label><textarea id="siRemarks" placeholder="Notes, blockers, or context...">${esc(it.remarks || '')}</textarea></div>
+    <div class="actions"><button type="button" id="siCancel">Cancel</button><button type="button" class="primary" id="siSave">Save</button></div>`);
+  $('siCancel').onclick = closeModal;
+  $('siSave').onclick = async () => {
+    try {
+      await api(`/projects/${state.project.id}/schedule/${id}`, { method: 'PATCH',
+        body: { actualCompletion: $('siDate').value || null, remarks: $('siRemarks').value.trim() } });
+      closeModal(); toast('Schedule item updated'); loadScheduleRows();
+    } catch (err) { toast(err.message, true); }
+  };
+}
+
+$('schHolidaysBtn').onclick = async () => {
+  const { holidays } = await api('/holidays');
+  const body = holidays.length ? `<ul style="list-style:none;padding:0;margin:0">${holidays.map((h) =>
+    `<li class="histrow">${fmtDMY(h.date)}${h.description ? ' &mdash; ' + esc(h.description) : ''}</li>`).join('')}</ul>`
+    : '<p class="muted">No holidays configured.</p>';
+  openModal(`<h3>Holiday calendar</h3><p class="ctx">Non-working days the schedule's day counts are based on.</p>${body}<div class="actions"><button type="button" id="hcClose">Close</button></div>`);
+  $('hcClose').onclick = closeModal;
+};
+
+$('schRatesBtn').onclick = async () => {
+  try {
+    const { rates } = await api('/resource-rates');
+    const body = rates.length ? `<table class="mtbl"><thead><tr><th>Role</th><th>Monthly rate (&#8377;)</th></tr></thead><tbody>${rates.map((r) =>
+      `<tr><td>${esc(r.role)}</td><td>${Number(r.monthlyRate).toLocaleString('en-IN')}</td></tr>`).join('')}</tbody></table>`
+      : '<p class="muted">No rate card configured.</p>';
+    openModal(`<h3>Resource rate card</h3><p class="ctx">Internal cost reference &mdash; not shown to Field/Office executives.</p>${body}<div class="actions"><button type="button" id="rcClose">Close</button></div>`);
+    $('rcClose').onclick = closeModal;
+  } catch (err) { toast(err.message, true); }
+};
+
+/* =====================================================================
+   PRD §4 — Project Detail & Activity Update Module (Office/Field tabs)
+   ===================================================================== */
+async function openActivityView(tab){
+  state.activity.projectId = state.project.id;
+  state.activity.code = state.project.code;
+  state.activity.name = state.project.name;
+  state.activity.filter = 'all';
+  $('actBack').textContent = `${abbr(state.project.name)} ${state.project.code}`;
+  $('addRowBtn').style.display = canEdit() ? '' : 'none';
+  $('tabEdit').style.display = canEdit() ? '' : 'none';
+  setActiveTab(tab);
+  showView('activityView');
+  pmisPush(3);
+  await loadActivityRows();
+}
+$('actBack').onclick = backToProject;
+$('actTabProject').onclick = backToProject;
+
+function setActiveTab(tab){
+  state.activity.tab = tab;
+  $('actTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${tab === 'office' ? 'Office' : 'Field'} Activities`;
+  $('tabOffice').classList.toggle('active', tab === 'office');
+  $('tabField').classList.toggle('active', tab === 'field');
+}
+$('tabOffice').onclick = async () => { setActiveTab('office'); state.activity.filter='all'; await loadActivityRows(); };
+$('tabField').onclick = async () => { setActiveTab('field'); state.activity.filter='all'; await loadActivityRows(); };
+$('tabSchedule').onclick = () => openScheduleView();
+
+$('addRowBtn').onclick = () => {
+  openModal(`<h3>Add corridor</h3>${rowFormFields('arRow', null)}
+    <div class="actions"><button type="button" id="arCancel">Cancel</button><button type="button" class="primary" id="arSave">Save</button></div>`);
+  $('arCancel').onclick = closeModal;
+  $('arSave').onclick = async () => {
+    const corridor = $('arRowCorridor').value.trim();
+    if (!corridor) { toast('Corridor name is required', true); return; }
+    try {
+      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: {
+        tab: state.activity.tab, corridor, lineType: $('arRowLine').value.trim() || null,
+        lengthKm: Number($('arRowLen').value) || null,
+        responsiblePerson: $('arRowResp').value.trim() || null,
+      }});
+      closeModal(); toast('Corridor added'); loadActivityRows();
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+async function loadActivityRows(){
+  const [{ activities }, { columns }] = await Promise.all([
+    api(`/projects/${state.activity.projectId}/activities?tab=${state.activity.tab}`),
+    api(`/projects/${state.activity.projectId}/column-progress?tab=${state.activity.tab}`),
+  ]);
+  state.activity.rows = activities;
+  state.activity.columnProgress = Object.fromEntries(columns.map((c) => [c.name, c.percentComplete]));
+  renderActivityGrid();
+}
+
+// Weight (shared across projects) and this project's own % complete for one
+// activity column -- shown wherever a single cell's detail is shown.
+function columnStatsLine(col){
+  const cols = (state.meta.columnDetail && state.meta.columnDetail[state.activity.tab]) || [];
+  const meta = cols.find((c) => c.name === col);
+  const weight = meta ? meta.weightage : 0;
+  const pct = state.activity.columnProgress[col] ?? 0;
+  return `<p class="ctx">Weight: <b>${weight}%</b> &middot; Project % complete for this activity: <b>${Math.round(pct)}%</b></p>`;
+}
+
+// Activity-matrix legend categories: filter/count chips and cell fills share
+// this one list, so a cell's color always matches the chip it's counted
+// under. Submitted/Approved/Hold stay their own category regardless of
+// schedule; In Progress and Yet to Start split into a plain and a "& Behind
+// Schedule" variant depending on `behind` (cell.alertState === 'overdue').
+// NA cells aren't counted/filterable (cellCategory returns 'NA', which
+// matches no chip).
+const ACTIVITY_CELL_CATEGORIES = [
+  ['SUB', 'Submitted', 'cs-SUB'], ['APP', 'Approved', 'cs-APP'], ['OH', 'Hold', 'cs-OH'],
+  ['YTS', 'Yet to Start', ''], ['IP', 'In Progress', 'cs-IP'],
+  ['IPB', 'In Progress & Behind Schedule', 'cs-IPB'], ['YTSB', 'Yet to Start & Behind Schedule', 'cs-YTSB'],
+];
+// Short grid-cell label for the cell's single tentative date -- the full
+// wording (state.meta.tentativeDateLabel) is used in the update modal instead,
+// where there's room for it.
+const TENTATIVE_SHORT_LABEL = { YTS: 'Start', IP: 'Finish', OH: 'Date', SUB: 'Approval', APP: 'Approved' };
+function cellCategory(status, behind){
+  if (status === 'SUB') return 'SUB';
+  if (status === 'APP') return 'APP';
+  if (status === 'OH') return 'OH';
+  if (status === 'NA') return 'NA';
+  if (status === 'IP') return behind ? 'IPB' : 'IP';
+  return behind ? 'YTSB' : 'YTS';
+}
+const CATEGORY_CLASS = Object.fromEntries(ACTIVITY_CELL_CATEGORIES.map(([k, , cls]) => [k, cls]));
+const statusText = (s) => (s ? state.meta.status[s] || s : 'Not set');
+
+// Pin the corridor-detail columns (Sl.No through % Complete) in place while the
+// grid scrolls horizontally through the activity cells. Offsets are measured
+// (not hardcoded) since column widths vary with content.
+function freezeActivityGridCols(){
+  const table = $('agrid');
+  let left = 0;
+  ['fz-sl','fz-cor','fz-line','fz-len','fz-resp','fz-pct'].forEach((cls) => {
+    const head = table.querySelector(`thead th.${cls}`);
+    if (!head) return;
+    table.querySelectorAll(`.${cls}`).forEach((el) => { el.style.left = left + 'px'; });
+    left += head.getBoundingClientRect().width;
+  });
+}
+
+function renderActivityGrid(){
+  const cols = state.meta.columnsByTab[state.activity.tab];
+  const editable = canEdit();
+  const f = state.activity.filter;
+
+  if (editable) {
+    $('actHint').textContent = 'Click any activity cell to update its status (signature required).';
+  } else if (state.activity.rows.some((r) => r.canEdit)) {
+    $('actHint').textContent = 'Click a cell in a corridor you\'ve been granted edit access to (shown below) to update its status (signature required). Other corridors are read-only.';
+  } else {
+    $('actHint').textContent = 'Read-only — click a cell to view its history.';
+  }
+
+  const counts = Object.fromEntries(ACTIVITY_CELL_CATEGORIES.map(([k]) => [k, 0]));
+  state.activity.rows.forEach((r) => cols.forEach((c) => {
+    const cell = r.cells[c], cat = cellCategory(cell.status, cell.alertState === 'overdue');
+    if (cat !== 'NA') counts[cat]++;
+  }));
+  $('statusChips').innerHTML = ACTIVITY_CELL_CATEGORIES.map(([k, label, cls]) =>
+    `<button class="chip ${cls} ${f===k?'on':''}" data-f="${k}">${label}: ${counts[k]}</button>`).join('');
+  document.querySelectorAll('#statusChips .chip').forEach((b) => b.onclick = () => {
+    state.activity.filter = state.activity.filter === b.dataset.f ? 'all' : b.dataset.f; renderActivityGrid();
+  });
+
+  const rowCategory = (r, c) => { const cell = r.cells[c]; return cellCategory(cell.status, cell.alertState === 'overdue'); };
+  const rows = f === 'all'
+    ? state.activity.rows
+    : state.activity.rows.filter((r) => cols.some((c) => rowCategory(r, c) === f));
+
+  let html = '<thead><tr><th class="frz fz-sl">Sl. No</th><th class="frz fz-cor">Corridor</th><th class="frz fz-line">Line</th><th class="frz fz-len">Length (Km)</th><th class="frz fz-resp">Responsible</th><th class="frz fz-pct frz-end">% Complete</th>'
+    + cols.map((c) => `<th style="white-space:normal;min-width:70px">${esc(c)}</th>`).join('')
+    + '<th class="pin">Last updated</th><th></th></tr></thead><tbody>';
+  if (!rows.length){
+    html += `<tr><td colspan="${cols.length+8}" class="empty">No corridor rows${f==='all'?' yet':' match this filter'}.</td></tr>`;
+  } else {
+    rows.forEach((r, i) => {
+      // A Project Lead/Coordinator with a per-corridor edit grant (r.canEdit)
+      // can update that corridor's cells even though canEdit() (pmo/admin) is
+      // false for them; other rows for the same user stay read-only.
+      const rowEditable = editable || !!r.canEdit;
+      // Merge consecutive rows with the same line type, as in the mockup.
+      let lineCell = '';
+      if (i === 0 || rows[i-1].lineType !== r.lineType) {
+        let span = 1; while (rows[i+span] && rows[i+span].lineType === r.lineType) span++;
+        lineCell = `<td class="line frz fz-line" rowspan="${span}">${esc(r.lineType||'')}</td>`;
+      }
+      const pct = r.percentComplete == null ? '&mdash;' : `${Math.round(r.percentComplete)}%`;
+      const corridorTitle = (!editable && r.canEdit) ? ' title="You have edit access to this corridor"' : '';
+      html += `<tr><td class="frz fz-sl">${state.activity.rows.indexOf(r)+1}</td><td class="n frz fz-cor"${corridorTitle}>${esc(r.corridor)}</td>${lineCell}<td class="frz fz-len">${r.lengthKm ?? ''}</td><td class="frz fz-resp">${esc(r.responsiblePerson||'')}</td><td class="pct frz fz-pct frz-end">${pct}</td>`;
+      cols.forEach((c) => {
+        const cell = r.cells[c];
+        const behind = cell.alertState === 'overdue';
+        const cat = cellCategory(cell.status, behind);
+        const dim = f !== 'all' && cat !== f ? ' style="opacity:.35"' : '';
+        const cellCls = cat === 'NA' ? 'g-NA' : CATEGORY_CLASS[cat];
+        // Overdue YTS/IP already get a distinct fill (cellCategory's IPB/
+        // YTSB); Submitted has no such variant, so an overdue Submitted cell
+        // (past the submission SLA) needs its own ring to stay visible.
+        const alertCls = cell.alertState === 'upcoming' ? ' alert-upcoming'
+          : (behind && cell.status === 'SUB') ? ' alert-overdue' : '';
+        const alertTitle = behind ? ' — behind schedule (pending action)' : cell.alertState === 'upcoming' ? ' — tentative date approaching' : '';
+        const shortLabel = cell.status && TENTATIVE_SHORT_LABEL[cell.status];
+        const dates = (cell.tentativeDate && shortLabel) ? `<small>${shortLabel}: ${fmtDMY(cell.tentativeDate)}</small>` : '';
+        // Alerted cells (upcoming or overdue) also get a hover popup -- see
+        // the #agrid mouseover/mousemove handler below -- spelling out the
+        // alert and its due date (Submitted's tentativeDate is the
+        // auto-filled SLA deadline, not a manually entered date), since the
+        // native `title` tooltip is slow and easy to miss.
+        let tipAttrs = '';
+        if (cell.alertState) {
+          const due = cell.tentativeDate ? `${shortLabel || 'Due'}: ${fmtDMY(cell.tentativeDate)}` : 'No due date set';
+          const tipTitle = behind ? 'Behind schedule' : 'Due soon';
+          const tipBody = `${r.corridor} — ${c} · ${due}`;
+          tipAttrs = ` data-alert="${cell.alertState}" data-tip-title="${esc(tipTitle)}" data-tip-body="${esc(tipBody)}"`;
+        }
+        html += `<td class="cellstat ${cellCls}${alertCls}"${dim} data-activity="${r.id}" data-col="${esc(c)}"${tipAttrs} title="${rowEditable ? 'Click to change status' : 'Click to view history'}${alertTitle}">`
+          + `${cell.status ? statusText(cell.status) : ''}${dates}</td>`;
+      });
+      html += `<td class="pin">${r.lastUpdated ? esc(r.lastUpdated.by)+'<br>'+esc(fmtDMY(r.lastUpdated.at)) : '&mdash;'}</td>`
+        + `<td><button class="iconbtn" data-hist="${r.id}">History</button></td></tr>`;
+    });
+  }
+  $('agrid').innerHTML = html + '</tbody>';
+  freezeActivityGridCols();
+
+  document.querySelectorAll('#agrid .cellstat').forEach((el) => el.addEventListener('click', () => {
+    const activityId = +el.dataset.activity, col = el.dataset.col;
+    const row = state.activity.rows.find((r) => r.id === activityId);
+    (editable || row.canEdit) ? openCellModal(row, col) : openCellHistory(row, col, true);
+  }));
+  document.querySelectorAll('#agrid [data-hist]').forEach((b) => b.addEventListener('click', () => {
+    const row = state.activity.rows.find((r) => r.id === +b.dataset.hist);
+    openRowHistory(row);
+  }));
+}
+
+// Hover popup for alerted (upcoming/overdue) activity cells, spelling out the
+// alert and its due date -- bound once on the table itself (delegated),
+// since renderActivityGrid replaces the cells on every render.
+(() => {
+  const tip = $('cellTip');
+  function place(x, y){
+    const pad = 14;
+    let left = x + pad, top = y + pad;
+    if (left + tip.offsetWidth > window.innerWidth - 8) left = x - tip.offsetWidth - pad;
+    if (top + tip.offsetHeight > window.innerHeight - 8) top = y - tip.offsetHeight - pad;
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top = Math.max(8, top) + 'px';
+  }
+  function show(td, x, y){
+    tip.innerHTML = `<b>${esc(td.dataset.tipTitle)}</b>${esc(td.dataset.tipBody)}`;
+    tip.classList.remove('sev-overdue', 'sev-upcoming');
+    tip.classList.add('on', `sev-${td.dataset.alert}`);
+    place(x, y);
+  }
+  $('agrid').addEventListener('mouseover', (e) => {
+    const td = e.target.closest('td.cellstat');
+    if (td && td.dataset.tipTitle) show(td, e.clientX, e.clientY);
+  });
+  $('agrid').addEventListener('mousemove', (e) => {
+    if (!tip.classList.contains('on')) return;
+    const td = e.target.closest('td.cellstat');
+    if (td && td.dataset.tipTitle) place(e.clientX, e.clientY); else tip.classList.remove('on');
+  });
+  $('agrid').addEventListener('mouseout', (e) => {
+    const to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('td.cellstat[data-tip-title]');
+    if (!to) tip.classList.remove('on');
+  });
+})();
+
+// Completed-like statuses (status group 'C': Submitted/Approved) pin %
+// complete to 100; Yet to Start pins it to 0. In Progress/On Hold leave it as
+// whatever was last set. Mirrors the same rule enforced server-side in the
+// cell PATCH route.
+function autoPctForStatus(status){
+  if (state.meta.statusGroup[status] === 'C') return 100;
+  if (status === 'YTS') return 0;
+  return null;
+}
+
+function openCellModal(row, col){
+  const cell = row.cells[col];
+  const statusLabel = state.meta.status;
+  const statusOrder = state.meta.statusUpdateOrder;
+  const colMeta = ((state.meta.columnDetail && state.meta.columnDetail[state.activity.tab]) || []).find((c) => c.name === col);
+  const curPct = state.activity.columnProgress[col] ?? 0;
+  openModal(`<h3>Update &mdash; ${esc(col)}</h3><p class="ctx">${esc(row.corridor)} &middot; Weight: <b>${colMeta ? colMeta.weightage : 0}%</b></p>
+    <div class="mf"><label>Status</label><select id="mStatus">${statusOrder.map((s) => `<option value="${s}" ${s===(cell.status||'YTS')?'selected':''}>${statusLabel[s]}</option>`).join('')}</select></div>
+    <div class="mf"><label id="mTentativeDateLabel">Tentative date</label><input id="mTentativeDate" type="date" value="${cell.tentativeDate||''}"></div>
+    <div class="mf"><label>% Complete <small class="muted">(this project's overall progress on this activity &mdash; set automatically for Submitted/Approved and Yet to Start)</small></label><input id="mPct" type="number" min="0" max="100" step="1" value="${curPct}"></div>
+    <div class="mf"><label>Remarks</label><textarea id="mRemarks" placeholder="Notes, blockers, or context...">${esc(cell.remarks||'')}</textarea></div>
+    <div class="sig"><input type="checkbox" id="mSig"><label for="mSig" style="margin:0;font-weight:400">I verify this update is accurate (digital signature)</label></div>
+    <div class="mf"><label>Attach files (PDF, DWG, XLSX, DOCX, Images)</label><input id="mFiles" type="file" multiple accept=".pdf,.dwg,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.gif"></div>
+    <div class="actions"><button type="button" id="mCancel">Cancel</button><button type="button" class="primary" id="mSave">Save update</button></div>`);
+  const syncFields = () => {
+    const status = $('mStatus').value;
+    const isNA = status === 'NA';
+    // Submitted's deadline defaults to SUB_APPROVAL_DAYS working days after
+    // the day it enters Submitted, but stays editable -- prefill it with
+    // that suggestion the first time this cell becomes Submitted (nothing
+    // stored yet) so there's something sensible to tweak rather than a blank
+    // box; once a value exists (from a prior save), leave it alone.
+    const isSUB = status === 'SUB';
+    const dateLabel = state.meta.tentativeDateLabel[status];
+    const auto = autoPctForStatus(status);
+    $('mTentativeDateLabel').textContent = (dateLabel || 'Tentative date') + (isSUB ? ' (defaults to 10 working days after submission)' : '');
+    $('mTentativeDate').disabled = isNA || !dateLabel;
+    $('mRemarks').disabled = isNA;
+    $('mFiles').disabled = isNA;
+    $('mPct').disabled = isNA || auto != null;
+    if (isNA || !dateLabel) $('mTentativeDate').value = '';
+    else if (isSUB && !$('mTentativeDate').value) {
+      $('mTentativeDate').value = addWorkingDaysISO(new Date().toISOString(), state.meta.subApprovalDays || 10);
+    }
+    if (isNA) { $('mRemarks').value = ''; }
+    else if (auto != null) $('mPct').value = auto;
+  };
+  syncFields();
+  $('mStatus').onchange = syncFields;
+  $('mPct').onchange = () => clampProgressInput($('mPct'));
+  $('mCancel').onclick = closeModal;
+  $('mSave').onclick = async () => {
+    if (!$('mSig').checked) { toast('Please tick the verification checkbox', true); return; }
+    clampProgressInput($('mPct'));
+    const status = $('mStatus').value;
+    const isNA = status === 'NA';
+    const auto = autoPctForStatus(status);
+    const pct = auto != null ? auto : Number($('mPct').value);
+    try {
+      let attachments = [];
+      const files = isNA ? null : $('mFiles').files;
+      if (files && files.length) {
+        const fd = new FormData();
+        Array.from(files).forEach((f) => fd.append('files', f));
+        const uploaded = await api('/uploads', { method: 'POST', isForm: true, body: fd });
+        attachments = uploaded.files;
+      }
+      const result = await api(`/projects/${state.activity.projectId}/activities/${row.id}/cells/${encodeURIComponent(col)}`, {
+        method: 'PATCH',
+        body: {
+          status, tentativeDate: $('mTentativeDate').disabled ? null : ($('mTentativeDate').value || null),
+          remarks: isNA ? '' : $('mRemarks').value.trim(), signed: true, attachments,
+        },
+      });
+      if (result.autoPercentComplete != null) {
+        state.activity.columnProgress[col] = result.autoPercentComplete;
+      } else if (colMeta && pct !== curPct) {
+        await api(`/projects/${state.activity.projectId}/column-progress`, { method: 'PUT', body: { tab: state.activity.tab, values: { [colMeta.id]: pct } } });
+        state.activity.columnProgress[col] = pct;
+      }
+      closeModal(); toast('Status updated & audit logged'); loadActivityRows();
+    } catch (err) { toast(err.message, true); }
+  };
+}
+
+async function openCellHistory(row, col){
+  const { history } = await api(`/projects/${state.activity.projectId}/activities/${row.id}/history`);
+  const entries = history.filter((h) => h.columnKey === col);
+  renderHistoryModal(`${esc(row.corridor)} &mdash; ${esc(col)}`, entries, columnStatsLine(col));
+}
+
+async function openRowHistory(row){
+  const { history } = await api(`/projects/${state.activity.projectId}/activities/${row.id}/history`);
+  renderHistoryModal(esc(row.corridor), history);
+}
+
+function renderHistoryModal(title, entries, extra){
+  const body = entries.length ? entries.map((h) => `
+    <div class="histrow"><b>${esc(h.columnKey)}</b>: ${esc(statusText(h.fromStatus))} &rarr; ${esc(statusText(h.toStatus))}
+      <small>By ${esc(h.updatedBy)} on ${esc(h.updatedAt)}${h.remarks?' &middot; '+esc(h.remarks):''}${h.attachments.length?' &middot; files: '+h.attachments.map((f)=>esc(f.originalName)).join(', '):''}</small>
+    </div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+  openModal(`<h3>History</h3><p class="ctx">${title}</p>${extra || ''}${body}<div class="actions"><button type="button" id="histClose">Close</button></div>`);
+  $('histClose').onclick = closeModal;
+}
+
+async function refreshActivityMeta(){ state.meta = await api('/activity-meta'); }
+
+// Edit grid screen: add/rename/delete the column headers (shared per tab,
+// across projects) and the corridor row headers (per project). Replaces the
+// old plain "Add corridor" button.
+let egState = { editingCol: null, editingRow: null, addingRow: false };
+
+function openEditGridView(){
+  egState = { editingCol: null, editingRow: null, addingRow: false };
+  $('egTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${state.activity.tab === 'office' ? 'Office' : 'Field'} Activities`;
+  showView('editGridView');
+  pmisPush(4);
+  renderEditGridView();
+}
+$('egBackBtn').onclick = () => { history.back(); };
+$('egActBack').onclick = () => { history.back(); };
+$('egProjBack').onclick = () => {
+  pmisSuppress = true; history.go(-2); pmisDepth = 2;
+  showView('projectView'); loadProjectView();
+};
+
+function rowFormFields(prefix, r){
+  r = r || { corridor: '', lineType: '', lengthKm: '', responsiblePerson: '' };
+  return `
+    <div class="mf"><label>Corridor name</label><input id="${prefix}Corridor" type="text" value="${esc(r.corridor)}"></div>
+    <div class="mf"><label>Line type</label><input id="${prefix}Line" type="text" placeholder="e.g. 4th Line, ROR, New Line" value="${esc(r.lineType || '')}"></div>
+    <div class="mf"><label>Length (Km)</label><input id="${prefix}Len" type="number" step="0.1" value="${r.lengthKm ?? ''}"></div>
+    <div class="mf"><label>Responsible person</label><input id="${prefix}Resp" type="text" placeholder="optional" value="${esc(r.responsiblePerson || '')}"></div>`;
+}
+
+function renderEditGridView(){
+  const tab = state.activity.tab;
+  const cols = (state.meta.columnDetail && state.meta.columnDetail[tab]) || [];
+  const rows = state.activity.rows || [];
+
+  const colsHtml = cols.length ? cols.map((c) => egState.editingCol === c.id ? `
+    <div class="eg-col eg-col-form">
+      <input id="egColName${c.id}" type="text" value="${esc(c.name)}">
+      <div class="actions"><button type="button" data-col-cancel="1">Cancel</button><button type="button" class="primary" data-col-save="${c.id}">Save</button></div>
+    </div>` : `
+    <div class="eg-col">
+      <span class="eg-col-name">${esc(c.name)}</span>
+      <span class="eg-col-weight">
+        <input type="number" class="eg-weight" data-weight-id="${c.id}" min="0" step="0.1" value="${c.weightage}">% weight
+      </span>
+      <div class="eg-col-actions">
+        <button type="button" class="iconbtn" data-col-edit="${c.id}">${ic('pencil', 14)}</button>
+        <button type="button" class="iconbtn" data-col-del="${c.id}">${ic('trash', 14)}</button>
+      </div>
+    </div>`).join('') : '<p class="muted" style="padding:8px 0">No columns yet.</p>';
+
+  const rowsHtml = rows.length ? rows.map((r) => egState.editingRow === r.id ? `
+    <li class="eg-row eg-row-form">${rowFormFields('egRow' + r.id, r)}
+      <div class="actions" style="margin-top:0"><button type="button" data-row-cancel="1">Cancel</button><button type="button" class="primary" data-row-save="${r.id}">Save</button></div>
+    </li>` : `
+    <li class="eg-row">
+      <span>${esc(r.corridor)}${r.lineType ? ` <small class="muted">(${esc(r.lineType)})</small>` : ''}</span>
+      <button type="button" class="iconbtn" data-row-edit="${r.id}">${ic('pencil', 14)}</button>
+      <button type="button" class="iconbtn" data-row-del="${r.id}">${ic('trash', 14)}</button>
+    </li>`).join('') : '<li class="muted" style="list-style:none;padding:8px 0">No corridor rows yet.</li>';
+
+  const addRowHtml = egState.addingRow ? `
+    <li class="eg-row eg-row-form">${rowFormFields('egNewRow', null)}
+      <div class="actions" style="margin-top:0"><button type="button" id="egNewRowCancel">Cancel</button><button type="button" class="primary" id="egNewRowSave">Save</button></div>
+    </li>` : '';
+
+  $('egContent').innerHTML = `
+    <div class="mf"><label>Columns</label>
+      <p class="ctx" style="margin-top:0">Weight sets how much each column counts toward the corridor's "% Complete" (right of Responsible on the grid) and the project's "Overall % Complete" KPI; it's shared across every project and must sum to 100%. Each column's % complete is set from its status-update dialog, not here.</p>
+      <div class="eg-col-grid">${colsHtml}</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <span id="egWeightTotal"></span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="egNewCol" type="text" placeholder="New column name" style="flex:1">
+        <button type="button" class="btn-o sm" id="egAddCol">${ic('plus', 14)}Add column</button>
+      </div>
+    </div>
+    <div class="mf"><label>Corridor rows</label>
+      <ul style="list-style:none;padding:0;margin:0">${rowsHtml}${addRowHtml}</ul>
+      ${egState.addingRow ? '' : `<button type="button" class="btn-o sm" id="egAddRowBtn" style="margin-top:10px">${ic('plus', 14)}Add corridor</button>`}
+    </div>`;
+  wireEditGridView();
+}
+
+function confirmEgDelete(title, body, onConfirm){
+  openModal(`<h3>${esc(title)}</h3><p class="ctx">${esc(body)}</p>
+    <div class="actions"><button type="button" id="egDelCancel">Cancel</button><button type="button" class="primary" id="egDelConfirm">Delete</button></div>`);
+  $('egDelCancel').onclick = closeModal;
+  $('egDelConfirm').onclick = async () => {
+    try { await onConfirm(); } catch (err) { toast(err.message, true); }
+    closeModal();
+    renderEditGridView();
+  };
+}
+
+function updateWeightTotalDisplay(){
+  const inputs = document.querySelectorAll('.eg-weight');
+  const sum = Array.from(inputs).reduce((s, el) => s + (Number(el.value) || 0), 0);
+  const ok = Math.abs(sum - 100) < 0.05;
+  const el = $('egWeightTotal');
+  if (!el) return;
+  el.textContent = `Total weightage: ${sum.toFixed(1)}%${ok ? '' : ' (must equal 100%)'}`;
+  el.style.color = ok ? 'var(--success)' : 'var(--danger)';
+}
+
+function clampProgressInput(el){
+  const v = Math.max(0, Math.min(100, Math.round(Number(el.value) || 0)));
+  el.value = v;
+}
+
+// One common "Save changes" for the edit window's batch-editable field
+// (weightage, an always-on input per column); renaming/adding/deleting a
+// column or row saves immediately instead, since those are one-off actions.
+async function saveAllEgChanges(){
+  if (egState.editingCol != null || egState.editingRow != null || egState.addingRow) {
+    toast('Finish or cancel the current edit first', true);
+    return;
+  }
+  const weights = {};
+  document.querySelectorAll('.eg-weight').forEach((el) => { weights[el.dataset.weightId] = Number(el.value) || 0; });
+  const weightSum = Object.values(weights).reduce((s, w) => s + w, 0);
+  if (Math.abs(weightSum - 100) > 0.05) { toast(`Weightage must sum to 100 (currently ${weightSum.toFixed(1)})`, true); return; }
+
+  try {
+    await api('/activity-columns/weights', { method: 'PUT', body: { tab: state.activity.tab, weights } });
+    await refreshActivityMeta(); await loadActivityRows();
+    toast('Changes saved'); renderEditGridView();
+  } catch (err) { toast(err.message, true); }
+}
+
+function wireEditGridView(){
+  updateWeightTotalDisplay();
+  document.querySelectorAll('.eg-weight').forEach((el) => el.addEventListener('input', updateWeightTotalDisplay));
+  $('egSaveAll').onclick = saveAllEgChanges;
+
+  $('egAddCol').onclick = async () => {
+    const name = $('egNewCol').value.trim();
+    if (!name) return;
+    try {
+      await api('/activity-columns', { method: 'POST', body: { tab: state.activity.tab, name } });
+      await refreshActivityMeta();
+      toast('Column added');
+      renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  };
+  document.querySelectorAll('[data-col-edit]').forEach((b) => b.onclick = () => { egState.editingCol = +b.dataset.colEdit; renderEditGridView(); });
+  document.querySelectorAll('[data-col-cancel]').forEach((b) => b.onclick = () => { egState.editingCol = null; renderEditGridView(); });
+  document.querySelectorAll('[data-col-save]').forEach((b) => b.onclick = async () => {
+    const id = +b.dataset.colSave, name = $('egColName' + id).value.trim();
+    if (!name) { toast('Column name is required', true); return; }
+    try {
+      await api(`/activity-columns/${id}`, { method: 'PATCH', body: { name } });
+      await refreshActivityMeta(); await loadActivityRows();
+      egState.editingCol = null; toast('Column renamed'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  });
+  document.querySelectorAll('[data-col-del]').forEach((b) => b.onclick = () => confirmEgDelete(
+    'Delete column?', "This removes the column and all of its recorded statuses/history across every project. This can't be undone.",
+    async () => {
+      await api(`/activity-columns/${b.dataset.colDel}`, { method: 'DELETE' });
+      await refreshActivityMeta(); await loadActivityRows();
+      toast('Column deleted');
+    }
+  ));
+
+  const addRowBtn = $('egAddRowBtn');
+  if (addRowBtn) addRowBtn.onclick = () => { egState.addingRow = true; renderEditGridView(); };
+  if ($('egNewRowCancel')) $('egNewRowCancel').onclick = () => { egState.addingRow = false; renderEditGridView(); };
+  if ($('egNewRowSave')) $('egNewRowSave').onclick = async () => {
+    const corridor = $('egNewRowCorridor').value.trim();
+    if (!corridor) { toast('Corridor name is required', true); return; }
+    try {
+      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: {
+        tab: state.activity.tab, corridor, lineType: $('egNewRowLine').value.trim() || null,
+        lengthKm: Number($('egNewRowLen').value) || null,
+        responsiblePerson: $('egNewRowResp').value.trim() || null,
+      }});
+      egState.addingRow = false; await loadActivityRows();
+      toast('Corridor added'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  };
+
+  document.querySelectorAll('[data-row-edit]').forEach((b) => b.onclick = () => { egState.editingRow = +b.dataset.rowEdit; renderEditGridView(); });
+  document.querySelectorAll('[data-row-cancel]').forEach((b) => b.onclick = () => { egState.editingRow = null; renderEditGridView(); });
+  document.querySelectorAll('[data-row-save]').forEach((b) => b.onclick = async () => {
+    const id = +b.dataset.rowSave, prefix = 'egRow' + id;
+    const corridor = $(prefix + 'Corridor').value.trim();
+    if (!corridor) { toast('Corridor name is required', true); return; }
+    try {
+      await api(`/projects/${state.activity.projectId}/activities/${id}`, { method: 'PATCH', body: {
+        corridor, lineType: $(prefix + 'Line').value.trim() || null, lengthKm: Number($(prefix + 'Len').value) || null,
+        responsiblePerson: $(prefix + 'Resp').value.trim() || null,
+      }});
+      egState.editingRow = null; await loadActivityRows();
+      toast('Corridor updated'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  });
+  document.querySelectorAll('[data-row-del]').forEach((b) => b.onclick = () => confirmEgDelete(
+    'Delete corridor row?', "This removes the row and all of its recorded statuses/history. This can't be undone.",
+    async () => {
+      await api(`/projects/${state.activity.projectId}/activities/${b.dataset.rowDel}`, { method: 'DELETE' });
+      await loadActivityRows();
+      toast('Corridor deleted');
+    }
+  ));
+}
+
+$('tabEdit').onclick = openEditGridView;
+
+/* ---------- Change own password ---------- */
+$('changePwBtn').onclick = () => {
+  openModal(`<h3>Change password</h3>
+    <div class="mf"><label>Current password</label><input id="cpCur" type="password" autocomplete="current-password"></div>
+    <div class="mf"><label>New password <span class="muted">(8&ndash;72 characters, letters and numbers)</span></label><input id="cpNew" type="password" autocomplete="new-password"></div>
+    <div class="mf"><label>Confirm new password</label><input id="cpConf" type="password" autocomplete="new-password"></div>
+    <div class="actions"><button type="button" id="cpCancel">Cancel</button><button type="button" class="primary" id="cpSave">Change password</button></div>`);
+  $('cpCancel').onclick = closeModal;
+  $('cpSave').onclick = async () => {
+    if ($('cpNew').value !== $('cpConf').value) return toast('New passwords do not match', true);
+    try {
+      await api('/auth/password', { method: 'POST', body: { currentPassword: $('cpCur').value, newPassword: $('cpNew').value } });
+      closeModal();
+      await doSignOut();
+      $('loginErr').textContent = 'Password changed — please sign in again.';
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+/* ---------- User provisioning (admin only, PRD §2.1) ---------- */
+$('manageUsersBtn').onclick = async () => {
+  const { users } = await api('/users');
+  openModal(`<h3>Manage users</h3>
+    <ul style="list-style:none;padding:0;margin:0 0 14px">
+      ${users.map((u) => `<li style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+        <span>${esc(u.displayName)} <span class="muted">(${esc(u.username)})</span></span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <select data-role-user="${esc(u.username)}" ${u.username === state.user.username ? 'disabled' : ''} aria-label="Role for ${esc(u.username)}">${['pmo', 'mgmt', 'member', 'admin'].map((r) => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select>
+          <button type="button" data-pw-user="${esc(u.username)}">Reset password</button>
+          ${u.username === state.user.username ? '' : `<button type="button" data-rm-user="${esc(u.username)}">Remove</button>`}
+        </span>
+      </li>`).join('')}
+    </ul>
+    <h3 style="font-size:1rem">Create account</h3>
+    <div class="mf"><label>Username</label><input id="nuUsername" type="text"></div>
+    <div class="mf"><label>Display name</label><input id="nuName" type="text"></div>
+    <div class="mf"><label>Temporary password <span class="muted">(8&ndash;72 characters, letters and numbers)</span></label><input id="nuPass" type="text"></div>
+    <div class="mf"><label>Role</label><select id="nuRole"><option value="pmo">pmo</option><option value="mgmt">mgmt</option><option value="member">member</option><option value="admin">admin</option></select></div>
+    <div class="actions"><button type="button" id="nuClose">Close</button><button type="button" class="primary" id="nuSave">Create</button></div>`);
+  $('nuClose').onclick = closeModal;
+  document.querySelectorAll('[data-role-user]').forEach((sel) => sel.onchange = async () => {
+    try {
+      await api(`/users/${encodeURIComponent(sel.dataset.roleUser)}`, { method: 'PATCH', body: { role: sel.value } });
+      toast('Role updated');
+    } catch (err) { toast(err.message, true); }
+    $('manageUsersBtn').click();
+  });
+  document.querySelectorAll('[data-pw-user]').forEach((b) => b.onclick = () => {
+    const username = b.dataset.pwUser;
+    openModal(`<h3>Reset password</h3><p class="ctx">Set a new password for <strong>${esc(username)}</strong>. They will be signed out everywhere.</p>
+      <div class="mf"><label>New password <span class="muted">(8&ndash;72 characters, letters and numbers)</span></label><input id="rpPass" type="text" autocomplete="off"></div>
+      <div class="actions"><button type="button" id="rpCancel">Cancel</button><button type="button" class="primary" id="rpSave">Reset</button></div>`);
+    $('rpCancel').onclick = () => $('manageUsersBtn').click();
+    $('rpSave').onclick = async () => {
+      try {
+        await api(`/users/${encodeURIComponent(username)}`, { method: 'PATCH', body: { password: $('rpPass').value } });
+        toast('Password reset'); $('manageUsersBtn').click();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
+  document.querySelectorAll('[data-rm-user]').forEach((b) => b.onclick = () => {
+    const username = b.dataset.rmUser;
+    openModal(`<h3>Remove account?</h3><p class="ctx">This permanently removes <strong>${esc(username)}</strong> and any project assignments for it. This can't be undone.</p>
+      <div class="actions"><button type="button" id="rmCancel">Cancel</button><button type="button" class="primary" id="rmConfirm">Remove</button></div>`);
+    $('rmCancel').onclick = closeModal;
+    $('rmConfirm').onclick = async () => {
+      try {
+        await api(`/users/${encodeURIComponent(username)}`, { method: 'DELETE' });
+        toast('Account removed'); closeModal(); $('manageUsersBtn').click();
+      } catch (err) { toast(err.message, true); closeModal(); }
+    };
+  });
+  $('nuSave').onclick = async () => {
+    try {
+      await api('/users', { method: 'POST', body: {
+        username: $('nuUsername').value.trim(), password: $('nuPass').value, displayName: $('nuName').value.trim(), role: $('nuRole').value,
+      }});
+      toast('Account created'); closeModal(); $('manageUsersBtn').click();
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+/* ---------- Browser back-button guard ----------
+   Levels: 0 = sign-in page, 1 = overview (dashView), 2 = project dashboard,
+   3 = activity / schedule view, 4 = edit grid (always a child of the
+   activity view). Physical Back steps down one level at a time; from the
+   overview it asks to sign out before dropping to level 0; from level 0 it
+   falls through to real browser history (e.g. a search engine result the
+   user arrived from). */
+history.replaceState({ pmis: 0 }, '', location.href);
+let pmisDepth = 0, pmisSuppress = false, pmis3OverProject = false;
+// Same-level moves (Activities <-> Schedule tabs) replace the entry so Back still returns to the project.
+function pmisPush(lvl){
+  const same = pmisDepth === lvl;
+  if (!same && lvl === 3) pmis3OverProject = pmisDepth === 2;
+  history[same ? 'replaceState' : 'pushState']({ pmis: lvl }, '', location.href); pmisDepth = lvl;
+}
+// Activities/Schedule may be opened from the top nav (no project entry underneath) — then swap in the project instead of going back.
+function backToProject(){
+  if (pmis3OverProject) history.back();
+  else { pmisDepth = 2; openProjectView(state.project.id); }
+}
+function pmisAskSignOut(){
+  openModal(`<h3>Sign out?</h3><p class="ctx">Do you want to sign out of Aarvee PMIS?</p>
+    <div class="actions"><button type="button" id="mStay">Stay signed in</button><button type="button" class="primary" id="mSignOut">Sign out</button></div>`);
+  $('mStay').onclick = closeModal;
+  $('mSignOut').onclick = () => { closeModal(); doSignOut(); };
+}
+window.addEventListener('popstate', (e) => {
+  if (pmisSuppress) { pmisSuppress = false; return; }
+  const to = (e.state && typeof e.state.pmis === 'number') ? e.state.pmis : 0;
+  if (pmisDepth > 1 && to === pmisDepth - 1) {
+    pmisDepth = to;
+    if (to === 3) { showView('activityView'); renderActivityGrid(); }
+    else if (to === 2) { showView('projectView'); loadProjectView(); }
+    else { showView('dashView'); loadAll(); }
+  } else if (pmisDepth === 1 && to === 0) {
+    pmisPush(1);
+    pmisAskSignOut();
+  } else {
+    pmisDepth = to;
+    if (to === 1) { showView('dashView'); loadAll(); }
+    else if (to === 2) { showView('projectView'); loadProjectView(); }
+  }
+});
+</script>
+</body>
+</html>

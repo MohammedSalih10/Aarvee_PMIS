@@ -1,0 +1,33 @@
+# Aarvee PMIS: Node app + nginx (TLS). Run: docker compose up -d --build
+# Needs next to this file: .env (see .env.example), data/ (owned by uid 1000), certs/ (fullchain.pem, privkey.pem).
+# Run exactly ONE app container: SQLite and the login rate limiter are per-process.
+services:
+  app:
+    build: .
+    image: aarvee-pmis:latest
+    restart: unless-stopped
+    env_file: .env
+    # `environment` overrides env_file, so a HOST=127.0.0.1 in .env can't make the app unreachable by nginx.
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      TRUST_PROXY: "1"
+      TZ: Asia/Kolkata
+    volumes:
+      - ./data:/app/data
+    expose:
+      - "3000"   # internal only: not published to the host
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/pmis-proxy.conf:/etc/nginx/pmis-proxy.conf:ro
+      - ./certs:/etc/ssl/pmis:ro
