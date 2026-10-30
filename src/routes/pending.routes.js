@@ -2,7 +2,8 @@ const express = require('express');
 const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { canSeeAllProjects, assignedProjectIds } = require('../scope');
-const { getDerivedCellAlerts } = require('../derivedAlerts');
+const { logAudit } = require('../changeLog');
+const { getDerivedCellAlerts, getDerivedPbgAlerts, sortEarliestDueFirst } = require('../derivedAlerts');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -29,8 +30,14 @@ router.get('/', (req, res) => {
       reason: u.reason,
       created_by: null, created_at: null, done_by: null, done_at: null,
     }));
+    derived.push(...getDerivedPbgAlerts(req.user).overdue.map((u) => ({
+      id: u.id, project_id: u.projectId, derived: true, due_date: u.dueDate,
+      title: `${u.projectName} (${u.projectCode}) — PBG renewal`,
+      reason: u.reason,
+      created_by: null, created_at: null, done_by: null, done_at: null,
+    })));
   }
-  res.json({ pending: [...derived, ...rows] });
+  res.json({ pending: sortEarliestDueFirst([...derived, ...rows]) });
 });
 
 router.post('/', requireAnyRole('pmo'), (req, res) => {
@@ -39,13 +46,16 @@ router.post('/', requireAnyRole('pmo'), (req, res) => {
   const info = db.prepare(
     'INSERT INTO pending_actions (project_id, title, due_date, created_by) VALUES (?,?,?,?)'
   ).run(projectId || null, title, dueDate || null, req.user.username);
+  logAudit(req.user, { projectId: projectId || null, area: 'pending', action: 'create', subject: title, detail: dueDate ? `Due: ${dueDate}` : null });
   res.status(201).json({ id: info.lastInsertRowid });
 });
 
 router.patch('/:id/done', requireAnyRole('pmo'), (req, res) => {
+  const item = db.prepare('SELECT project_id AS projectId, title FROM pending_actions WHERE id = ?').get(req.params.id);
   db.prepare(
     "UPDATE pending_actions SET done_by = ?, done_at = datetime('now') WHERE id = ?"
   ).run(req.user.username, req.params.id);
+  if (item) logAudit(req.user, { projectId: item.projectId, area: 'pending', action: 'update', subject: item.title, detail: 'Marked done' });
   res.json({ ok: true });
 });
 

@@ -3,6 +3,8 @@ const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
 const { loadMilestoneConfig } = require('../milestones');
+const { getColumnRows } = require('../activityColumns');
+const { logActivityChange } = require('../changeLog');
 
 // Payment-milestone (KD) header band for a project's activity grid: which
 // columns sit under which KD, each KD's claim weightage, and whether the
@@ -25,7 +27,8 @@ router.put('/projects/:id/milestones', requireAuth, requireProjectAccess(), requ
   }
   if (!['column', 'kd'].includes(basis)) return res.status(400).json({ error: 'basis must be column or kd' });
 
-  const validCols = new Set(db.prepare('SELECT id FROM activity_columns WHERE tab = ?').all(tab).map((c) => c.id));
+  const tabColumns = getColumnRows(tab, req.params.id);
+  const validCols = new Set(tabColumns.map((c) => c.id));
   const usedCols = new Set(), labels = new Set();
   let sum = 0;
   const clean = [];
@@ -53,7 +56,30 @@ router.put('/projects/:id/milestones', requireAuth, requireProjectAccess(), requ
   }
 
   const pid = req.params.id;
+  const before = loadMilestoneConfig(pid, tab);
+  const colName = new Map(tabColumns.map((c) => [c.id, c.name]));
+  const colList = (ids) => (ids.length ? ids.map((id) => colName.get(id)).join(', ') : 'no columns');
+  const diffs = [];
+  const oldByLabel = new Map(before.milestones.map((m) => [m.label.toLowerCase(), m]));
+  clean.forEach((m) => {
+    const old = oldByLabel.get(m.label.toLowerCase());
+    oldByLabel.delete(m.label.toLowerCase());
+    if (!old) { diffs.push({ subject: m.label, action: 'create', detail: `Added — ${m.weightage}%, ${colList(m.columnIds)}` }); return; }
+    const parts = [];
+    if (old.weightage !== m.weightage) parts.push(`Weightage: ${old.weightage}% → ${m.weightage}%`);
+    const a = [...old.columnIds].sort((x, y) => x - y).join(), b = [...m.columnIds].sort((x, y) => x - y).join();
+    if (a !== b) parts.push(`Columns: ${colList(old.columnIds)} → ${colList(m.columnIds)}`);
+    if (parts.length) diffs.push({ subject: m.label, action: 'update', detail: parts.join('; ') });
+  });
+  oldByLabel.forEach((old) => diffs.push({ subject: old.label, action: 'delete', detail: 'KD removed' }));
+  const newBasis = clean.length ? basis : 'column';
+  if (newBasis !== before.basis) {
+    const basisText = (b) => (b === 'kd' ? 'KD weightages' : 'Column weightages');
+    diffs.push({ subject: '% Complete basis', action: 'update', detail: `Computed from: ${basisText(before.basis)} → ${basisText(newBasis)}` });
+  }
+
   db.transaction(() => {
+    diffs.forEach((d) => logActivityChange(req.user, { projectId: Number(pid), tab, panel: 'milestone', ...d }));
     db.prepare('DELETE FROM project_milestones WHERE project_id = ? AND tab = ?').run(pid, tab);
     db.prepare('DELETE FROM project_milestone_config WHERE project_id = ? AND tab = ?').run(pid, tab);
     if (!clean.length) return;

@@ -4,6 +4,9 @@ const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
 const { BUDGET_CATEGORIES, DELIVERABLE_STATUS } = require('../dashboardConstants');
 const { loadMilestoneConfig, rowPercent } = require('../milestones');
+const { getColumnRows } = require('../activityColumns');
+const { classifyPbgRenewal } = require('../derivedAlerts');
+const { logAudit, describeChanges } = require('../changeLog');
 
 // Project dashboard (mockup page 3): header dates/amounts, budget vs
 // expenditure, life cycle totals and the billing/collection deliverables.
@@ -18,7 +21,7 @@ const router = express.Router();
 function computeProjectPercent(projectId) {
   let total = 0, count = 0;
   ['office', 'field'].forEach((tab) => {
-    const columnRows = db.prepare('SELECT id, column_key AS name, weightage FROM activity_columns WHERE tab = ?').all(tab);
+    const columnRows = getColumnRows(tab, projectId);
     if (!columnRows.length) return;
     const activities = db.prepare('SELECT id FROM project_activities WHERE project_id = ? AND tab = ?').all(projectId, tab);
     if (!activities.length) return;
@@ -47,18 +50,39 @@ const DETAIL_FIELDS = {
   retentionCr: 'retention_cr', bankGuaranteeCr: 'bank_guarantee_cr',
 };
 
+const DETAIL_LABELS = {
+  contractStart: 'Contract start', contractEnd: 'Contract end', forecastCompletion: 'Forecast completion', eotUpto: 'EOT upto',
+  pbgValidUpto: 'PBG valid upto', unbilledRevenueCr: 'Unbilled revenue (Cr)', retentionCr: 'Retention (Cr)', bankGuaranteeCr: 'Bank guarantee (Cr)',
+};
+
+// Budget categories are per-project rows (add / rename / delete). The standard set is
+// copied in once, the first time a project's dashboard is read or saved, so new projects
+// start with it and it can then be edited freely (budget_seeded stops deleted ones returning).
+function ensureBudgetRows(projectId) {
+  const p = db.prepare('SELECT budget_seeded FROM projects WHERE id = ?').get(projectId);
+  if (!p || p.budget_seeded) return;
+  const seed = db.prepare(`
+    INSERT INTO project_budget (project_id, category, budget_cr, expenditure_cr, sort_order) VALUES (?,?,0,0,?)
+    ON CONFLICT(project_id, category) DO UPDATE SET sort_order = excluded.sort_order`);
+  db.transaction(() => {
+    BUDGET_CATEGORIES.forEach((category, i) => seed.run(projectId, category, i));
+    db.prepare('UPDATE projects SET budget_seeded = 1 WHERE id = ?').run(projectId);
+  })();
+}
+
+const BUDGET_SELECT = 'SELECT id, category, budget_cr AS budgetCr, expenditure_cr AS expenditureCr FROM project_budget WHERE project_id = ? ORDER BY sort_order, id';
+
 router.get('/projects/:id/dashboard', requireAuth, requireProjectAccess(), (req, res) => {
   const project = db.prepare(`
     SELECT id, code, name, type, wo_value_cr AS woValueCr, contract_start AS contractStart, contract_end AS contractEnd,
            forecast_completion AS forecastCompletion, eot_upto AS eotUpto, pbg_valid_upto AS pbgValidUpto,
-           unbilled_revenue_cr AS unbilledRevenueCr, retention_cr AS retentionCr, bank_guarantee_cr AS bankGuaranteeCr
+           pbg_prev_valid_upto AS pbgPrevValidUpto, unbilled_revenue_cr AS unbilledRevenueCr, retention_cr AS retentionCr, bank_guarantee_cr AS bankGuaranteeCr,
+           activity_layout AS activityLayout
     FROM projects WHERE id = ?`).get(req.params.id);
   if (!project) return res.status(404).json({ error: 'Project not found' });
 
-  const stored = new Map(db.prepare(
-    'SELECT category, budget_cr AS budgetCr, expenditure_cr AS expenditureCr FROM project_budget WHERE project_id = ?'
-  ).all(req.params.id).map((b) => [b.category, b]));
-  const budget = BUDGET_CATEGORIES.map((category) => stored.get(category) || { category, budgetCr: 0, expenditureCr: 0 });
+  ensureBudgetRows(project.id);
+  const budget = db.prepare(BUDGET_SELECT).all(project.id);
 
   const lifetime = db.prepare(`
     SELECT COALESCE(SUM(actual_billing),0) AS billing, COALESCE(SUM(actual_collection),0) AS collection
@@ -71,6 +95,7 @@ router.get('/projects/:id/dashboard', requireAuth, requireProjectAccess(), (req,
 
   res.json({
     project,
+    pbgRenewal: classifyPbgRenewal(project.eotUpto, project.pbgValidUpto),
     percentComplete: computeProjectPercent(req.params.id),
     budget,
     lifetime,
@@ -92,21 +117,75 @@ router.patch('/projects/:id/details', requireAuth, requireProjectAccess(), requi
   }
   const sets = [];
   const values = [];
+  // Remember the date the PBG was changed from, so the project view can flag the change.
+  if (body.pbgValidUpto !== undefined) {
+    const current = db.prepare('SELECT pbg_valid_upto FROM projects WHERE id = ?').get(req.params.id);
+    const next = body.pbgValidUpto || null;
+    if (current && current.pbg_valid_upto !== next) {
+      sets.push('pbg_prev_valid_upto = ?');
+      values.push(next ? current.pbg_valid_upto : null);
+    }
+  }
   for (const [key, col] of Object.entries(DETAIL_FIELDS)) {
     if (body[key] === undefined) continue;
     sets.push(`${col} = ?`);
     values.push(col.endsWith('_cr') ? Number(body[key]) || 0 : body[key] || null);
   }
-  const upsertBudget = db.prepare(`
-    INSERT INTO project_budget (project_id, category, budget_cr, expenditure_cr) VALUES (?,?,?,?)
-    ON CONFLICT(project_id, category) DO UPDATE SET budget_cr = excluded.budget_cr, expenditure_cr = excluded.expenditure_cr`);
+
+  // `budget`, when sent, is the project's complete category list: rows with an id are
+  // updated (incl. rename), rows without one are added, stored rows left out are deleted.
+  let budgetRows = null;
+  if (Array.isArray(body.budget)) {
+    budgetRows = body.budget.map((b) => ({
+      id: Number(b.id) || null, category: String(b.category || '').trim(),
+      budgetCr: Number(b.budgetCr) || 0, expenditureCr: Number(b.expenditureCr) || 0,
+    }));
+    if (budgetRows.some((b) => !b.category)) return res.status(400).json({ error: 'Every budget category needs a name' });
+    const names = budgetRows.map((b) => b.category.toLowerCase());
+    if (new Set(names).size !== names.length) return res.status(400).json({ error: 'Budget category names must be unique' });
+  }
+
+  ensureBudgetRows(req.params.id);
+  const before = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
+  const budgetBefore = new Map(db.prepare(BUDGET_SELECT).all(req.params.id).map((r) => [r.id, r]));
 
   db.transaction(() => {
     if (sets.length) db.prepare(`UPDATE projects SET ${sets.join(', ')} WHERE id = ?`).run(...values, req.params.id);
-    (Array.isArray(body.budget) ? body.budget : []).forEach((b) => {
-      if (!BUDGET_CATEGORIES.includes(b.category)) return;
-      upsertBudget.run(req.params.id, b.category, Number(b.budgetCr) || 0, Number(b.expenditureCr) || 0);
-    });
+    const changes = [];
+    if (before) {
+      const after = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
+      const d = describeChanges(before, after, Object.fromEntries(Object.entries(DETAIL_FIELDS).map(([k, col]) => [col, DETAIL_LABELS[k]])));
+      if (d) changes.push(d);
+    }
+    if (budgetRows) {
+      const kept = new Set(budgetRows.filter((b) => budgetBefore.has(b.id)).map((b) => b.id));
+      budgetBefore.forEach((old) => {
+        if (kept.has(old.id)) return;
+        db.prepare('DELETE FROM project_budget WHERE id = ?').run(old.id);
+        changes.push(`Removed budget category ${old.category}`);
+      });
+      // Park renamed rows on a temporary name first so swapping two names can't trip UNIQUE(project_id, category).
+      budgetRows.forEach((b) => {
+        const old = budgetBefore.get(b.id);
+        if (old && old.category !== b.category) db.prepare('UPDATE project_budget SET category = ? WHERE id = ?').run(`\u0000${old.id}`, old.id);
+      });
+      budgetRows.forEach((b, i) => {
+        const old = budgetBefore.get(b.id);
+        if (!old) {
+          db.prepare('INSERT INTO project_budget (project_id, category, budget_cr, expenditure_cr, sort_order) VALUES (?,?,?,?,?)')
+            .run(req.params.id, b.category, b.budgetCr, b.expenditureCr, i);
+          changes.push(`Added budget category ${b.category} (budget ${b.budgetCr} Cr, expenditure ${b.expenditureCr} Cr)`);
+          return;
+        }
+        db.prepare('UPDATE project_budget SET category = ?, budget_cr = ?, expenditure_cr = ?, sort_order = ? WHERE id = ?')
+          .run(b.category, b.budgetCr, b.expenditureCr, i, old.id);
+        const d = describeChanges(old, b, { category: 'name', budgetCr: 'budget (Cr)', expenditureCr: 'expenditure (Cr)' });
+        if (d) changes.push(`${old.category} — ${d}`);
+      });
+    }
+    if (changes.length) {
+      logAudit(req.user, { projectId: Number(req.params.id), area: 'details', action: 'update', subject: before ? `${before.code} — project details` : 'Project details', detail: changes.join(' | ') });
+    }
   })();
   res.json({ ok: true });
 });
@@ -124,6 +203,10 @@ router.post('/projects/:id/deliverables', requireAuth, requireProjectAccess(), r
     VALUES (?,?,?,?,?,?,?,?)`).run(
     req.params.id, kind, name, Number(valueCr) || 0, dueDate || null, maxOrder + 1, req.user.username, new Date().toISOString()
   );
+  logAudit(req.user, {
+    projectId: Number(req.params.id), area: 'deliverable', action: 'create', subject: `${kind === 'billing' ? 'Billing' : 'Collection'} — ${name}`,
+    detail: [`Value: ${Number(valueCr) || 0} Cr`, dueDate && `Due: ${dueDate}`].filter(Boolean).join('; '),
+  });
   res.status(201).json({ id: info.lastInsertRowid });
 });
 
@@ -146,6 +229,10 @@ router.patch('/projects/:id/deliverables/:did', requireAuth, requireProjectAcces
     db.prepare(`
       INSERT INTO deliverable_audit_log (deliverable_id, from_status, to_status, remarks, updated_by, updated_at)
       VALUES (?,?,?,?,?,?)`).run(existing.id, existing.status, status, remarks || '', req.user.username, now);
+    logAudit(req.user, {
+      projectId: Number(req.params.id), area: 'deliverable', action: 'update', subject: `${existing.kind === 'billing' ? 'Billing' : 'Collection'} — ${existing.name}`,
+      detail: [`Status: ${existing.status} → ${status}`, (remarks || '') !== (existing.remarks || '') && `Remarks: ${remarks || '—'}`].filter(Boolean).join('; '),
+    });
   })();
   res.json({ ok: true });
 });
@@ -153,8 +240,8 @@ router.patch('/projects/:id/deliverables/:did', requireAuth, requireProjectAcces
 router.get('/projects/:id/deliverables/:did/history', requireAuth, requireProjectAccess(), (req, res) => {
   if (!findDeliverable(req)) return res.status(404).json({ error: 'Deliverable not found' });
   const history = db.prepare(`
-    SELECT from_status AS fromStatus, to_status AS toStatus, remarks, updated_by AS updatedBy, updated_at AS updatedAt
-    FROM deliverable_audit_log WHERE deliverable_id = ? ORDER BY updated_at DESC, id DESC`).all(req.params.did);
+    SELECT l.from_status AS fromStatus, l.to_status AS toStatus, l.remarks, l.updated_by AS updatedBy, u.display_name AS updatedByName, l.updated_at AS updatedAt
+    FROM deliverable_audit_log l LEFT JOIN users u ON u.username = l.updated_by WHERE l.deliverable_id = ? ORDER BY l.updated_at DESC, l.id DESC`).all(req.params.did);
   res.json({ history });
 });
 

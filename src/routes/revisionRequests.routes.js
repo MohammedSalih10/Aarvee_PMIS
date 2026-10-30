@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { requireAuth } = require('../auth');
 const { requireProjectAccess, canEditCorridor } = require('../scope');
-const { MAX_FREE_REVISION } = require('../activityConstants');
+const { MAX_FREE_REVISION, SUB_APPROVAL_DAYS, addWorkingDaysISO } = require('../activityConstants');
 
 // Comment Compliance revisions beyond MAX_FREE_REVISION. Whoever can edit the
 // cell raises a request; admin/mgmt approve (the cell is moved to Comment
@@ -10,7 +10,6 @@ const { MAX_FREE_REVISION } = require('../activityConstants');
 // contractEnd.routes.js / financials.routes.js.
 const router = express.Router();
 
-const isValidDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s));
 const isApprover = (user) => user.role === 'admin' || user.role === 'mgmt';
 
 const requestSelect = `
@@ -39,8 +38,10 @@ router.post(
     if (!canEditCorridor(req.user, req.params.id, activity.corridor)) {
       return res.status(403).json({ error: 'You do not have edit access to this corridor' });
     }
-    const { approvalDate, reason } = req.body || {};
-    if (!isValidDate(approvalDate)) return res.status(400).json({ error: 'Approval date is required (YYYY-MM-DD)' });
+    const { reason } = req.body || {};
+    // The approval date isn't editable: it's SUB_APPROVAL_DAYS working days from
+    // the day the request is raised, whatever the client sent.
+    const approvalDate = addWorkingDaysISO(new Date().toISOString(), SUB_APPROVAL_DAYS);
     if (!reason || !String(reason).trim()) return res.status(400).json({ error: 'A reason is required' });
 
     const cell = db.prepare('SELECT status, revision FROM activity_cells WHERE activity_id = ? AND column_key = ?')

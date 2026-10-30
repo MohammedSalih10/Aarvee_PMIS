@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { requireAuth, validatePassword } = require('../auth');
+const { logAudit } = require('../changeLog');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -43,10 +44,11 @@ router.post('/', requireAdmin, async (req, res) => {
     db.prepare(
       'INSERT INTO users (username, password_hash, display_name, role) VALUES (?,?,?,?)'
     ).run(username, hash, displayName, role);
-    res.status(201).json({ ok: true });
   } catch {
-    res.status(400).json({ error: 'That username already exists' });
+    return res.status(400).json({ error: 'That username already exists' });
   }
+  logAudit(req.user, { area: 'user', action: 'create', subject: username, detail: `Account created (${displayName}, role ${role})` });
+  res.status(201).json({ ok: true });
 });
 
 // Lets admin correct an existing account (role, and/or reset a forgotten
@@ -76,6 +78,12 @@ router.patch('/:username', requireAdmin, async (req, res) => {
     db.prepare('UPDATE users SET password_hash = ? WHERE username = ?')
       .run(await bcrypt.hash(password, 10), req.params.username);
   }
+  // Never the password itself, only that it was reset.
+  const changes = [
+    role !== undefined && role !== target.role && `Role: ${target.role} → ${role}`,
+    password !== undefined && 'Password reset',
+  ].filter(Boolean);
+  if (changes.length) logAudit(req.user, { area: 'user', action: 'update', subject: req.params.username, detail: changes.join('; ') });
   res.json({ ok: true });
 });
 
@@ -94,6 +102,7 @@ router.delete('/:username', requireAdmin, (req, res) => {
     if (n <= 1) return res.status(400).json({ error: 'At least one admin account must remain' });
   }
   db.prepare('DELETE FROM users WHERE username = ?').run(req.params.username);
+  logAudit(req.user, { area: 'user', action: 'delete', subject: req.params.username, detail: `Account removed (role ${target.role})` });
   res.json({ ok: true });
 });
 

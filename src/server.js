@@ -9,6 +9,8 @@ const authRoutes = require('./routes/auth.routes');
 const projectsRoutes = require('./routes/projects.routes');
 const financialsRoutes = require('./routes/financials.routes');
 const activitiesRoutes = require('./routes/activities.routes');
+const activityImportRoutes = require('./routes/activityImport.routes');
+const activityExportRoutes = require('./routes/activityExport.routes');
 const milestonesRoutes = require('./routes/milestones.routes');
 const assignmentsRoutes =require('./routes/assignments.routes');
 const alertsRoutes = require('./routes/alerts.routes');
@@ -20,6 +22,9 @@ const contractEndRoutes = require('./routes/contractEnd.routes');
 const scheduleRoutes = require('./routes/schedule.routes');
 const revisionRequestsRoutes = require('./routes/revisionRequests.routes');
 const requestResultsRoutes = require('./routes/requestResults.routes');
+const auditLogRoutes = require('./routes/auditLog.routes');
+const undoRoutes = require('./routes/undo.routes');
+const { captureUndo } = require('./undo');
 
 seed();
 
@@ -36,10 +41,13 @@ app.get('/healthz', (req, res) => {
   res.json({ ok: true });
 });
 
+app.use('/api', captureUndo);
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api', financialsRoutes);
 app.use('/api', activitiesRoutes);
+app.use('/api', activityImportRoutes);
+app.use('/api', activityExportRoutes);
 app.use('/api', milestonesRoutes);
 app.use('/api', assignmentsRoutes);
 app.use('/api', projectDashboardRoutes);
@@ -47,6 +55,8 @@ app.use('/api', contractEndRoutes);
 app.use('/api', scheduleRoutes);
 app.use('/api', revisionRequestsRoutes);
 app.use('/api', requestResultsRoutes);
+app.use('/api', auditLogRoutes);
+app.use('/api', undoRoutes);
 app.use('/api/alerts', alertsRoutes);
 app.use('/api/pending', pendingRoutes);
 app.use('/api/users', usersRoutes);

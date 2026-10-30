@@ -117,7 +117,7 @@ function seedProjectDashboards() {
       unbilled_revenue_cr = ?, retention_cr = ?, bank_guarantee_cr = ?
     WHERE id = ? AND contract_start IS NULL`);
   const insertBudget = db.prepare(
-    'INSERT OR IGNORE INTO project_budget (project_id, category, budget_cr, expenditure_cr) VALUES (?,?,?,?)'
+    'INSERT OR IGNORE INTO project_budget (project_id, category, budget_cr, expenditure_cr, sort_order) VALUES (?,?,?,?,?)'
   );
   const hasDeliverables = db.prepare('SELECT 1 FROM project_deliverables WHERE project_id = ? LIMIT 1');
   const insertDeliverable = db.prepare(`
@@ -133,7 +133,7 @@ function seedProjectDashboards() {
 
     BUDGET_CATEGORIES.forEach((category, i) => {
       const budget = BUDGET_SHARE[i] * w / 2.5;
-      insertBudget.run(p.id, category, round2(budget), round2(budget * (0.12 + 0.35 * r(20 + i))));
+      insertBudget.run(p.id, category, round2(budget), round2(budget * (0.12 + 0.35 * r(20 + i))), i);
     });
 
     if (!hasDeliverables.get(p.id)) {

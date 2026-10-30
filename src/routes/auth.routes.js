@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { authenticate, signToken, requireAuth, validatePassword, COOKIE_NAME } = require('../auth');
 const { createLimiter } = require('../rateLimit');
+const { logAudit } = require('../changeLog');
 
 const router = express.Router();
 
@@ -82,6 +83,7 @@ router.post('/password', requireAuth, async (req, res) => {
   passwordByUser.reset(key);
 
   db.prepare('UPDATE users SET password_hash = ? WHERE username = ?').run(await bcrypt.hash(newPassword, 10), key);
+  logAudit(req.user, { area: 'user', action: 'update', subject: key, detail: 'Changed own password' });
   res.clearCookie(COOKIE_NAME);
   res.json({ ok: true });
 });

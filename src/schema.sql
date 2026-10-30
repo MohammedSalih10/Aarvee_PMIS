@@ -31,9 +31,12 @@ CREATE TABLE IF NOT EXISTS projects (
   forecast_completion TEXT,
   eot_upto TEXT,
   pbg_valid_upto TEXT,
+  pbg_prev_valid_upto TEXT,
   unbilled_revenue_cr REAL NOT NULL DEFAULT 0,
   retention_cr REAL NOT NULL DEFAULT 0,
   bank_guarantee_cr REAL NOT NULL DEFAULT 0,
+  -- 'split': separate Office / Field activity tabs; 'combined': one tab showing both.
+  activity_layout TEXT NOT NULL DEFAULT 'split' CHECK(activity_layout IN ('split','combined')),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -86,18 +89,67 @@ CREATE TABLE IF NOT EXISTS project_activities (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Corridor-detail columns (Line, Length, Responsible, ...) shown beside the
+-- corridor name; configurable per project + tab from the Edit grid screen.
+-- Values are free-form text (any mix of text and numbers). corridor_detail_init
+-- marks a project+tab whose defaults were already created (see
+-- corridorDetails.js), so deleting every column doesn't bring them back.
+CREATE TABLE IF NOT EXISTS corridor_detail_columns (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+  name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(project_id, tab, name)
+);
+CREATE TABLE IF NOT EXISTS corridor_detail_values (
+  activity_id INTEGER NOT NULL REFERENCES project_activities(id) ON DELETE CASCADE,
+  column_id INTEGER NOT NULL REFERENCES corridor_detail_columns(id) ON DELETE CASCADE,
+  value TEXT NOT NULL,
+  PRIMARY KEY(activity_id, column_id)
+);
+CREATE TABLE IF NOT EXISTS corridor_detail_init (
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+  PRIMARY KEY(project_id, tab)
+);
+
+-- In a project using the single merged "Office and Field activities" tab, each
+-- activity column is classed as an office or a field activity (default office),
+-- per project, so the grid can be filtered by it. Unused in the split layout.
+CREATE TABLE IF NOT EXISTS project_column_kind (
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  column_id INTEGER NOT NULL REFERENCES activity_columns(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK(kind IN ('office','field')),
+  PRIMARY KEY(project_id, column_id)
+);
+
+-- Per project + tab overrides for the grid's built-in columns (Sl. No, % Complete,
+-- Last updated): a renamed header and/or hidden from the grid. A hidden column is
+-- only not shown -- % Complete is still calculated and used everywhere else.
+CREATE TABLE IF NOT EXISTS corridor_builtin_columns (
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+  key TEXT NOT NULL CHECK(key IN ('slno','pct','updated')),
+  label TEXT,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(project_id, tab, key)
+);
+
 -- Column headers for the Office/Field activity grid, editable via the Edit
--- grid screen (add/rename/delete). Shared across all projects for a tab, like
--- the grid's row set is per-project (project_activities above).
+-- grid screen (add/rename/delete). project_id NULL = the set shared by every
+-- project for a tab; a project that has its own rows for a tab uses only those
+-- (see activityColumns.js). Uniqueness of (project scope, tab, column_key) is an
+-- index created in migrate.js, which also rebuilds older tables to add project_id.
 CREATE TABLE IF NOT EXISTS activity_columns (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tab TEXT NOT NULL CHECK(tab IN ('office','field')),
   column_key TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
   -- Share of the corridor's overall "% Complete" this column contributes;
-  -- all columns' weightage within a tab must sum to 100.
+  -- all columns' weightage within a tab (and scope) must sum to 100.
   weightage REAL NOT NULL DEFAULT 0,
-  UNIQUE(tab, column_key)
+  project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE
 );
 
 -- Per-project, per-column progress estimate (0-100), set by PMO independent
@@ -175,6 +227,8 @@ CREATE TABLE IF NOT EXISTS activity_audit_log (
   from_status TEXT,
   to_status TEXT,
   revision INTEGER, -- Comment Compliance revision recorded by this entry
+  tentative_date TEXT, -- the cell's date / planned finish date as saved by this entry
+  planned_finish_date TEXT,
   remarks TEXT,
   updated_by TEXT NOT NULL,
   updated_at TEXT NOT NULL
@@ -207,6 +261,43 @@ CREATE TABLE IF NOT EXISTS activity_attachments (
   uploaded_by TEXT NOT NULL,
   uploaded_at TEXT NOT NULL
 );
+
+-- Trail of every edit to the activity grid's panels other than a
+-- cell's status update (which has activity_audit_log): corridor row details,
+-- columns / weightages (global per tab, project_id NULL), KD milestones and
+-- per-column % complete. Deliberately no foreign keys so the trail survives
+-- the row / column / project it describes being deleted; corridor is a snapshot.
+CREATE TABLE IF NOT EXISTS activity_change_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER,
+  tab TEXT NOT NULL,
+  panel TEXT NOT NULL CHECK(panel IN ('row','column','weight','milestone','progress')),
+  action TEXT NOT NULL CHECK(action IN ('create','update','delete')),
+  activity_id INTEGER,
+  subject TEXT NOT NULL,
+  detail TEXT,
+  changed_by TEXT NOT NULL,
+  changed_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_activity_change_log_project ON activity_change_log(project_id, tab, id);
+
+-- Admin-only trail of every other edit in the app (activity-grid panels have
+-- activity_change_log above): project record / details, monthly financials and
+-- change requests, contract end, deliverables, project access, schedule,
+-- alerts, pending actions and user accounts. No foreign keys, and the project
+-- code is a snapshot, so entries survive the project / user being deleted.
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  area TEXT NOT NULL,
+  action TEXT NOT NULL,
+  project_id INTEGER,
+  project_code TEXT,
+  subject TEXT NOT NULL,
+  detail TEXT,
+  changed_by TEXT NOT NULL,
+  changed_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_audit_log_project ON audit_log(project_id, id);
 
 CREATE TABLE IF NOT EXISTS financial_entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -306,6 +397,7 @@ CREATE TABLE IF NOT EXISTS project_budget (
   category TEXT NOT NULL,
   budget_cr REAL NOT NULL DEFAULT 0,
   expenditure_cr REAL NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   UNIQUE(project_id, category)
 );
 
@@ -376,4 +468,29 @@ CREATE TABLE IF NOT EXISTS holidays (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   holiday_date TEXT UNIQUE NOT NULL,
   description TEXT
+);
+
+-- Ctrl+Z history (see undo.js / undoTriggers.js). undo_group is one captured
+-- request owned by a user; undo_journal holds the before/after row images that
+-- triggers wrote while it ran; undo_ctx.group_id is the group being captured
+-- right now (NULL = not capturing). Rebuilt empty on every server start.
+CREATE TABLE IF NOT EXISTS undo_group (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT,
+  label TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS undo_journal (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id INTEGER NOT NULL,
+  tbl TEXT NOT NULL,
+  op TEXT NOT NULL CHECK(op IN ('I','U','D')),
+  row_id INTEGER NOT NULL,
+  old_row TEXT,
+  new_row TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_undo_journal_group ON undo_journal(group_id, id);
+CREATE TABLE IF NOT EXISTS undo_ctx (
+  id INTEGER PRIMARY KEY CHECK(id = 1),
+  group_id INTEGER
 );

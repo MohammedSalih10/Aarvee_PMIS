@@ -3,6 +3,7 @@ const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
 const { deriveScheduleStatus } = require('../scheduleConstants');
+const { logAudit, describeChanges } = require('../changeLog');
 
 // Schedule / resource-planning module (from "NR schedule stage 1 -Final.xlsx"):
 // a flat task list per stretch with planned dates + resourcing, separate from
@@ -31,15 +32,25 @@ router.post('/projects/:id/schedule', requireAuth, requireProjectAccess(), requi
     daysRequired || null, plannedStart || null, leadLagDays || 0, plannedFinish || null, predecessor || null, designExpenditureCr || null,
     maxOrder + 1, req.user.username, new Date().toISOString()
   );
+  logAudit(req.user, {
+    projectId: Number(req.params.id), area: 'schedule', action: 'create', subject: `${stretch} — ${workItem}`,
+    detail: [plannedStart && `Planned start: ${plannedStart}`, plannedFinish && `Planned finish: ${plannedFinish}`, resources && `Resources: ${resources}`].filter(Boolean).join('; ') || null,
+  });
   res.status(201).json({ id: info.lastInsertRowid });
 });
 
 router.patch('/projects/:id/schedule/:itemId', requireAuth, requireProjectAccess(), requireAnyRole('pmo'), (req, res) => {
-  const existing = db.prepare('SELECT id FROM schedule_items WHERE id = ? AND project_id = ?').get(req.params.itemId, req.params.id);
+  const existing = db.prepare(
+    'SELECT id, stretch, work_item AS workItem, actual_completion AS actualCompletion, remarks FROM schedule_items WHERE id = ? AND project_id = ?'
+  ).get(req.params.itemId, req.params.id);
   if (!existing) return res.status(404).json({ error: 'Schedule item not found' });
   const { actualCompletion, remarks } = req.body || {};
-  db.prepare('UPDATE schedule_items SET actual_completion = ?, remarks = ?, updated_by = ?, updated_at = ? WHERE id = ?')
-    .run(actualCompletion || null, remarks || '', req.user.username, new Date().toISOString(), existing.id);
+  db.transaction(() => {
+    db.prepare('UPDATE schedule_items SET actual_completion = ?, remarks = ?, updated_by = ?, updated_at = ? WHERE id = ?')
+      .run(actualCompletion || null, remarks || '', req.user.username, new Date().toISOString(), existing.id);
+    const detail = describeChanges(existing, { actualCompletion: actualCompletion || null, remarks: remarks || '' }, { actualCompletion: 'Actual completion', remarks: 'Remarks' });
+    if (detail) logAudit(req.user, { projectId: Number(req.params.id), area: 'schedule', action: 'update', subject: `${existing.stretch} — ${existing.workItem}`, detail });
+  })();
   res.json({ ok: true });
 });
 

@@ -11,7 +11,7 @@
 // "assigned, but restricted to other corridors" in one call.
 const db = require('./db');
 const { deriveCellAlertDetails } = require('./activityConstants');
-const { canAccessCorridor } = require('./scope');
+const { canAccessCorridor, canAccessProject } = require('./scope');
 
 // kind: 'finish' is a Yet to Start cell's planned finish date; every other
 // reason follows the cell's status (its tentative date).
@@ -54,4 +54,59 @@ function getDerivedCellAlerts(user) {
   return { upcoming, overdue };
 }
 
-module.exports = { getDerivedCellAlerts };
+// PBG renewal: once an EOT has been granted past the PBG's valid-up-to date the
+// PBG must be renewed to cover it. It alerts from one calendar month before
+// the PBG's valid-up-to date ('upcoming') and becomes a pending action once
+// that date passes with the PBG still not renewed ('overdue'). Renewing means
+// moving the PBG valid-up-to date to (or beyond) the EOT date, which resolves
+// it -- nothing is stored.
+function oneMonthBeforeISO(dateISO) {
+  const [y, m, d] = dateISO.slice(0, 10).split('-').map(Number);
+  const lastDayPrev = new Date(Date.UTC(y, m - 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m - 2, Math.min(d, lastDayPrev))).toISOString().slice(0, 10);
+}
+
+function classifyPbgRenewal(eotUpto, pbgValidUpto, todayISO = new Date().toISOString().slice(0, 10)) {
+  if (!eotUpto || !pbgValidUpto || eotUpto.slice(0, 10) <= pbgValidUpto.slice(0, 10)) return null;
+  const pbg = pbgValidUpto.slice(0, 10);
+  if (todayISO > pbg) return 'overdue';
+  if (todayISO >= oneMonthBeforeISO(pbg)) return 'upcoming';
+  return null;
+}
+
+function getDerivedPbgAlerts(user) {
+  const rows = db.prepare(`
+    SELECT id AS projectId, code AS projectCode, name AS projectName, eot_upto AS eotUpto, pbg_valid_upto AS pbgValidUpto
+    FROM projects WHERE eot_upto IS NOT NULL AND pbg_valid_upto IS NOT NULL
+  `).all();
+  const upcoming = [], overdue = [];
+  rows.forEach((r) => {
+    const state = classifyPbgRenewal(r.eotUpto, r.pbgValidUpto);
+    if (!state || !canAccessProject(user, r.projectId)) return;
+    const item = {
+      id: `pbg-${r.projectId}`, projectId: r.projectId, projectName: r.projectName, projectCode: r.projectCode,
+      dueDate: r.pbgValidUpto.slice(0, 10), eotUpto: r.eotUpto.slice(0, 10),
+      reason: state === 'overdue'
+        ? `PBG not renewed; EOT granted up to ${r.eotUpto.slice(0, 10)}`
+        : `PBG renewal due; EOT granted up to ${r.eotUpto.slice(0, 10)}`,
+    };
+    (state === 'upcoming' ? upcoming : overdue).push(item);
+  });
+  return { upcoming, overdue };
+}
+
+// Alerts / pending actions list the earliest due date first: `sort_date` (derived items' deadline),
+// else the item's due date. Items with no due date go last, oldest-created first; ties keep the
+// incoming order.
+const dueDay = (i) => (i.sort_date || i.due_date || '').slice(0, 10);
+function sortEarliestDueFirst(items) {
+  return items.map((item, idx) => [item, idx])
+    .sort(([a, i], [b, j]) => {
+      const da = dueDay(a), db = dueDay(b);
+      if (da !== db) return !da ? 1 : !db ? -1 : da.localeCompare(db);
+      return (a.created_at || '').localeCompare(b.created_at || '') || i - j;
+    })
+    .map(([item]) => item);
+}
+
+module.exports = { getDerivedCellAlerts, getDerivedPbgAlerts, classifyPbgRenewal, sortEarliestDueFirst };

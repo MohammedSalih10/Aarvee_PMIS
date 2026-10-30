@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { canSeeAllProjects, assignedProjectIds, requireProjectAccess } = require('../scope');
+const { logAudit, describeChanges } = require('../changeLog');
 
 const router = express.Router();
 
@@ -65,7 +66,8 @@ router.put(
       }
     }
 
-    db.prepare(`
+    const prior = monthRows(req.params.id, fiscalYear)[mi];
+    db.transaction(() => { db.prepare(`
       INSERT INTO financial_entries
         (project_id, fiscal_year, month_index, plan_billing, actual_billing, plan_collection, actual_collection, expenditure,
          forecast_billing, forecast_collection, updated_by, updated_at)
@@ -94,6 +96,14 @@ router.put(
       forecastCollection,
       updatedBy: req.user.username,
     });
+    const next = { planBilling, actualBilling, planCollection, actualCollection, expenditure, forecastBilling, forecastCollection };
+    Object.keys(next).forEach((k) => { next[k] = Number(next[k]) || 0; });
+    const detail = describeChanges(prior, next, {
+      planBilling: 'ABP billing', actualBilling: 'Actual billing', planCollection: 'ABP collection', actualCollection: 'Actual collection',
+      expenditure: 'Expenditure', forecastBilling: 'Forecast billing', forecastCollection: 'Forecast collection',
+    });
+    if (detail) logAudit(req.user, { projectId: Number(req.params.id), area: 'financial', action: 'update', subject: `FY ${fiscalYear} ${MONTHS[mi]} (₹ Cr)`, detail });
+    })();
     res.json({ ok: true });
   }
 );
@@ -162,6 +172,10 @@ router.post(
         (project_id, fiscal_year, month_index, field, old_value, new_value, reason, requested_by)
       VALUES (?,?,?,?,?,?,?,?)
     `).run(req.params.id, fiscalYear, mi, field, current, newValue, String(reason).trim(), req.user.username);
+    logAudit(req.user, {
+      projectId: Number(req.params.id), area: 'financial', action: 'request', subject: `FY ${fiscalYear} ${MONTHS[mi]} — ${FIELD_LABELS[field]}`,
+      detail: `Change requested: ${current} → ${newValue} (₹ Cr) — ${String(reason).trim()}`,
+    });
     res.status(201).json({ id: info.lastInsertRowid });
   }
 );
@@ -202,6 +216,11 @@ function decide(status) {
       db.prepare(
         "UPDATE financial_change_requests SET status = ?, decided_by = ?, decided_at = datetime('now'), decision_note = ? WHERE id = ?"
       ).run(status, req.user.username, note, r.id);
+      logAudit(req.user, {
+        projectId: r.project_id, area: 'financial', action: status === 'approved' ? 'approve' : 'reject',
+        subject: `FY ${r.fiscal_year} ${MONTHS[r.month_index]} — ${FIELD_LABELS[r.field]}`,
+        detail: `Change request (raised by ${r.requested_by}): ${r.old_value} → ${r.new_value} (₹ Cr)${note ? ` — ${note}` : ''}`,
+      });
       return { code: 200 };
     })();
     if (outcome.error) return res.status(outcome.code).json({ error: outcome.error });
@@ -211,13 +230,19 @@ function decide(status) {
 // A still-pending request can be withdrawn (e.g. a typo) by whoever raised it, or by an admin.
 // Pending requests have not touched any figure, so a hard delete loses nothing.
 router.delete('/financial-change-requests/:id', requireAuth, (req, res) => {
-  const r = db.prepare('SELECT id, status, requested_by AS requestedBy FROM financial_change_requests WHERE id = ?').get(req.params.id);
+  const r = db.prepare(
+    'SELECT id, status, requested_by AS requestedBy, project_id AS projectId, fiscal_year AS fiscalYear, month_index AS monthIndex, field FROM financial_change_requests WHERE id = ?'
+  ).get(req.params.id);
   if (!r) return res.status(404).json({ error: 'Request not found' });
   if (req.user.role !== 'admin' && r.requestedBy !== req.user.username) {
     return res.status(403).json({ error: 'Only the person who raised this request (or an admin) can delete it' });
   }
   const info = db.prepare("DELETE FROM financial_change_requests WHERE id = ? AND status = 'pending'").run(r.id);
   if (!info.changes) return res.status(409).json({ error: `Request was already ${r.status} and can no longer be deleted` });
+  logAudit(req.user, {
+    projectId: r.projectId, area: 'financial', action: 'withdraw', subject: `FY ${r.fiscalYear} ${MONTHS[r.monthIndex]} — ${FIELD_LABELS[r.field]}`,
+    detail: `Pending change request (raised by ${r.requestedBy}) withdrawn`,
+  });
   res.json({ ok: true });
 });
 router.post('/financial-change-requests/:id/approve', requireAuth, requireApprover, decide('approved'));
@@ -231,7 +256,7 @@ router.get('/mis', requireAuth, (req, res) => {
   const cutoff = Math.min(11, Math.max(0, quarter * 3 - 1));
 
   let projects = db.prepare(
-    'SELECT id, code, name, type, wo_value_cr AS woValueCr FROM projects ORDER BY code'
+    'SELECT id, code, name, type, wo_value_cr AS woValueCr FROM projects ORDER BY created_at DESC, id DESC'
   ).all();
   if (type) projects = projects.filter((p) => p.type === type);
   if (!canSeeAllProjects(req.user)) {

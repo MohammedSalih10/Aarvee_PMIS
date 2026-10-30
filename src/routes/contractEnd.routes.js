@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
+const { logAudit } = require('../changeLog');
 
 // Contractual end date change requests. The date is frozen once set (enforced in
 // PATCH /projects/:id/details); a pmo raises a request here and admin/mgmt decide it.
@@ -54,6 +55,10 @@ router.post(
       INSERT INTO contract_end_change_requests (project_id, old_value, new_value, reason, requested_by)
       VALUES (?,?,?,?,?)
     `).run(req.params.id, project.value, newValue, String(reason).trim(), req.user.username);
+    logAudit(req.user, {
+      projectId: Number(req.params.id), area: 'contract_end', action: 'request', subject: 'Contractual end date',
+      detail: `Change requested: ${project.value} → ${newValue} — ${String(reason).trim()}`,
+    });
     res.status(201).json({ id: info.lastInsertRowid });
   }
 );
@@ -76,13 +81,14 @@ router.get('/contract-end-change-requests', requireAuth, (req, res) => {
 
 // A still-pending request can be withdrawn by whoever raised it, or by an admin.
 router.delete('/contract-end-change-requests/:id', requireAuth, (req, res) => {
-  const r = db.prepare('SELECT id, status, requested_by AS requestedBy FROM contract_end_change_requests WHERE id = ?').get(req.params.id);
+  const r = db.prepare('SELECT id, status, requested_by AS requestedBy, project_id AS projectId FROM contract_end_change_requests WHERE id = ?').get(req.params.id);
   if (!r) return res.status(404).json({ error: 'Request not found' });
   if (req.user.role !== 'admin' && r.requestedBy !== req.user.username) {
     return res.status(403).json({ error: 'Only the person who raised this request (or an admin) can delete it' });
   }
   const info = db.prepare("DELETE FROM contract_end_change_requests WHERE id = ? AND status = 'pending'").run(r.id);
   if (!info.changes) return res.status(409).json({ error: `Request was already ${r.status} and can no longer be deleted` });
+  logAudit(req.user, { projectId: r.projectId, area: 'contract_end', action: 'withdraw', subject: 'Contractual end date', detail: `Pending change request (raised by ${r.requestedBy}) withdrawn` });
   res.json({ ok: true });
 });
 
@@ -99,6 +105,10 @@ function decide(status) {
       db.prepare(
         "UPDATE contract_end_change_requests SET status = ?, decided_by = ?, decided_at = datetime('now'), decision_note = ? WHERE id = ?"
       ).run(status, req.user.username, note, r.id);
+      logAudit(req.user, {
+        projectId: r.project_id, area: 'contract_end', action: status === 'approved' ? 'approve' : 'reject', subject: 'Contractual end date',
+        detail: `Change request (raised by ${r.requested_by}): ${r.old_value} → ${r.new_value}${note ? ` — ${note}` : ''}`,
+      });
       return { code: 200 };
     })();
     if (outcome.error) return res.status(outcome.code).json({ error: outcome.error });

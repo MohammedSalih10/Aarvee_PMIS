@@ -102,7 +102,7 @@ function seedActivityColumns(db) {
 // sum-to-100 rule holds immediately); leave any tab a user already weighted.
 function backfillColumnWeights(db) {
   ['office', 'field'].forEach((tab) => {
-    const rows = db.prepare('SELECT id, weightage FROM activity_columns WHERE tab = ? ORDER BY sort_order, id').all(tab);
+    const rows = db.prepare('SELECT id, weightage FROM activity_columns WHERE tab = ? AND project_id IS NULL ORDER BY sort_order, id').all(tab);
     if (!rows.length || rows.some((r) => r.weightage !== 0)) return;
     const even = Math.floor((100 / rows.length) * 100) / 100;
     const last = Math.round((100 - even * (rows.length - 1)) * 100) / 100;
@@ -147,14 +147,17 @@ function dropProjectDivision(db) {
   if (cols.includes('division')) db.exec('ALTER TABLE projects DROP COLUMN division');
 }
 
+// Only for projects on the shared column set: a project with its own columns
+// (activity_columns.project_id) names them itself, and this runs on every start.
 function renameLegacyColumnKeys(db) {
   for (const [tab, renames] of Object.entries(LEGACY_COLUMN_RENAMES)) {
-    const scope = 'activity_id IN (SELECT id FROM project_activities WHERE tab = ?)';
+    const scope = `activity_id IN (SELECT id FROM project_activities WHERE tab = ?
+      AND project_id NOT IN (SELECT project_id FROM activity_columns WHERE tab = ? AND project_id IS NOT NULL))`;
     const cells = db.prepare(`UPDATE OR IGNORE activity_cells SET column_key = ? WHERE column_key = ? AND ${scope}`);
     const audit = db.prepare(`UPDATE activity_audit_log SET column_key = ? WHERE column_key = ? AND ${scope}`);
     for (const [from, to] of Object.entries(renames)) {
-      cells.run(to, from, tab);
-      audit.run(to, from, tab);
+      cells.run(to, from, tab, tab);
+      audit.run(to, from, tab, tab);
     }
   }
 }
@@ -187,13 +190,48 @@ function allowCommentComplianceStatus(db) {
   `);
 }
 
+// activity_columns gained project_id (NULL = shared set, else that project's own
+// set) and its UNIQUE(tab, column_key) had to become per scope, which SQLite
+// can't alter in place -- so rebuild. foreign_keys must be OFF for the rebuild
+// (DROP TABLE would otherwise cascade-delete project_column_progress and
+// project_milestone_columns rows), and the pragma is a no-op inside a
+// transaction, so it is toggled around it.
+function scopeActivityColumnsToProject(db) {
+  const cols = db.prepare('PRAGMA table_info(activity_columns)').all().map((c) => c.name);
+  if (!cols.includes('project_id')) {
+    db.pragma('foreign_keys = OFF');
+    try {
+      db.transaction(() => {
+        db.exec(`
+          CREATE TABLE activity_columns_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tab TEXT NOT NULL CHECK(tab IN ('office','field')),
+            column_key TEXT NOT NULL,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            weightage REAL NOT NULL DEFAULT 0,
+            project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE
+          );
+          INSERT INTO activity_columns_new (id, tab, column_key, sort_order, weightage)
+            SELECT id, tab, column_key, sort_order, weightage FROM activity_columns;
+          DROP TABLE activity_columns;
+          ALTER TABLE activity_columns_new RENAME TO activity_columns;
+        `);
+      })();
+    } finally {
+      db.pragma('foreign_keys = ON');
+    }
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_activity_columns_scope ON activity_columns(COALESCE(project_id, 0), tab, column_key)');
+}
+
 function migrate(db) {
   [
     ['contract_start', 'TEXT'], ['contract_end', 'TEXT'], ['forecast_completion', 'TEXT'],
-    ['eot_upto', 'TEXT'], ['pbg_valid_upto', 'TEXT'],
+    ['eot_upto', 'TEXT'], ['pbg_valid_upto', 'TEXT'], ['pbg_prev_valid_upto', 'TEXT'],
     ['unbilled_revenue_cr', 'REAL NOT NULL DEFAULT 0'], ['retention_cr', 'REAL NOT NULL DEFAULT 0'],
     ['bank_guarantee_cr', 'REAL NOT NULL DEFAULT 0'],
   ].forEach(([col, def]) => addColumnIfMissing(db, 'projects', col, def));
+  addColumnIfMissing(db, 'projects', 'activity_layout', "TEXT NOT NULL DEFAULT 'split' CHECK(activity_layout IN ('split','combined'))");
   addColumnIfMissing(db, 'financial_entries', 'forecast_billing', 'REAL NOT NULL DEFAULT 0');
   addColumnIfMissing(db, 'financial_entries', 'forecast_collection', 'REAL NOT NULL DEFAULT 0');
   addColumnIfMissing(db, 'project_activities', 'responsible_person', 'TEXT');
@@ -201,6 +239,11 @@ function migrate(db) {
   addColumnIfMissing(db, 'project_assignments', 'project_role', 'TEXT');
   addColumnIfMissing(db, 'activity_columns', 'weightage', 'REAL NOT NULL DEFAULT 0');
   addColumnIfMissing(db, 'alerts', 'due_date', 'TEXT');
+  // Budget categories are per-project and editable; the standard set is copied into a
+  // project the first time its dashboard is loaded (budget_seeded = 0 -> 1).
+  addColumnIfMissing(db, 'project_budget', 'sort_order', 'INTEGER NOT NULL DEFAULT 0');
+  addColumnIfMissing(db, 'projects', 'budget_seeded', 'INTEGER NOT NULL DEFAULT 0');
+  scopeActivityColumnsToProject(db);
 
   db.transaction(() => {
     widenUserRoleCheck(db);
@@ -218,6 +261,8 @@ function migrate(db) {
   addColumnIfMissing(db, 'activity_cells', 'planned_finish_date', 'TEXT');
   addColumnIfMissing(db, 'activity_cells', 'revision', 'INTEGER');
   addColumnIfMissing(db, 'activity_audit_log', 'revision', 'INTEGER');
+  addColumnIfMissing(db, 'activity_audit_log', 'tentative_date', 'TEXT');
+  addColumnIfMissing(db, 'activity_audit_log', 'planned_finish_date', 'TEXT');
   db.transaction(() => allowCommentComplianceStatus(db))();
   // Every request (whatever its outcome) gets a 'CCQ' "requested" entry at the
   // time it was raised, same match rule as the rejections below.

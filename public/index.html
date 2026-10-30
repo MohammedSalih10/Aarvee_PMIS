@@ -135,7 +135,7 @@ select option{background:var(--surface);color:var(--ink)}
 .auth-form{width:100%;max-width:400px;display:flex;flex-direction:column;gap:28px}
 .auth-mobile-logo-link{display:none;width:190px}
 .auth-mobile-logo{display:block;width:100%;height:auto}
-.auth-head h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.5px}
+.auth-head h1{margin:0;font-size:30px;font-weight:600;letter-spacing:-.5px}
 .auth-head p{margin:8px 0 0;font-size:14.5px;line-height:22px;color:var(--muted)}
 .fields{display:flex;flex-direction:column;gap:18px}
 .field{display:flex;flex-direction:column;gap:8px}
@@ -314,13 +314,16 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 .chart-card svg,.cc svg{display:block;width:100%;height:auto}
 .chart-card text,.cc text{fill:var(--subtle);font-size:12px;font-family:inherit}
 .tip{position:absolute;z-index:5;display:none;padding:8px 10px;border-radius:8px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.55;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-pop)}
-.cell-tip{position:fixed;z-index:70;display:none;max-width:260px;padding:9px 12px;border-radius:9px;background:var(--ink);color:var(--surface);font-size:14px;line-height:1.55;pointer-events:none;box-shadow:var(--shadow-pop)}
+.cell-tip{position:fixed;z-index:80;display:none;max-width:260px;padding:9px 12px;border-radius:9px;background:var(--ink);color:var(--surface);font-size:14px;line-height:1.55;pointer-events:none;box-shadow:var(--shadow-pop)}
 .cell-tip.on{display:block}
 .cell-tip b{display:block;margin-bottom:2px}
 /* Behind-schedule vs approaching-deadline popups get their own shade,
    matching the warning/danger ring already used on the grid cell itself. */
 .cell-tip.sev-overdue{background:#F8D7DA;color:#842029}
-.cell-tip.sev-upcoming{background:#FFF3CD;color:#664D03}
+.cell-tip.sev-upcoming,.cell-tip.sev-pending{background:#FFF3CD;color:#664D03}
+.cell-tip.sev-info{background:#CFE2FF;color:#052C65}
+.cell-tip.sev-changed{background:#D1E7DD;color:#0A3622}
+.kv[data-tip-title],input[data-tip-title]{cursor:help}
 .side{display:flex;flex-direction:column;gap:16px;min-width:0}
 .panel{display:flex;flex-direction:column;gap:14px;padding:20px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -330,11 +333,11 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 .panel-head h3.pop{cursor:pointer;border-radius:6px}
 .panel-head h3.pop:hover{color:var(--primary)}
 .panel-head h3.pop:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
-.plist.plist-full{max-height:none;overflow:visible}
+.plist.plist-full{min-height:0;max-height:none;overflow:visible}
 #pendingCard .panel-head h3 .pending-icons [data-ic],#pdPendingCard .panel-head h3 .pending-icons [data-ic]{color:var(--ink)}
 .pending-icons{position:relative;display:inline-flex;align-items:center;color:var(--ink)}
 .pending-mark{position:absolute;right:-5px;bottom:-3px;display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;border:1.5px solid var(--surface);border-radius:50%;background:var(--danger);color:#fff;font-size:9px;font-weight:800;line-height:1}
-.plist{display:flex;flex-direction:column;gap:8px;max-height:280px;margin:0;padding:0;overflow:auto;list-style:none}
+.plist{display:flex;flex-direction:column;gap:8px;min-height:280px;max-height:280px;margin:0;padding:0;overflow:auto;list-style:none}
 .plist li{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--head);font-size:14.5px}
 .plist .li-txt{flex:1;min-width:0;line-height:1.4}
 .plist small{display:block;margin-top:2px;color:var(--muted);font-size:13px}
@@ -374,6 +377,8 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 .kvs > :nth-last-child(-n+2){border-bottom:0}
 .kv.req-pending{color:var(--amber-ink)}
 .kv.req-changed{color:var(--success)}
+.kv.pbg-due{color:var(--amber-ink)}
+.kv.pbg-overdue{color:var(--danger)}
 .bud-wrap{display:flex;align-items:center;gap:12px}
 .bud-legend{display:flex;flex:1;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
 .bud-legend i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:3px;vertical-align:-1px}
@@ -398,6 +403,12 @@ table.grid tr.tot td{background:var(--head);font-weight:700;color:var(--ink)}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 /* Activity matrix legend chips sit at the right edge of the card header. */
 #statusChips{margin-left:auto;justify-content:flex-end}
+.kind-filter{position:relative}
+.kind-filter .btn-o.on{border-color:var(--primary);color:var(--primary)}
+.kind-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:20;min-width:190px;padding:10px 14px;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(15,34,51,.18)}
+.kind-menu.on{display:flex}
+.kind-menu label{display:flex;align-items:center;gap:8px;font-size:13.5px;white-space:nowrap;cursor:pointer}
+table.agrid th small.col-kind{display:block;font-size:11px;font-weight:500;opacity:.75}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);font-size:14px;font-weight:600}
 .chip.on{box-shadow:0 0 0 2px var(--ink)}
 /* Bounded height + its own scrollbars, so the horizontal scrollbar sits right
@@ -498,6 +509,12 @@ table.sgrid td.n{min-width:160px;text-align:left;white-space:normal}
 .sig input{width:16px;height:16px;accent-color:var(--primary)}
 .histrow{padding:10px 0;border-bottom:1px solid var(--border);font-size:14.5px}
 .histrow small{display:block;margin-top:2px;color:var(--muted)}
+.hist-who{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:3px;font-size:14.5px}
+.hist-by{display:inline-flex;align-items:center;gap:6px}
+.hist-by [data-ic],.hist-by svg{color:var(--primary)}
+.hist-when{color:var(--muted);font-size:13px}
+.cl-btn,h3 .au-btn{margin-left:8px;padding:2px 8px;font-size:12px;font-weight:500}
+.cell-hist h4 .cl-btn{margin-left:10px}
 .eg-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
 .eg-row>span:first-child{flex:1}
 .eg-row-form{flex-direction:column;align-items:stretch}
@@ -520,6 +537,7 @@ table.mtbl{width:100%;margin-top:6px;border-collapse:collapse;font-size:14.5px}
 table.mtbl th{padding:6px 4px;color:var(--muted);font-size:12.5px;font-weight:600;text-align:left}
 table.mtbl td{padding:3px 4px}
 table.mtbl input{width:84px;height:32px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);font-size:14.5px}
+table.mtbl input.bud-name{width:100%;min-width:220px}
 table.mtbl input:disabled{background:var(--head);color:var(--muted)}
 table.mtbl input.frozen,.mf input.frozen{background:var(--head);color:var(--muted);cursor:pointer;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:12px}
 table.mtbl input.frozen.req-pending,.mf input.frozen.req-pending{background-color:var(--warning-soft);color:var(--amber-ink);border-color:var(--warning)}
@@ -615,6 +633,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
       <button type="button" class="um-btn" id="umBtn" aria-haspopup="menu"><span class="avatar" id="avatar">&ndash;</span><span class="um-text"><strong id="whoami">&mdash;</strong></span><span data-ic="chevron-down"></span></button>
       <div class="um-pop" id="umPop" role="menu" hidden>
         <button type="button" id="manageUsersBtn" style="display:none"><span data-ic="users"></span>Manage users</button>
+        <button type="button" class="au-btn" data-au-areas="" data-au-filters="1" data-au-title="Audit log" style="display:none"><span data-ic="clock"></span>Audit log</button>
         <button type="button" id="changePwBtn"><span data-ic="key"></span>Change password</button>
         <button type="button" id="signout"><span data-ic="log-out"></span>Sign out</button>
       </div>
@@ -633,6 +652,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
         <label class="sel-btn" title="Fiscal year"><span data-ic="calendar"></span><select id="fFY" aria-label="Fiscal year"></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
         <label class="sel-btn" title="Figures up to quarter"><select id="fQ" aria-label="Quarter"><option value="1">Up to Q1</option><option value="2">Up to Q2</option><option value="3">Up to Q3</option><option value="4" selected>Up to Q4</option></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
         <button class="btn-o" id="exportBtn" type="button"><span data-ic="download"></span>Export</button>
+        <button class="btn-o au-btn" type="button" data-au-areas="project" data-au-title="Projects added, edited or deleted" style="display:none"><span data-ic="clock"></span>History</button>
         <button class="btn-p" id="addProjectBtn" type="button" style="display:none"><span data-ic="plus"></span>Add project</button>
       </div>
     </div>
@@ -707,8 +727,10 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
       </div>
       <div class="ph-actions">
         <label class="sel-btn" title="Fiscal year"><span data-ic="calendar"></span><select id="pdFY" aria-label="Fiscal year"></select><span class="chev-dn" data-ic="chevron-down" data-s="14"></span></label>
+        <button class="btn-o au-btn" type="button" data-au-areas="" data-au-scope="project" data-au-title="Project history" style="display:none"><span data-ic="clock"></span>History</button>
         <button class="btn-o" id="pdAccess" type="button" style="display:none"><span data-ic="users"></span>Manage access</button>
         <button class="btn-o" id="pdEdit" type="button" style="display:none"><span data-ic="pencil"></span>Edit details</button>
+        <button class="btn-o" id="pdDelete" type="button" style="display:none;color:var(--danger)"><span data-ic="trash"></span>Delete project</button>
       </div>
     </div>
     <div class="seg ptabs">
@@ -720,7 +742,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
     <div class="pd-top">
       <div class="side">
         <div class="card panel" id="pdAlertsCard">
-          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span data-ic="triangle-alert" data-s="18"></span>Alerts</h3><span class="ph-right"><button type="button" class="iconbtn" id="pdAlertToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdAlertCount">0</span></span></div>
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span data-ic="triangle-alert" data-s="18"></span>Alerts</h3><span class="ph-right"><button type="button" class="iconbtn au-btn" data-au-areas="alert" data-au-scope="project" data-au-title="Alerts" style="display:none"><span data-ic="clock" data-s="14"></span>History</button><button type="button" class="iconbtn" id="pdAlertToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdAlertCount">0</span></span></div>
           <ul class="plist" id="pdAlertsList"></ul>
           <div class="addrow" id="pdAlertAdd" style="display:none">
             <input id="pdAlertMsg" placeholder="New alert message...">
@@ -729,7 +751,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
           </div>
         </div>
         <div class="card panel" id="pdPendingCard">
-          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span class="pending-icons"><span data-ic="clock" data-s="18"></span><span class="pending-mark" aria-hidden="true">!</span></span>Pending actions</h3><span class="ph-right"><button type="button" class="iconbtn" id="pdPendToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdPendCount">0</span></span></div>
+          <div class="panel-head"><h3 class="pop" tabindex="0" role="button" title="View all"><span class="pending-icons"><span data-ic="clock" data-s="18"></span><span class="pending-mark" aria-hidden="true">!</span></span>Pending actions</h3><span class="ph-right"><button type="button" class="iconbtn au-btn" data-au-areas="pending" data-au-scope="project" data-au-title="Pending actions" style="display:none"><span data-ic="clock" data-s="14"></span>History</button><button type="button" class="iconbtn" id="pdPendToggle" aria-expanded="false" style="display:none"><span data-ic="plus" data-s="14"></span>Add</button><span class="count" id="pdPendCount">0</span></span></div>
           <ul class="plist" id="pdPendList"></ul>
           <div class="addrow" id="pdPendAdd" style="display:none">
             <input id="pdPendTitle" placeholder="New pending action...">
@@ -751,8 +773,8 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
     </div>
     <div class="pd-tbar"><label for="pdTgtMonth">Targets for month</label><input type="month" id="pdTgtMonth"></div>
     <div class="pd-tables">
-      <div class="card"><div class="card-head"><div class="ch-title"><h3>Billing targets</h3></div><button class="btn-o sm" id="pdAddB" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlB"></table></div></div>
-      <div class="card"><div class="card-head"><div class="ch-title"><h3>Collection targets</h3></div><button class="btn-o sm" id="pdAddC" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlC"></table></div></div>
+      <div class="card"><div class="card-head"><div class="ch-title"><h3>Billing targets</h3></div><button class="btn-o sm au-btn" type="button" data-au-areas="deliverable" data-au-scope="project" data-au-title="Billing &amp; collection targets" style="display:none"><span data-ic="clock" data-s="14"></span>History</button><button class="btn-o sm" id="pdAddB" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlB"></table></div></div>
+      <div class="card"><div class="card-head"><div class="ch-title"><h3>Collection targets</h3></div><button class="btn-o sm au-btn" type="button" data-au-areas="deliverable" data-au-scope="project" data-au-title="Billing &amp; collection targets" style="display:none"><span data-ic="clock" data-s="14"></span>History</button><button class="btn-o sm" id="pdAddC" type="button" style="display:none"><span data-ic="plus" data-s="14"></span>Add target</button></div><div class="table-wrap"><table class="dl" id="pdDlC"></table></div></div>
     </div>
   </div>
 </div>
@@ -767,6 +789,9 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
       </div>
       <div class="ph-actions">
         <button class="btn-o" id="addRowBtn" type="button" style="display:none"><span data-ic="plus"></span>Add corridor</button>
+        <button class="btn-o" id="importGridBtn" type="button" style="display:none"><span data-ic="upload"></span>Import Excel</button>
+        <button class="btn-o" id="exportGridBtn" type="button"><span data-ic="download"></span>Export Excel</button>
+        <button class="btn-o" id="actChangeLogBtn" type="button" style="display:none"><span data-ic="clock"></span>Change history</button>
         <button class="btn-p" id="tabEdit" type="button" style="display:none"><span data-ic="pencil"></span>Edit</button>
       </div>
     </div>
@@ -778,6 +803,14 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
     </div>
     <section class="card">
       <div class="card-head">
+        <!-- Merged "Office and Field activities" projects only: show Office and/or Field columns. -->
+        <div class="kind-filter" id="kindFilter" style="display:none">
+          <button class="btn-o sm" id="kindFilterBtn" type="button" title="Filter Office / Field activities"><span data-ic="filter" data-s="14"></span><span id="kindFilterLbl">All activities</span></button>
+          <div class="kind-menu" id="kindFilterMenu">
+            <label><input type="checkbox" data-kind="office" checked> Office activities</label>
+            <label><input type="checkbox" data-kind="field" checked> Field activities</label>
+          </div>
+        </div>
         <div class="chips" id="statusChips"></div>
       </div>
       <div class="table-wrap agrid-wrap"><table class="agrid" id="agrid"></table></div>
@@ -791,7 +824,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
       <div class="ph-title">
         <div class="crumbs"><button type="button" class="crumb-home">Overview</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="egProjBack">Project</button><span data-ic="chevron-right" data-s="12"></span><button type="button" id="egActBack">Activities</button><span data-ic="chevron-right" data-s="12"></span><span class="cur">Edit grid</span></div>
         <h1 class="title" id="egTitle">&mdash;</h1>
-        <p class="ph-sub">Add, rename, or remove columns and corridor rows. Column changes apply across every project; corridor rows apply to this project only.</p>
+        <p class="ph-sub">Add, rename, or remove columns and corridor rows. Column changes apply across every project that uses the shared columns (a project with its own column set is changed on its own); corridor rows apply to this project only.</p>
       </div>
       <div class="ph-actions">
         <button class="btn-p" id="egSaveAll" type="button">Save changes</button>
@@ -799,6 +832,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
       </div>
     </div>
     <section class="card" style="padding:20px">
+      <div id="egLayout"></div>
       <div id="egContent"></div>
     </section>
   </div>
@@ -813,6 +847,7 @@ table.mtbl input.req-changed,.mf input.req-changed{background-color:var(--succes
         <p class="ph-sub">Work plan per stretch from the project's schedule file &mdash; planned dates and resourcing. Status is derived from today's date vs. the plan.</p>
       </div>
       <div class="ph-actions">
+        <button class="btn-o au-btn" type="button" data-au-areas="schedule" data-au-scope="project" data-au-title="Schedule" style="display:none"><span data-ic="clock"></span>History</button>
         <button class="btn-o" id="schRatesBtn" type="button" style="display:none"><span data-ic="rupee"></span>Resource rates</button>
         <button class="btn-o" id="schHolidaysBtn" type="button"><span data-ic="calendar"></span>Holiday calendar</button>
       </div>
@@ -852,6 +887,7 @@ const ICONS = {
   'chevron-down': '<path d="m6 9 6 6 6-6"/>',
   'chevron-right': '<path d="m9 18 6-6-6-6"/>',  calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
   download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
   briefcase: '<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   receipt: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/>',
   wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
@@ -869,6 +905,7 @@ const ICONS = {
   trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
   clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
   building: '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/>',
+  filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
   'hard-hat': '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6M14 6a6 6 0 0 1 6 6v3"/>',
 };
 const ic = (n, s = 16) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
@@ -882,13 +919,19 @@ const canManageAccess = () => state.user && (state.user.role === 'pmo' || state.
 // Granting a Lead/Coordinator per-corridor edit access is admin-only -- pmo
 // keeps every other assignment-management capability, but not this one.
 const canGrantEditAccess = () => state.user && state.user.role === 'admin';
+const canImportGrid = () => state.user && state.user.role === 'admin';
+// Who-changed-what history for the activity grid's editable panels: every signed-in user
+// (the server scopes it to the corridors they may see).
+const canViewChangeLog = () => !!state.user && state.user.role === 'admin';
 const state = {
   user: null, projects: [], fiscalYear: null, quarter: 4, type: '',
   meta: null, search: '', tableMode: 'summary', chartMode: 'monthly',
   selP: null, // MIS row selected to filter the charts
   hidden: { ch1: new Set(), ch2: new Set(), pdCB: new Set(), pdCC: new Set() }, // series toggled off per chart
   project: { id: null, code: null, name: null, fiscalYear: null, data: null, months: null },
-  activity: { projectId: null, code: null, name: null, tab: 'office', filter: 'all', rows: [], columnProgress: {} },
+  // combined: the project uses a single "Office and Field activities" tab (stored as the 'office' tab).
+  // columnKinds: column id -> 'office'|'field' (merged projects); kindFilter: which of those the grid shows.
+  activity: { projectId: null, code: null, name: null, tab: 'office', filter: 'all', rows: [], columnProgress: {}, combined: false, columnKinds: {}, kindFilter: { office: true, field: true } },
 };
 const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
 
@@ -1026,6 +1069,7 @@ async function enter(user){
   $('footLegend').textContent = canEdit() ? 'Edit monthly ABP / actual figures' : 'View monthly ABP / actual figures';
   $('addProjectBtn').style.display = (user.role === 'pmo' || user.role === 'admin') ? '' : 'none';
   $('manageUsersBtn').style.display = (user.role === 'admin') ? '' : 'none';
+  document.querySelectorAll('.au-btn').forEach((b) => { b.style.display = user.role === 'admin' ? '' : 'none'; });
   $('exportBtn').style.display = canEdit() ? '' : 'none';
   $('reqBtn').style.display = (canEdit() || user.role === 'mgmt') ? '' : 'none';
   $('reqDot').hidden = true;
@@ -1109,6 +1153,9 @@ const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov',
 // ISO YYYY-MM-DD -> 19-Jan-2025 (project dates) / 19-01-2025 (cell & due dates)
 function fmtDate(iso){ if (!iso) return '&mdash;'; const [y,m,d] = iso.split('-'); return `${d}-${MON3[+m-1]}-${y}`; }
 function fmtDMY(iso){ if (!iso) return ''; const [y,m,d] = iso.slice(0,10).split('-'); return `${d}-${m}-${y}`; }
+// Hover-popup attributes for the shared #cellTip (see its handler near the activity grid). `lines` are
+// 'Label|Value' rows, or a plain string for a note under them. sev: changed | pending | upcoming | overdue.
+const tipAttrs = (sev, title, lines) => ` data-tip-sev="${sev}" data-tip-title="${esc(title)}" data-tip-body="${esc(lines.join('\n'))}"`;
 // Mirrors activityConstants.js's addWorkingDaysISO -- used only to preview
 // Submitted's suggested "Expected approval date" before the first save (the
 // server computes the authoritative value the same way).
@@ -1396,6 +1443,10 @@ $('addProjectBtn').onclick = () => {
     <div class="mf"><label>Work order value (&#8377; Cr)</label><input id="npWo" type="number" step="0.01"></div>
     <div class="mf"><label>Responsible person</label><input id="npResp" type="text"></div>
     <div class="mf"><label>Stage</label><input id="npStage" type="text"></div>
+    <div class="mf"><label>Activity layout</label><select id="npLayout">
+      <option value="split">Separate Office and Field activities tabs</option>
+      <option value="combined">Single tab: Office and Field activities (starts with the standard merged columns)</option>
+    </select></div>
     <div class="actions"><button type="button" id="npCancel">Cancel</button><button type="button" class="primary" id="npSave">Save</button></div>`);
   $('npCancel').onclick = closeModal;
   $('npSave').onclick = async () => {
@@ -1403,6 +1454,7 @@ $('addProjectBtn').onclick = () => {
       await api('/projects', { method: 'POST', body: {
         code: Number($('npCode').value), name: $('npName').value.trim(), type: $('npType').value, woValueCr: Number($('npWo').value) || 0,
         responsiblePerson: $('npResp').value.trim() || null, stage: $('npStage').value.trim() || null,
+        activityLayout: $('npLayout').value,
       }});
       closeModal(); toast('Project added'); loadAll();
     } catch (err) { toast(err.message, true); }
@@ -1416,6 +1468,63 @@ const FROZEN_LABEL = { planBilling: 'ABP billing', planCollection: 'ABP collecti
 function openModal2(html){ $('modal2Box').innerHTML = html; $('modal2').classList.add('on'); }
 function closeModal2(){ $('modal2').classList.remove('on'); }
 $('modal2').addEventListener('click', (e) => { if (e.target.id === 'modal2') closeModal2(); });
+
+/* ---------- Audit log (admin only) ----------
+   "Who changed what" for everything outside a cell's status update, shown in
+   the second modal so it opens over whatever modal or screen the admin is on.
+   Any element with data-au-areas opens it: data-au-areas is a comma-separated
+   list of areas (empty = all), data-au-project a project id, or
+   data-au-scope="project" for the project currently open. Static buttons start
+   hidden and are revealed for admin at sign-in (showApp). */
+const canViewAuditLog = () => !!state.user && state.user.role === 'admin';
+// Shared by every history list: who made the change comes first and in bold
+// (full name plus login), then when.
+function fmtWhen(ts){
+  const d = new Date(ts);
+  return Number.isNaN(d.getTime()) ? String(ts || '') : d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function whoHtml(by, name, at){
+  const who = name && name !== by ? `<b>${esc(name)}</b> <span class="muted">(${esc(by)})</span>` : `<b>${esc(by)}</b>`;
+  return `<div class="hist-who"><span class="hist-by">${ic('user-round', 14)}${who}</span><span class="hist-when">${esc(fmtWhen(at))}</span></div>`;
+}
+const AUDIT_AREA_LABEL = {
+  project: 'Project', details: 'Project details', financial: 'Billing & collection', contract_end: 'Contract end date',
+  deliverable: 'Billing / collection targets', access: 'Project access', schedule: 'Schedule', alert: 'Alert',
+  pending: 'Pending action', user: 'User account', activity: 'Activity grid', undo: 'Undo',
+};
+const AUDIT_ACTION_LABEL = { create: 'Added', update: 'Updated', delete: 'Deleted', request: 'Change requested', approve: 'Approved', reject: 'Rejected', withdraw: 'Withdrawn', undo: 'Reverted' };
+function auditBtn(areas, { projectId = '', title = '', label = 'History' } = {}){
+  if (!canViewAuditLog()) return '';
+  return `<button type="button" class="iconbtn au-btn" data-au-areas="${areas}" data-au-project="${projectId}" data-au-title="${esc(title)}">${ic('clock', 13)}${label}</button>`;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-au-areas]');
+  if (!b) return;
+  const projectId = b.dataset.auScope === 'project' ? state.project.id : (b.dataset.auProject || '');
+  openAuditLog({ title: b.dataset.auTitle || '', areas: b.dataset.auAreas, projectId, filters: b.dataset.auFilters === '1' });
+});
+async function openAuditLog(o){
+  const qs = new URLSearchParams();
+  if (o.areas) qs.set('area', o.areas);
+  if (o.projectId) qs.set('projectId', o.projectId);
+  let history;
+  try { ({ history } = await api(`/audit-log?${qs}`)); } catch (err) { toast(err.message, true); return; }
+  const project = o.projectId ? state.projects.find((p) => p.id === +o.projectId) : null;
+  const ctx = [esc(o.title), project ? `${esc(project.name)} (${esc(project.code)})` : (o.title ? '' : 'All projects')].filter(Boolean).join(' &middot; ');
+  const mixed = !o.areas || o.areas.includes(',');
+  const filters = o.filters ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px">
+      <select id="auArea" aria-label="Area"><option value="">All areas</option>${Object.entries(AUDIT_AREA_LABEL).map(([k, v]) => `<option value="${k}" ${o.areas === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>
+      <select id="auProject" aria-label="Project"><option value="">All projects</option>${state.projects.map((p) => `<option value="${p.id}" ${+o.projectId === p.id ? 'selected' : ''}>${esc(p.code)} &mdash; ${esc(p.name)}</option>`).join('')}</select>
+    </div>` : '';
+  const body = history.length ? history.map((h) => `<div class="histrow">${whoHtml(h.changedBy, h.changedByName, h.changedAt)}<div><b>${mixed ? esc(AUDIT_AREA_LABEL[h.area] || h.area) + ' &mdash; ' : ''}${!o.projectId && h.projectCode ? esc(h.projectCode) + ' &middot; ' : ''}${esc(h.subject)}</b>: ${esc(AUDIT_ACTION_LABEL[h.action] || h.action)}${h.detail ? ' &middot; ' + esc(h.detail) : ''}</div></div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+  openModal2(`<h3>Change history</h3>${ctx ? `<p class="ctx">${ctx}</p>` : ''}${filters}${body}
+    <div class="actions"><button type="button" id="auClose">Close</button></div>`);
+  $('auClose').onclick = closeModal2;
+  if (o.filters) {
+    const refilter = () => openAuditLog({ ...o, areas: $('auArea').value, projectId: $('auProject').value });
+    $('auArea').onchange = refilter; $('auProject').onchange = refilter;
+  }
+}
 
 async function openFinancialsModal(projectId){
   const p = state.projects.find((x) => x.id === projectId);
@@ -1433,13 +1542,15 @@ async function openFinancialsModal(projectId){
     const ap = changed.get(`${m.monthIndex}:${k}`);
     const wasChanged = ap && Number(ap.newValue) === Number(v);
     const chgTitle = wasChanged ? `Changed from ${ap.oldValue} to ${ap.newValue} (approved by ${ap.decidedBy})` : '';
+    const chgTip = () => tipAttrs('changed', 'Figure changed', [`Changed from|${ap.oldValue}`, `Changed to|${ap.newValue}`]);
     if (!ro && Number(v) !== 0 && state.user.role !== 'admin') {
       const rq = pending.get(`${m.monthIndex}:${k}`);
-      const title = rq ? `Change to ${rq.newValue} requested — awaiting management approval`
-        : (wasChanged ? `${chgTitle} — click to request another change` : 'Frozen — click to request a change');
-      return `<input data-k="${k}" data-frozen="1" class="frozen${rq ? ' req-pending' : (wasChanged ? ' req-changed' : '')}" value="${v}" readonly title="${esc(title)}">`;
+      const tip = rq ? tipAttrs('pending', 'Change requested', [`Current value|${v}`, `Requested value|${rq.newValue}`])
+        : (wasChanged ? chgTip() : ` title="Frozen — click to request a change"`);
+      return `<input data-k="${k}" data-frozen="1" class="frozen${rq ? ' req-pending' : (wasChanged ? ' req-changed' : '')}" value="${v}" readonly${tip}>`;
     }
-    return `<input data-k="${k}" class="${wasChanged ? 'req-changed' : ''}" value="${v}" ${ro?'disabled':''}${wasChanged ? ` title="${esc(chgTitle)}"` : ''}>`;
+    // Disabled inputs (read-only users) don't raise mouse events, so they keep the native title.
+    return `<input data-k="${k}" class="${wasChanged ? 'req-changed' : ''}" value="${v}" ${ro?'disabled':''}${wasChanged ? (ro ? ` title="${esc(chgTitle)}"` : chgTip()) : ''}>`;
   };
   const rowHtml = (m) => `<tr><td>${MONTHS[m.monthIndex]}</td>
     <td>${planInput(m, 'planBilling')}</td>
@@ -1453,7 +1564,7 @@ async function openFinancialsModal(projectId){
     ${!ro && state.user.role === 'pmo' ? '<p class="mtbl-hint">ABP billing and ABP collection are frozen once saved. Click a locked cell to request a change.</p>' : ''}
     <table class="mtbl"><thead><tr><th>Month</th><th>ABP billing</th><th>Actual billing</th><th>ABP collection</th><th>Actual collection</th><th>Expenditure</th><th>Forecast billing</th><th>Forecast collection</th></tr></thead>
     <tbody id="finRows">${months.map(rowHtml).join('')}</tbody></table>
-    <div class="actions"><button type="button" id="finClose">${ro?'Close':'Cancel'}</button>${ro?'':'<button type=\"button\" class=\"primary\" id=\"finSave\">Save all</button>'}</div>`);
+    <div class="actions">${auditBtn('financial,contract_end', { projectId, title: 'Billing & collection' })}<button type="button" id="finClose">${ro?'Close':'Cancel'}</button>${ro?'':'<button type=\"button\" class=\"primary\" id=\"finSave\">Save all</button>'}</div>`);
   $('finClose').onclick = closeModal;
   if (!ro) {
     const doSave = async () => {
@@ -1506,6 +1617,7 @@ async function openFinancialsModal(projectId){
             await api(`/financial-change-requests/${open.id}`, { method: 'DELETE' });
             pending.delete(`${mi}:${k}`);
             inp.classList.remove('req-pending');
+            delete inp.dataset.tipSev; delete inp.dataset.tipTitle; delete inp.dataset.tipBody;
             inp.title = 'Frozen — click to request a change';
             closeModal2(); toast('Change request deleted'); refreshReqBadge();
           } catch (err) { toast(err.message, true); }
@@ -1528,7 +1640,9 @@ async function openFinancialsModal(projectId){
             id, requestedBy: state.user.username, oldValue: inp.value, newValue: $('crVal').value, reason: $('crReason').value.trim(),
           });
           inp.classList.add('req-pending');
-          inp.title = `Change to ${$('crVal').value} requested — awaiting management approval`;
+          inp.removeAttribute('title');
+          inp.dataset.tipSev = 'pending'; inp.dataset.tipTitle = 'Change requested';
+          inp.dataset.tipBody = [`Current value|${inp.value}`, `Requested value|${$('crVal').value}`].join('\n');
           closeModal2(); toast('Change request sent for management approval'); refreshReqBadge();
         } catch (err) { toast(err.message, true); }
       };
@@ -1568,11 +1682,11 @@ async function openRequestsInbox(){
   try {
     if (!isApprover()) (await api('/request-results/unseen')).unseen.forEach((u) => unseen.add(`${u.kind}:${u.id}`));
     const [f, e, v] = await Promise.all([api(REQ_BASE.fin), api(REQ_BASE.end), api(REQ_BASE.rev)]);
-    // Pending first, then newest activity first (timestamps are sortable 'YYYY-MM-DD HH:MM:SS').
+    // Newest first by the date the request was sent, or the date it was decided
+    // once approved/rejected (timestamps are sortable 'YYYY-MM-DD HH:MM:SS').
     requests = [...f.requests.map((r) => ({ ...r, kind: 'fin' })), ...e.requests.map((r) => ({ ...r, kind: 'end' })),
       ...v.requests.map((r) => ({ ...r, kind: 'rev' }))]
-      .sort((a, b) => (b.status === 'pending') - (a.status === 'pending')
-        || (b.decidedAt || b.requestedAt).localeCompare(a.decidedAt || a.requestedAt));
+      .sort((a, b) => (b.decidedAt || b.requestedAt).localeCompare(a.decidedAt || a.requestedAt));
   } catch (err) { return toast(err.message, true); }
   const approver = isApprover();
   const change = (r) => r.kind === 'rev'
@@ -1767,7 +1881,8 @@ $('pendAddBtn').onclick = async () => {
    Project dashboard (mockup page 3)
    ===================================================================== */
 const DL_STATUS = { completed: ['Completed', 1], in_progress: ['In Progress', .5], pending: ['Pending', 0] };
-const BUD_COLORS = ['#0A4F73','#0A78AD','#1BA0DA','#7CC4E8','#BFE3F5'];
+const BUD_COLORS = ['#0A4F73','#0A78AD','#1BA0DA','#7CC4E8','#BFE3F5','#F5B544','#1E8E5A','#8A5FBF','#D9534F','#6B7B8C'];
+const budColor = (i) => BUD_COLORS[i % BUD_COLORS.length];
 
 async function openProjectView(projectId){
   state.project.id = projectId;
@@ -1778,6 +1893,7 @@ async function openProjectView(projectId){
   state.project.targetMonth = null; // picked in loadProjectView once the targets are known
   ['pdEdit','pdAddB','pdAddC'].forEach((id) => { $(id).style.display = canEdit() ? '' : 'none'; });
   $('pdAccess').style.display = canManageAccess() ? '' : 'none';
+  $('pdDelete').style.display = state.user.role === 'admin' ? '' : 'none';
   showView('projectView');
   pmisPush(2);
   scrollTo(0, 0);
@@ -1807,6 +1923,8 @@ async function loadProjectView(){
   $('pdTgtMonth').value = state.project.targetMonth;
   const p = dash.project;
   state.project.code = p.code; state.project.name = p.name;
+  state.project.activityLayout = p.activityLayout; state.project.layoutFor = id;
+  applyLayoutTabs();
   $('pdTitle').textContent = p.name;
   $('pdSub').innerHTML = `Project code: ${esc(p.code)} &middot; ${esc(p.type)} &middot; Work order &#8377; ${fmt(p.woValueCr)} Cr &middot; ${fyLabel(state.project.fiscalYear)}`;
   renderProjectView();
@@ -1883,19 +2001,26 @@ $('pdPendAddBtn').onclick = async () => {
 ['pdAlertsCard', 'pdPendingCard'].forEach((id) => bindListPopup(id, () => `${esc(state.project.name)} (${esc(state.project.code)})`));
 
 function renderProjectView(){
-  const { project: p, percentComplete, budget, lifetime, deliverables } = state.project.data;
-  const kv = (rows) => rows.map(([l, v, cls, title]) => `<div class="kl">${l}</div><div class="kv${cls ? ' ' + cls : ''}"${title ? ` title="${esc(title)}"` : ''}>${v}</div>`).join('');
+  const { project: p, percentComplete, budget, lifetime, deliverables, pbgRenewal } = state.project.data;
+  // 4th element is an optional hover popup: [sev, title, lines] (see tipAttrs).
+  const kv = (rows) => rows.map(([l, v, cls, tip]) => `<div class="kl">${l}</div><div class="kv${cls ? ' ' + cls : ''}"${tip ? tipAttrs(...tip) : ''}>${v}</div>`).join('');
   const er = state.project.endReq || { requests: [], approved: [] };
   const endPend = er.requests[0], endAppr = er.approved[er.approved.length - 1];
   const endChg = !endPend && endAppr && endAppr.newValue === p.contractEnd;
+  const pbgChg = !!p.pbgPrevValidUpto && p.pbgPrevValidUpto !== p.pbgValidUpto;
   const endCls = endPend ? 'req-pending' : (endChg ? 'req-changed' : '');
-  const endTip = endPend ? `Change to ${fmtDate(endPend.newValue)} requested — awaiting management approval`
-    : (endChg ? `Changed from ${fmtDate(endAppr.oldValue)} to ${fmtDate(endAppr.newValue)}` : '');
+  const endTip = endPend ? ['pending', 'Date change requested', [`Current|${fmtDate(p.contractEnd)}`, `Requested|${fmtDate(endPend.newValue)}`]]
+    : (endChg ? ['changed', 'Date changed', [`Changed from|${fmtDate(endAppr.oldValue)}`, `Changed to|${fmtDate(endAppr.newValue)}`]] : null);
+  const pbgTip = pbgRenewal
+    ? [pbgRenewal === 'overdue' ? 'overdue' : 'upcoming', pbgRenewal === 'overdue' ? 'PBG not renewed' : 'PBG renewal due',
+      [`PBG valid up to|${fmtDate(p.pbgValidUpto)}`, `EOT granted up to|${fmtDate(p.eotUpto)}`]]
+    : (pbgChg ? ['changed', 'Date changed', [`Changed from|${fmtDate(p.pbgPrevValidUpto)}`, `Changed to|${fmtDate(p.pbgValidUpto)}`]] : null);
   $('pdKl').innerHTML = kv([['Contractual Start date', fmtDate(p.contractStart)], ['Contractual End Date', fmtDate(p.contractEnd), endCls, endTip],
     ['Forecast Project Completion', fmtDate(p.forecastCompletion)], ['EOT received up to', fmtDate(p.eotUpto)],
     ['Overall % Complete', percentComplete == null ? '&mdash;' : Math.round(percentComplete) + '%']]);
   $('pdKr').innerHTML = kv([['O/S', fmt(lifetime.billing - lifetime.collection) + ' Cr'], ['Unbilled Revenue', fmt(p.unbilledRevenueCr) + ' Cr'],
-    ['Retention', fmt(p.retentionCr) + ' Cr'], ['Bank Guarantee', fmt(p.bankGuaranteeCr) + ' Cr'], ['PBG Valid up to', fmtDate(p.pbgValidUpto)]]);
+    ['Retention', fmt(p.retentionCr) + ' Cr'], ['Bank Guarantee', fmt(p.bankGuaranteeCr) + ' Cr'], ['PBG Valid up to', fmtDate(p.pbgValidUpto),
+      pbgRenewal === 'overdue' ? 'pbg-overdue' : (pbgRenewal === 'upcoming' ? 'pbg-due' : (pbgChg ? 'req-changed' : '')), pbgTip]]);
   renderBudgetChart(budget);
   renderLifeCycle(p.woValueCr, lifetime);
   const months = state.project.months, last = lastActualIdx(state.project.fiscalYear, 11);
@@ -1922,13 +2047,13 @@ function renderBudgetChart(budget){
   const bud = budget.map((b) => b.budgetCr), ex = budget.map((b) => b.expenditureCr);
   const top = Math.max(.5, Math.ceil(Math.max(bud.reduce((a, b) => a + b, 0), ex.reduce((a, b) => a + b, 0)) * 2) / 2);
   const L = 40, T = 10, ih = 200, Y = (v) => T + ih * (1 - v / top);
-  $('pdBudLegend').innerHTML = budget.map((b, i) => `<li><i style="background:${BUD_COLORS[i]}"></i>${esc(b.category)}</li>`).join('');
+  $('pdBudLegend').innerHTML = budget.map((b, i) => `<li><i style="background:${budColor(i)}"></i>${esc(b.category)}</li>`).join('');
   let g = '';
   for (let i = 0; i <= 5; i++){ const v = top * i / 5; g += `<line x1="${L}" x2="265" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" ${i ? 'stroke-dasharray="2 4"' : ''}/><text x="${L-4}" y="${Y(v)+4}" text-anchor="end" font-size="10">${v.toFixed(2)}</text>`; }
   [[bud, 'Budget', 70], [ex, 'Expenditure', 170]].forEach(([arr, name, x]) => {
     let acc = 0;
     arr.forEach((v, i) => {
-      g += `<rect x="${x}" y="${Y(acc + v)}" width="60" height="${Y(acc) - Y(acc + v)}" fill="${BUD_COLORS[i]}"><title>${name} - ${esc(budget[i].category)}: ${fmt(v)} Cr</title></rect>`;
+      g += `<rect x="${x}" y="${Y(acc + v)}" width="60" height="${Y(acc) - Y(acc + v)}" fill="${budColor(i)}"><title>${name} - ${esc(budget[i].category)}: ${fmt(v)} Cr</title></rect>`;
       acc += v;
     });
     g += `<text x="${x+30}" y="228" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--ink)">${name}</text>`;
@@ -1992,8 +2117,7 @@ function renderDeliverables(tableId, kind, label, items){
 
 async function openDeliverableHistory(d, label){
   const { history } = await api(`/projects/${state.project.id}/deliverables/${d.id}/history`);
-  const body = history.length ? history.map((h) => `<div class="histrow">${DL_STATUS[h.fromStatus][0]} &rarr; ${DL_STATUS[h.toStatus][0]}
-    <small>By ${esc(h.updatedBy)} on ${esc(h.updatedAt)}${h.remarks ? ' &middot; ' + esc(h.remarks) : ''}</small></div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+  const body = history.length ? history.map((h) => `<div class="histrow">${whoHtml(h.updatedBy, h.updatedByName, h.updatedAt)}<div>${DL_STATUS[h.fromStatus][0]} &rarr; ${DL_STATUS[h.toStatus][0]}${h.remarks ? ' <small>' + esc(h.remarks) + '</small>' : ''}</div></div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
   openModal(`<h3>${label} status &mdash; history</h3><p class="ctx">${esc(d.name)}</p>${body}<div class="actions"><button type="button" id="dlClose">Close</button></div>`);
   $('dlClose').onclick = closeModal;
 }
@@ -2034,6 +2158,26 @@ function openAddDeliverable(kind, label){
 $('pdAddB').onclick = () => openAddDeliverable('billing', 'Billing');
 $('pdAddC').onclick = () => openAddDeliverable('collection', 'Collection');
 
+// Admin only (server-enforced too). Cascades to everything under the project.
+$('pdDelete').onclick = () => {
+  const { project: p } = state.project.data;
+  openModal(`<h3>Delete project?</h3><p class="ctx">${esc(p.name)} (${esc(p.code)})</p>
+    <p class="ctx">This permanently removes the project with all its corridors, activity statuses and history, financials, schedule, deliverables and access assignments. This can't be undone.</p>
+    <div class="actions"><button type="button" id="dpCancel">Cancel</button><button type="button" class="primary" id="dpConfirm">Delete project</button></div>`);
+  $('dpCancel').onclick = closeModal;
+  $('dpConfirm').onclick = async () => {
+    try {
+      await api(`/projects/${p.id}`, { method: 'DELETE' });
+      closeModal(); toast('Project deleted');
+      history.back();
+    } catch (err) { toast(err.message, true); }
+  };
+};
+
+const budRowHtml = (b) => `<tr data-id="${b.id}"><td><input class="bud-name" data-k="category" value="${esc(b.category)}" placeholder="Category name"></td>`
+  + `<td><input data-k="budgetCr" value="${b.budgetCr}"></td><td><input data-k="expenditureCr" value="${b.expenditureCr}"></td>`
+  + `<td><button type="button" class="icon-btn sm bud-rm" title="Delete category" style="color:var(--danger)"><span data-ic="trash"></span></button></td></tr>`;
+
 $('pdEdit').onclick = async () => {
   const { project: p, budget } = state.project.data;
   // Contractual end date freezes once set (server-enforced); a pmo requests a change, admin edits directly.
@@ -2043,34 +2187,54 @@ $('pdEdit').onclick = async () => {
   const endApproved = endReq.approved[endReq.approved.length - 1];
   const endChanged = endApproved && endApproved.newValue === p.contractEnd;
   const endFrozen = !!p.contractEnd && state.user.role !== 'admin';
-  const endTitle = () => {
-    if (endPending) return `Change to ${fmtDate(endPending.newValue)} requested — awaiting management approval`;
-    const parts = [];
-    if (endChanged) parts.push(`Changed from ${fmtDate(endApproved.oldValue)} to ${fmtDate(endApproved.newValue)} (approved by ${endApproved.decidedBy})`);
-    if (endFrozen) parts.push('Frozen — click to request a change');
-    return parts.join(' — ');
+  // Popup for a pending/changed end date, as [sev, title, lines] (see tipAttrs); null when there is nothing to flag.
+  const endHint = () => {
+    if (endPending) return ['pending', 'Date change requested', [`Current|${fmtDate(p.contractEnd)}`, `Requested|${fmtDate(endPending.newValue)}`]];
+    if (endChanged) return ['changed', 'Date changed', [`Changed from|${fmtDate(endApproved.oldValue)}`, `Changed to|${fmtDate(endApproved.newValue)}`]];
+    return null;
+  };
+  const endTipAttrs = () => { const h = endHint(); return h ? tipAttrs(...h) : (endFrozen ? ' title="Frozen — click to request a change"' : ''); };
+  const applyEndTip = (el) => {
+    const h = endHint();
+    ['tipSev', 'tipTitle', 'tipBody'].forEach((k) => delete el.dataset[k]);
+    el.removeAttribute('title');
+    if (h) { el.dataset.tipSev = h[0]; el.dataset.tipTitle = h[1]; el.dataset.tipBody = h[2].join('\n'); }
+    else if (endFrozen) el.title = 'Frozen — click to request a change';
   };
   const endCls = () => (endFrozen ? 'frozen ' : '') + (endPending ? 'req-pending' : (endChanged ? 'req-changed' : ''));
   const endField = `<div class="mf"><label>Contractual end date</label><input id="edEnd" type="date" value="${p.contractEnd || ''}" class="${endCls()}"
-    ${endFrozen ? 'readonly' : ''} title="${esc(endTitle())}"></div>`;
+    ${endFrozen ? 'readonly' : ''}${endTipAttrs()}></div>`;
   const dateF = (id, label, v) => id === 'edEnd' ? endField
     : `<div class="mf"><label>${label}</label><input id="${id}" type="date" value="${v || ''}"></div>`;
   const numF = (id, label, v) => `<div class="mf"><label>${label} (&#8377; Cr)</label><input id="${id}" type="number" step="0.01" value="${v}"></div>`;
-  openModal(`<h3>Project details</h3><p class="ctx">${esc(p.name)} (${p.code})</p>
+  // Project name is admin-only (server-enforced too).
+  const nameField = state.user.role === 'admin' ? `<div class="mf"><label>Project name</label><input id="edName" value="${esc(p.name)}"></div>` : '';
+  openModal(`<h3>Project details ${auditBtn('details,contract_end', { projectId: p.id, title: 'Project details' })}</h3><p class="ctx">${esc(p.name)} (${p.code})</p>
+    ${nameField}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
       ${dateF('edStart','Contractual start date',p.contractStart)}${dateF('edEnd','Contractual end date',p.contractEnd)}
       ${dateF('edFc','Forecast project completion',p.forecastCompletion)}${dateF('edEot','EOT received up to',p.eotUpto)}
       ${dateF('edPbg','PBG valid up to',p.pbgValidUpto)}${numF('edUnb','Unbilled revenue',p.unbilledRevenueCr)}
       ${numF('edRet','Retention',p.retentionCr)}${numF('edBg','Bank guarantee',p.bankGuaranteeCr)}
     </div>
-    <table class="mtbl"><thead><tr><th>Budget category</th><th>Budget</th><th>Expenditure</th></tr></thead><tbody id="edBud">
-      ${budget.map((b) => `<tr data-cat="${esc(b.category)}"><td>${esc(b.category)}</td><td><input data-k="budgetCr" value="${b.budgetCr}"></td><td><input data-k="expenditureCr" value="${b.expenditureCr}"></td></tr>`).join('')}
+    <table class="mtbl"><thead><tr><th>Budget category</th><th>Budget</th><th>Expenditure</th><th></th></tr></thead><tbody id="edBud">
+      ${budget.map(budRowHtml).join('')}
     </tbody></table>
+    <button type="button" class="btn-o sm" id="edBudAdd" style="margin-top:8px"><span data-ic="plus"></span>Add category</button>
     <div class="actions"><button type="button" id="edCancel">Cancel</button><button type="button" class="primary" id="edSave">Save</button></div>`);
+  hydrateIcons($('modalBox'));
   $('edCancel').onclick = closeModal;
+  const bindBudRemove = (scope) => scope.querySelectorAll('.bud-rm').forEach((b) => { b.onclick = () => b.closest('tr').remove(); });
+  bindBudRemove($('edBud'));
+  $('edBudAdd').onclick = () => {
+    $('edBud').insertAdjacentHTML('beforeend', budRowHtml({ id: '', category: '', budgetCr: 0, expenditureCr: 0 }));
+    const tr = $('edBud').lastElementChild;
+    hydrateIcons(tr); bindBudRemove(tr);
+    tr.querySelector('[data-k=category]').focus();
+  };
   const ctx = `${esc(p.name)} (${p.code}) &middot; Contractual end date`;
   const refreshEnd = () => {
-    $('edEnd').className = endCls(); $('edEnd').title = endTitle();
+    $('edEnd').className = endCls(); applyEndTip($('edEnd'));
     loadProjectEndReq().then(renderProjectView);
   };
   if (endFrozen) $('edEnd').addEventListener('click', () => {
@@ -2107,11 +2271,15 @@ $('pdEdit').onclick = async () => {
   });
   $('edSave').onclick = async () => {
     const budgetRows = Array.from(document.querySelectorAll('#edBud tr')).map((tr) => ({
-      category: tr.dataset.cat,
+      id: tr.dataset.id ? Number(tr.dataset.id) : undefined,
+      category: tr.querySelector('[data-k=category]').value.trim(),
       budgetCr: Number(tr.querySelector('[data-k=budgetCr]').value) || 0,
       expenditureCr: Number(tr.querySelector('[data-k=expenditureCr]').value) || 0,
     }));
     try {
+      const newName = $('edName') ? $('edName').value.trim() : p.name;
+      if (!newName) return toast('Project name is required', true);
+      if (newName !== p.name) await api(`/projects/${state.project.id}`, { method: 'PATCH', body: { name: newName } });
       await api(`/projects/${state.project.id}/details`, { method: 'PATCH', body: {
         contractStart: $('edStart').value, contractEnd: $('edEnd').value, forecastCompletion: $('edFc').value,
         eotUpto: $('edEot').value, pbgValidUpto: $('edPbg').value, unbilledRevenueCr: $('edUnb').value,
@@ -2152,7 +2320,7 @@ $('pdAccess').onclick = async () => {
     await endpoint;
   }
 
-  openModal(`<h3>Manage access</h3><p class="ctx">${esc(state.project.name)} (${state.project.code})</p>
+  openModal(`<h3>Manage access ${auditBtn('access', { projectId: state.project.id, title: 'Project access' })}</h3><p class="ctx">${esc(state.project.name)} (${state.project.code})</p>
     <h3 style="font-size:1rem">Project roles</h3>
     <div class="mf"><label>Project Lead</label><select id="paLead">${roleOptions(lead && lead.username)}</select></div>
     <div class="mf"><label>Project Coordinator</label><select id="paCoord">${roleOptions(coordinator && coordinator.username)}</select></div>
@@ -2260,6 +2428,7 @@ const SCHEDULE_STATUS_LABEL = { C: 'Completed', YTS: 'Yet to Start', IP: 'In Pro
 let scheduleItems = [];
 
 async function openScheduleView(){
+  await ensureProjectLayout();
   $('schTitle').textContent = `${state.project.code}: ${abbr(state.project.name)} Schedule`;
   $('schBack').textContent = `${abbr(state.project.name)} ${state.project.code}`;
   $('schRatesBtn').style.display = (state.user.role === 'mgmt' || state.user.role === 'pmo' || state.user.role === 'admin') ? '' : 'none';
@@ -2344,15 +2513,44 @@ $('schRatesBtn').onclick = async () => {
 /* =====================================================================
    PRD §4 — Project Detail & Activity Update Module (Office/Field tabs)
    ===================================================================== */
+// A project's activity layout ('split' = separate Office / Field tabs, 'combined' = one tab with
+// both grids) is set on its Edit page. Fetched on entry because the Activities / Schedule screens
+// can be opened from the top nav without going through the project dashboard first.
+async function ensureProjectLayout(force){
+  if (!force && state.project.layoutFor === state.project.id) return;
+  try {
+    const { project } = await api(`/projects/${state.project.id}`);
+    state.project.activityLayout = project.activityLayout;
+    state.project.layoutFor = state.project.id;
+  } catch { state.project.activityLayout = state.project.activityLayout || 'split'; }
+  applyLayoutTabs();
+}
+// Relabel the Office / Field tab buttons of the project, activity and schedule screens: in a
+// combined project the Office button becomes the single "Office and Field activities" tab.
+function applyLayoutTabs(){
+  const combined = state.project.activityLayout === 'combined';
+  const label = combined ? 'Office and Field activities' : 'Office activities';
+  [['pdOffice', 'pdField'], ['tabOffice', 'tabField'], ['schTabOffice', 'schTabField']].forEach(([o, f]) => {
+    $(o).lastChild.textContent = label;
+    $(f).style.display = combined ? 'none' : '';
+  });
+}
+
 async function openActivityView(tab){
   state.activity.projectId = state.project.id;
   state.activity.code = state.project.code;
   state.activity.name = state.project.name;
   state.activity.filter = 'all';
+  state.activity.kindFilter = { office: true, field: true };
+  await ensureProjectLayout(true);
+  await refreshActivityMeta();
+  state.activity.combined = state.project.activityLayout === 'combined';
   $('actBack').textContent = `${abbr(state.project.name)} ${state.project.code}`;
   $('addRowBtn').style.display = canEdit() ? '' : 'none';
+  $('importGridBtn').style.display = canImportGrid() ? '' : 'none';
   $('tabEdit').style.display = canEdit() ? '' : 'none';
-  setActiveTab(tab);
+  $('actChangeLogBtn').style.display = canViewChangeLog() ? '' : 'none';
+  setActiveTab(state.activity.combined ? 'office' : tab); // combined: the one tab is the 'office' data
   showView('activityView');
   pmisPush(3);
   await loadActivityRows();
@@ -2361,10 +2559,11 @@ $('actBack').onclick = backToProject;
 $('actTabProject').onclick = backToProject;
 
 function setActiveTab(tab){
+  const combined = state.activity.combined;
   state.activity.tab = tab;
-  $('actTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${tab === 'office' ? 'Office' : 'Field'} Activities`;
-  $('tabOffice').classList.toggle('active', tab === 'office');
-  $('tabField').classList.toggle('active', tab === 'field');
+  $('actTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${combined ? 'Office and Field' : tab === 'office' ? 'Office' : 'Field'} Activities`;
+  $('tabOffice').classList.toggle('active', combined || tab === 'office');
+  $('tabField').classList.toggle('active', !combined && tab === 'field');
 }
 $('tabOffice').onclick = async () => { setActiveTab('office'); state.activity.filter='all'; await loadActivityRows(); };
 $('tabField').onclick = async () => { setActiveTab('field'); state.activity.filter='all'; await loadActivityRows(); };
@@ -2375,26 +2574,97 @@ $('addRowBtn').onclick = () => {
     <div class="actions"><button type="button" id="arCancel">Cancel</button><button type="button" class="primary" id="arSave">Save</button></div>`);
   $('arCancel').onclick = closeModal;
   $('arSave').onclick = async () => {
-    const corridor = $('arRowCorridor').value.trim();
-    if (!corridor) { toast('Corridor name is required', true); return; }
+    const form = readRowForm('arRow');
+    if (!form.corridor) { toast('Corridor name is required', true); return; }
     try {
-      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: {
-        tab: state.activity.tab, corridor, lineType: $('arRowLine').value.trim() || null,
-        lengthKm: Number($('arRowLen').value) || null,
-        responsiblePerson: $('arRowResp').value.trim() || null,
-      }});
+      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: { tab: state.activity.tab, ...form }});
       closeModal(); toast('Corridor added'); loadActivityRows();
     } catch (err) { toast(err.message, true); }
   };
 };
 
+// Excel export: the whole project's grid (one sheet when combined, Office + Field sheets when split) in the
+// import layout. Fetched as a blob so a failure shows as a toast instead of navigating to a JSON error.
+$('exportGridBtn').onclick = async () => {
+  const btn = $('exportGridBtn');
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/projects/${state.activity.projectId}/activities/export`, { credentials: 'same-origin' });
+    if (!res.ok) {
+      let msg = `Export failed (${res.status})`;
+      try { msg = (await res.json()).error || msg; } catch {}
+      throw new Error(msg);
+    }
+    const name = ((res.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/) || [])[1] || `${state.activity.code}_activities.xlsx`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(await res.blob());
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast('Export downloaded');
+  } catch (err) { toast(err.message, true); }
+  btn.disabled = false;
+};
+
+// Excel import (admin only -- also enforced by the server): preview what the workbook would create, then confirm.
+$('importGridBtn').onclick = () => {
+  if (!state.activity.combined) { toast('Switch this project to the combined Office and Field layout (Edit grid) before importing', true); return; }
+  openModal(`<h3>Import from Excel</h3>
+    <p class="ctx">Fills this project's grid from a workbook in the standard layout: KD labels and weightage above a header row that starts with "Project code", a "Corridor" column, then one column per activity. The grid must still be empty and the sheet's project code must match this project (${esc(state.activity.code)}).</p>
+    <div class="mf"><label>Excel file (.xlsx)</label><input id="impFile" type="file" accept=".xlsx"></div>
+    <div id="impResult"></div>
+    <div class="actions"><button type="button" id="impCancel">Cancel</button><button type="button" id="impPreview">Preview</button><button type="button" class="primary" id="impApply" disabled>Import</button></div>`);
+  const send = (mode) => {
+    const file = $('impFile').files[0];
+    if (!file) throw new Error('Choose an .xlsx file first');
+    const fd = new FormData();
+    fd.append('mode', mode);
+    fd.append('file', file);
+    return api(`/projects/${state.activity.projectId}/activities/import`, { method: 'POST', isForm: true, body: fd });
+  };
+  const busy = (on) => { ['impPreview', 'impApply', 'impCancel'].forEach((id) => { $(id).disabled = on; }); };
+  $('impCancel').onclick = closeModal;
+  $('impFile').onchange = () => { $('impApply').disabled = true; $('impResult').innerHTML = ''; };
+  $('impPreview').onclick = async () => {
+    busy(true);
+    try {
+      const { report: r } = await send('preview');
+      const names = state.meta.status || {};
+      const counts = Object.entries(r.statusCount).map(([k, n]) => `${esc(names[k] || k)}: ${n}`).join(' &middot; ');
+      $('impResult').innerHTML = `
+        <p><b>${r.corridors}</b> corridors &times; <b>${r.columns}</b> activities = <b>${r.cells}</b> cells</p>
+        <p class="ctx">${counts}</p>
+        <p class="ctx">KDs: ${r.kds.map((k) => `${esc(k.label)} ${k.weightage}% (${k.columns} col${k.columns === 1 ? '' : 's'})`).join(', ')}</p>
+        <p class="ctx">Corridor columns: ${r.detailColumns.map(esc).join(', ') || 'none'}</p>
+        <p class="ctx">Submitted cells get an expected approval date of ${esc(r.submittedExpectedApprovalDate)} (${state.meta.subApprovalDays} working days from today); Observations become Comment Compliance revision 1.</p>
+        ${r.ignoredStrayCells.length ? `<p class="ctx">Ignored stray cells outside any corridor row: ${r.ignoredStrayCells.map((s) => esc(s.cell)).join(', ')}</p>` : ''}
+        ${r.warnings.length ? `<p class="ctx">${r.warnings.length} blank cell(s) will be left empty.</p>` : ''}`;
+      $('impApply').disabled = false;
+    } catch (err) { $('impResult').innerHTML = ''; $('impApply').disabled = true; toast(err.message, true); }
+    busy(false);
+    if ($('impResult').innerHTML === '') $('impApply').disabled = true;
+  };
+  $('impApply').onclick = async () => {
+    busy(true);
+    try {
+      const { report: r } = await send('apply');
+      closeModal();
+      toast(`Imported ${r.corridors} corridors and ${r.cells} cells`);
+      await refreshActivityMeta(); await loadActivityRows();
+    } catch (err) { toast(err.message, true); busy(false); }
+  };
+};
+
 async function loadActivityRows(){
-  const [{ activities }, { columns }, milestones] = await Promise.all([
+  const [{ activities, detailColumns, builtinColumns, columnKinds }, { columns }, milestones] = await Promise.all([
     api(`/projects/${state.activity.projectId}/activities?tab=${state.activity.tab}`),
     api(`/projects/${state.activity.projectId}/column-progress?tab=${state.activity.tab}`),
     api(`/projects/${state.activity.projectId}/milestones?tab=${state.activity.tab}`),
   ]);
   state.activity.rows = activities;
+  state.activity.detailColumns = detailColumns;
+  state.activity.builtinColumns = builtinColumns || [];
+  state.activity.columnKinds = columnKinds || {};
   state.activity.milestones = { basis: milestones.basis, milestones: milestones.milestones };
   state.activity.columnProgress = Object.fromEntries(columns.map((c) => [c.name, c.percentComplete]));
   renderActivityGrid();
@@ -2426,6 +2696,22 @@ const ACTIVITY_CELL_CATEGORIES = [
 // wording (state.meta.tentativeDateLabel) is used in the update modal instead,
 // where there's room for it.
 const TENTATIVE_SHORT_LABEL = { YTS: 'Start', IP: 'Finish', OH: 'On hold from', SUB: 'Approval', CC: 'Approval', APP: 'Approved' };
+// Compact hover popup for a Submitted / Comment Compliance cell: status line + date. Severity, most urgent
+// first: rejected revision > behind schedule > due soon > revision awaiting approval > plain info.
+function subCcTip(cell, behind){
+  const isCC = cell.status === 'CC';
+  const rej = cell.rejectedRevision, pend = cell.pendingRevision;
+  let sev = 'info', title = isCC ? `Comment compliance${cell.revision ? ' — Rev ' + cell.revision : ''}` : 'Submitted';
+  if (rej) { sev = 'overdue'; title = `Revision ${rej.toRevision} rejected`; }
+  else if (behind) { sev = 'overdue'; title += ' — behind schedule'; }
+  else if (cell.alertState === 'upcoming') { sev = 'upcoming'; title += ' — due soon'; }
+  else if (pend) { sev = 'pending'; title = `Revision ${pend.toRevision} awaiting approval`; }
+  const dueDate = cell.alertDueDate || cell.tentativeDate;
+  const lines = [];
+  if (rej && rej.at) lines.push(`Rejected on|${fmtDMY(rej.at)}`);
+  else if (dueDate) lines.push(`${isCC ? 'Approval date' : 'Expected approval'}|${fmtDMY(dueDate)}`);
+  return tipAttrs(sev, title, lines);
+}
 function cellCategory(status, behind, rejected){
   if (status === 'SUB') return 'SUB';
   if (status === 'CC') return rejected ? 'CCR' : 'CC';
@@ -2444,9 +2730,9 @@ const statusText = (s) => (s ? state.meta.status[s] || s : 'Not set');
 function freezeActivityGridCols(){
   const table = $('agrid');
   let left = 0;
-  ['fz-sl','fz-cor','fz-line','fz-len','fz-resp','fz-pct'].forEach((cls) => {
-    const head = table.querySelector(`thead th.${cls}`);
-    if (!head) return;
+  // Every frozen header carries a unique fz-* class (fz-sl, fz-cor, fz-d<id>, fz-pct).
+  table.querySelectorAll('thead th.frz').forEach((head) => {
+    const cls = Array.from(head.classList).find((c) => c.startsWith('fz-'));
     table.querySelectorAll(`.${cls}`).forEach((el) => { el.style.left = left + 'px'; });
     left += head.getBoundingClientRect().width;
   });
@@ -2471,8 +2757,36 @@ function fitActivityGridHeight(){
 }
 window.addEventListener('resize', fitActivityGridHeight);
 
+// Office / Field class of an activity column (merged-layout projects; default office).
+function colKind(name){
+  const d = ((state.meta.columnDetail || {})[state.activity.tab] || []).find((c) => c.name === name);
+  return (d && state.activity.columnKinds[d.id]) || 'office';
+}
+const KIND_LABEL = { office: 'Office', field: 'Field' };
+
+// Filter-icon button above the merged grid: tick Office and/or Field to choose which columns show.
+function renderKindFilter(){
+  const f = state.activity.kindFilter;
+  $('kindFilter').style.display = state.activity.combined ? '' : 'none';
+  $('kindFilterMenu').querySelectorAll('input[data-kind]').forEach((i) => { i.checked = f[i.dataset.kind]; });
+  const both = f.office && f.field;
+  $('kindFilterLbl').textContent = both ? 'All activities' : `${KIND_LABEL[f.office ? 'office' : 'field']} activities`;
+  $('kindFilterBtn').classList.toggle('on', !both);
+}
+$('kindFilterBtn').onclick = (e) => { e.stopPropagation(); $('kindFilterMenu').classList.toggle('on'); };
+$('kindFilterMenu').addEventListener('click', (e) => e.stopPropagation());
+$('kindFilterMenu').addEventListener('change', (e) => {
+  const f = state.activity.kindFilter, k = e.target.dataset.kind;
+  f[k] = e.target.checked;
+  if (!f.office && !f.field) f[k] = true; // keep at least one kind showing
+  renderActivityGrid();
+});
+document.addEventListener('click', () => $('kindFilterMenu').classList.remove('on'));
+
 function renderActivityGrid(){
-  const cols = state.meta.columnsByTab[state.activity.tab];
+  renderKindFilter();
+  const allCols = state.meta.columnsByTab[state.activity.tab];
+  const cols = state.activity.combined ? allCols.filter((c) => state.activity.kindFilter[colKind(c)]) : allCols;
   const editable = canEdit();
   const f = state.activity.filter;
 
@@ -2530,28 +2844,45 @@ function renderActivityGrid(){
     }
   }
   const pctSub = msCfg.basis === 'kd' ? '<small class="kd-basis">by KD</small>' : '';
-  const colHeads = cols.map((c) => `<th class="${(kdEdge[c] || '').trim()}" style="white-space:normal;min-width:70px">${esc(c)}</th>`).join('');
-  const fixedHeads = `<th class="frz fz-sl"${rs}>Sl. No</th><th class="frz fz-cor"${rs}>Corridor</th><th class="frz fz-line"${rs}>Line</th><th class="frz fz-len"${rs}>Length (Km)</th><th class="frz fz-resp"${rs}>Responsible</th><th class="frz fz-pct frz-end"${rs}>% Complete${pctSub}</th>`;
+  const colHeads = cols.map((c) => `<th class="${(kdEdge[c] || '').trim()}" style="white-space:normal;min-width:70px">${esc(c)}${state.activity.combined ? `<small class="col-kind">${KIND_LABEL[colKind(c)]}</small>` : ''}</th>`).join('');
+  const detailCols = state.activity.detailColumns || [];
+  // Built-in columns (Sl. No, % Complete, Last updated) can be renamed or removed per project
+  // on the Edit page; the last visible pinned column carries the divider.
+  const built = Object.fromEntries((state.activity.builtinColumns || []).map((b) => [b.key, b]));
+  const showB = (k) => !(built[k] && built[k].hidden);
+  const nameB = (k, dflt) => (built[k] ? built[k].name : dflt);
+  const lastFrozen = showB('pct') ? 'pct' : detailCols.length ? 'd' + detailCols[detailCols.length - 1].id : 'cor';
+  const endCls = (k) => (k === lastFrozen ? ' frz-end' : '');
+  const fixedHeads = (showB('slno') ? `<th class="frz fz-sl"${rs}>${esc(nameB('slno', 'Sl. No'))}</th>` : '')
+    + `<th class="frz fz-cor${endCls('cor')}"${rs}>Corridor</th>`
+    + detailCols.map((d) => `<th class="frz fz-d${d.id}${endCls('d' + d.id)}"${rs}>${esc(d.name)}</th>`).join('')
+    + (showB('pct') ? `<th class="frz fz-pct frz-end"${rs}>${esc(nameB('pct', '% Complete'))}${pctSub}</th>` : '');
+  const updHead = showB('updated') ? `<th class="pin"${rs}>${esc(nameB('updated', 'Last updated'))}</th>` : '';
   let html = '<thead>' + (hasBand
-    ? `<tr>${fixedHeads}${bandHtml}<th class="pin"${rs}>Last updated</th><th${rs}></th></tr><tr>${colHeads}</tr>`
-    : `<tr>${fixedHeads}${colHeads}<th class="pin">Last updated</th><th></th></tr>`) + '</thead><tbody>';
+    ? `<tr>${fixedHeads}${bandHtml}${updHead}<th${rs}></th></tr><tr>${colHeads}</tr>`
+    : `<tr>${fixedHeads}${colHeads}${updHead}<th></th></tr>`) + '</thead><tbody>';
   if (!rows.length){
-    html += `<tr><td colspan="${cols.length+8}" class="empty">No corridor rows${f==='all'?' yet':' match this filter'}.</td></tr>`;
+    const span = cols.length + 2 + detailCols.length + ['slno', 'pct', 'updated'].filter(showB).length;
+    html += `<tr><td colspan="${span}" class="empty">No corridor rows${f==='all'?' yet':' match this filter'}.</td></tr>`;
   } else {
     rows.forEach((r, i) => {
       // A Project Lead/Coordinator with a per-corridor edit grant (r.canEdit)
       // can update that corridor's cells even though canEdit() (pmo/admin) is
       // false for them; other rows for the same user stay read-only.
       const rowEditable = editable || !!r.canEdit;
-      // Merge consecutive rows with the same line type, as in the mockup.
-      let lineCell = '';
-      if (i === 0 || rows[i-1].lineType !== r.lineType) {
-        let span = 1; while (rows[i+span] && rows[i+span].lineType === r.lineType) span++;
-        lineCell = `<td class="line frz fz-line" rowspan="${span}">${esc(r.lineType||'')}</td>`;
-      }
+      // Corridor-detail cells. A column named "Line" merges consecutive rows
+      // with the same value, as in the mockup; the rest are plain cells.
+      const detailCells = detailCols.map((d) => {
+        const val = (r.details || {})[d.id] ?? '';
+        if (!/^line\b/i.test(d.name)) return `<td class="frz fz-d${d.id}${endCls('d' + d.id)}">${esc(val)}</td>`;
+        const same = (x) => ((x.details || {})[d.id] ?? '') === val;
+        if (i > 0 && same(rows[i-1])) return '';
+        let span = 1; while (rows[i+span] && same(rows[i+span])) span++;
+        return `<td class="line frz fz-d${d.id}${endCls('d' + d.id)}" rowspan="${span}">${esc(val)}</td>`;
+      }).join('');
       const pct = r.percentComplete == null ? '&mdash;' : `${Math.round(r.percentComplete)}%`;
       const corridorTitle = (!editable && r.canEdit) ? ' title="You have edit access to this corridor"' : '';
-      html += `<tr><td class="frz fz-sl">${state.activity.rows.indexOf(r)+1}</td><td class="n frz fz-cor"${corridorTitle}>${esc(r.corridor)}</td>${lineCell}<td class="frz fz-len">${r.lengthKm ?? ''}</td><td class="frz fz-resp">${esc(r.responsiblePerson||'')}</td><td class="pct frz fz-pct frz-end">${pct}</td>`;
+      html += `<tr>${showB('slno') ? `<td class="frz fz-sl">${state.activity.rows.indexOf(r)+1}</td>` : ''}<td class="n frz fz-cor${endCls('cor')}"${corridorTitle}>${esc(r.corridor)}</td>${detailCells}${showB('pct') ? `<td class="pct frz fz-pct frz-end">${pct}</td>` : ''}`;
       cols.forEach((c) => {
         const cell = r.cells[c];
         const behind = cell.alertState === 'overdue';
@@ -2572,19 +2903,25 @@ function renderActivityGrid(){
         // alert and its due date (Submitted's tentativeDate is the
         // auto-filled SLA deadline, not a manually entered date), since the
         // native `title` tooltip is slow and easy to miss.
-        let tipAttrs = '';
-        if (cell.alertState) {
+        // Submitted and Comment Compliance cells always get the larger popup (status, dates,
+        // revision, who/when, remarks), coloured by alert / revision state -- see subCcTip.
+        const clickHint = rowEditable ? 'Click to change status' : 'Click to view history';
+        let tipHtml = '', titleAttr = ` title="${clickHint}${alertTitle}"`;
+        if (cell.status === 'SUB' || cell.status === 'CC') {
+          tipHtml = subCcTip(cell, behind);
+          titleAttr = '';
+        } else if (cell.alertState) {
           const dueLabel = cell.alertKind === 'finish' ? 'Planned finish' : (shortLabel || 'Due');
           const dueDate = cell.alertDueDate || cell.tentativeDate;
           const due = dueDate ? `${dueLabel}: ${fmtDMY(dueDate)}` : 'No due date set';
           const tipTitle = behind ? 'Behind schedule' : 'Due soon';
           const tipBody = `${r.corridor} — ${c} · ${due}`;
-          tipAttrs = ` data-alert="${cell.alertState}" data-tip-title="${esc(tipTitle)}" data-tip-body="${esc(tipBody)}"`;
+          tipHtml = ` data-alert="${cell.alertState}" data-tip-title="${esc(tipTitle)}" data-tip-body="${esc(tipBody)}"`;
         }
-        html += `<td class="cellstat ${cellCls}${alertCls}${kdEdge[c] || ''}"${dim} data-activity="${r.id}" data-col="${esc(c)}"${tipAttrs} title="${rowEditable ? 'Click to change status' : 'Click to view history'}${alertTitle}">`
+        html += `<td class="cellstat ${cellCls}${alertCls}${kdEdge[c] || ''}"${dim} data-activity="${r.id}" data-col="${esc(c)}"${tipHtml}${titleAttr}>`
           + `${cell.status ? statusText(cell.status) : ''}${cell.status === 'CC' && cell.revision ? `<small>Revision ${cell.revision}</small>` : ''}${cell.pendingRevision ? `<small>Rev ${cell.pendingRevision.toRevision} awaiting approval</small>` : ''}${cell.rejectedRevision ? `<small>Rev ${cell.rejectedRevision.toRevision} rejected</small>` : ''}${dates}</td>`;
       });
-      html += `<td class="pin">${r.lastUpdated ? esc(r.lastUpdated.by)+'<br>'+esc(fmtDMY(r.lastUpdated.at)) : '&mdash;'}</td>`
+      html += (showB('updated') ? `<td class="pin">${r.lastUpdated ? esc(r.lastUpdated.by)+'<br>'+esc(fmtDMY(r.lastUpdated.at)) : '&mdash;'}</td>` : '')
         + `<td><button class="iconbtn" data-hist="${r.id}">History</button></td></tr>`;
     });
   }
@@ -2617,23 +2954,28 @@ function renderActivityGrid(){
     tip.style.left = Math.max(8, left) + 'px';
     tip.style.top = Math.max(8, top) + 'px';
   }
-  function show(td, x, y){
-    tip.innerHTML = `<b>${esc(td.dataset.tipTitle)}</b>${esc(td.dataset.tipBody)}`;
-    tip.classList.remove('sev-overdue', 'sev-upcoming');
-    tip.classList.add('on', `sev-${td.dataset.alert}`);
+  // Also serves flagged dates/figures elsewhere (project view, ABP): any element carrying
+  // data-tip-sev + data-tip-title + data-tip-body. Body lines are 'Label|Value', shown as 'Label: Value'.
+  function show(el, x, y){
+    tip.classList.remove('sev-overdue', 'sev-upcoming', 'sev-pending', 'sev-changed', 'sev-info');
+    const body = el.dataset.tipSev
+      ? el.dataset.tipBody.split('\n').filter(Boolean).map((l) => esc(l.replace('|', ': '))).join('<br>')
+      : esc(el.dataset.tipBody);
+    tip.innerHTML = `<b>${esc(el.dataset.tipTitle)}</b>${body}`;
+    tip.classList.add('on', `sev-${el.dataset.tipSev || el.dataset.alert}`);
     place(x, y);
   }
-  $('agrid').addEventListener('mouseover', (e) => {
-    const td = e.target.closest('td.cellstat');
-    if (td && td.dataset.tipTitle) show(td, e.clientX, e.clientY);
+  const target = (e) => e.target.closest && e.target.closest('[data-tip-title]');
+  document.addEventListener('mouseover', (e) => {
+    const el = target(e);
+    if (el) show(el, e.clientX, e.clientY);
   });
-  $('agrid').addEventListener('mousemove', (e) => {
+  document.addEventListener('mousemove', (e) => {
     if (!tip.classList.contains('on')) return;
-    const td = e.target.closest('td.cellstat');
-    if (td && td.dataset.tipTitle) place(e.clientX, e.clientY); else tip.classList.remove('on');
+    if (target(e)) place(e.clientX, e.clientY); else tip.classList.remove('on');
   });
-  $('agrid').addEventListener('mouseout', (e) => {
-    const to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('td.cellstat[data-tip-title]');
+  document.addEventListener('mouseout', (e) => {
+    const to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-tip-title]');
     if (!to) tip.classList.remove('on');
   });
 })();
@@ -2666,8 +3008,9 @@ function openCellModal(row, col){
     <div class="mf"><label>Remarks</label><textarea id="mRemarks" placeholder="Notes, blockers, or context...">${esc(cell.remarks||'')}</textarea></div>
     <div class="sig"><input type="checkbox" id="mSig"><label for="mSig" style="margin:0;font-weight:400">I verify this update is accurate (digital signature)</label></div>
     <div class="mf"><label>Attach files (PDF, DWG, XLSX, DOCX, Images)</label><input id="mFiles" type="file" multiple accept=".pdf,.dwg,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.gif"></div>
-    <div class="cell-hist"><h4>History</h4><div id="mHistBody"><p class="muted">Loading&hellip;</p></div></div>
+    <div class="cell-hist"><h4>History${changeLogBtn('progress', { subject: col })}</h4><div id="mHistBody"><p class="muted">Loading&hellip;</p></div></div>
     <div class="actions"><button type="button" id="mCancel">Cancel</button><button type="button" class="primary" id="mSave">Save update</button></div>`);
+  wireChangeLogBtns($('modalBox'), `${esc(row.corridor)} &mdash; ${esc(col)}`);
   // This activity's history (status changes and rejected revision requests),
   // newest first, shown right in the update popup.
   api(`/projects/${state.activity.projectId}/activities/${row.id}/history`).then(({ history }) => {
@@ -2702,12 +3045,14 @@ function openCellModal(row, col){
     const isNA = status === 'NA';
     $('mRevisionWrap').style.display = status === 'CC' ? '' : 'none';
     $('mSave').textContent = needsApproval() ? 'Send for approval' : 'Save update';
-    // Submitted's deadline defaults to SUB_APPROVAL_DAYS working days after
-    // the day it enters Submitted, but stays editable -- prefill it with
-    // that suggestion the first time this cell becomes Submitted (nothing
-    // stored yet) so there's something sensible to tweak rather than a blank
-    // box; once a value exists (from a prior save), leave it alone.
-    const isSUB = status === 'SUB' || status === 'CC';
+    // Submitted's "Expected approval date" and Comment Compliance's "Approval
+    // date" are read-only. A cell already in that status (and, for CC, on the
+    // same revision) shows its stored date; otherwise it's SUB_APPROVAL_DAYS
+    // working days from today -- moving to a new revision restarts the clock.
+    // The server applies the same rule.
+    const isLocked = status === 'SUB' || status === 'CC';
+    const wasLocked = $('mTentativeDate').readOnly;
+    $('mTentativeDate').readOnly = isLocked;
     const dateLabel = state.meta.tentativeDateLabel[status];
     const auto = autoPctForStatus(status);
     $('mTentativeDateLabel').textContent = (dateLabel || 'Tentative date') + (isNA ? '' : ' *');
@@ -2717,25 +3062,23 @@ function openCellModal(row, col){
     $('mFiles').disabled = isNA;
     $('mPct').disabled = isNA || auto != null;
     if (isNA || !dateLabel) $('mTentativeDate').value = '';
-    else if (isSUB && !$('mTentativeDate').value) {
-      $('mTentativeDate').value = addWorkingDaysISO(new Date().toISOString(), state.meta.subApprovalDays || 10);
+    else if (isLocked) {
+      const keep = cell.status === status && cell.tentativeDate && (status !== 'CC' || Number($('mRevision').value) === storedRev);
+      $('mTentativeDate').value = keep ? cell.tentativeDate
+        : addWorkingDaysISO(new Date().toISOString(), state.meta.subApprovalDays || 10);
+    } else if (wasLocked) {
+      // leaving Submitted / Comment Compliance: drop the auto date so it isn't carried into another status
+      $('mTentativeDate').value = (cell.status === status && cell.tentativeDate) || '';
     }
     if (isNA) { $('mRemarks').value = ''; }
     else if (auto != null) $('mPct').value = auto;
   };
   syncFields();
   $('mStatus').onchange = syncFields;
-  // Moving to a different revision restarts the approval-date clock: the date
-  // refills to SUB_APPROVAL_DAYS working days from today (the day it's updated
-  // to that revision), still editable. Going back to the revision the cell
-  // already holds restores its stored date.
-  $('mRevision').onchange = () => {
-    syncFields();
-    if ($('mStatus').value !== 'CC' || $('mTentativeDate').disabled) return;
-    const fresh = addWorkingDaysISO(new Date().toISOString(), state.meta.subApprovalDays || 10);
-    $('mTentativeDate').value = Number($('mRevision').value) !== storedRev
-      ? fresh : ((cell.status === 'CC' && cell.tentativeDate) || fresh);
-  };
+  // Moving to a different revision restarts the approval-date clock (syncFields
+  // refills it); going back to the revision the cell already holds restores
+  // its stored date.
+  $('mRevision').onchange = syncFields;
   $('mPct').onchange = () => clampProgressInput($('mPct'));
   $('mCancel').onclick = closeModal;
   $('mSave').onclick = async () => {
@@ -2817,10 +3160,45 @@ function historyEntryHtml(h){
     : h.toStatus === 'CCA'
     ? `Comment Compliance &mdash; <b>Revision ${h.revision} request approved</b>${h.fromStatus && h.fromStatus !== 'CC' ? ` (was ${esc(statusText(h.fromStatus))})` : ''}`
     : `${esc(statusText(h.fromStatus))} &rarr; ${esc(statusText(h.toStatus))}${h.toStatus === 'CC' && h.revision ? ` (Revision ${h.revision})` : ''}`;
-  return `<div class="histrow${h.toStatus === 'CCR' ? ' rej' : h.toStatus === 'CCA' ? ' ok' : h.toStatus === 'CCQ' ? ' req' : ''}"><b>${esc(h.columnKey)}</b>: ${change}
-      <small>By ${esc(h.updatedBy)} on ${esc(h.updatedAt)}${h.remarks?' &middot; '+esc(h.remarks):''}${h.attachments.length?' &middot; files: '+h.attachments.map((f)=>esc(f.originalName)).join(', '):''}</small>
+  const dates = [
+    h.tentativeDate && `${esc((state.meta.tentativeDateLabel[h.toStatus] || 'Date'))}: ${fmtDMY(h.tentativeDate)}`,
+    h.plannedFinishDate && `Planned finish: ${fmtDMY(h.plannedFinishDate)}`,
+  ].filter(Boolean).map((d) => ' &middot; ' + d).join('');
+  return `<div class="histrow${h.toStatus === 'CCR' ? ' rej' : h.toStatus === 'CCA' ? ' ok' : h.toStatus === 'CCQ' ? ' req' : ''}">${whoHtml(h.updatedBy, h.updatedByName, h.updatedAt)}<div><b>${esc(h.columnKey)}</b>: ${change}</div>
+      <small>${[dates.replace(/^ &middot; /, ''), h.remarks && esc(h.remarks), h.attachments.length && 'files: ' + h.attachments.map((f)=>esc(f.originalName)).join(', ')].filter(Boolean).join(' &middot; ')}</small>
     </div>`;
 }
+
+// "Who changed what" log for the activity grid's panels other than
+// a cell's status update (which has the History list above). The button
+// carries the panel(s) / corridor row / column it is about; wireChangeLogBtns
+// opens the log over whatever modal or screen is showing, in the second modal.
+const CHANGE_PANEL_LABEL = { row: 'Corridor details', column: 'Column', weight: 'Weightage', milestone: 'KD milestone', progress: '% Complete' };
+const CHANGE_ACTION_LABEL = { create: 'Added', update: 'Updated', delete: 'Deleted' };
+function changeLogBtn(panels, { activityId = '', subject = '', label = 'History' } = {}){
+  if (!canViewChangeLog()) return '';
+  return `<button type="button" class="iconbtn cl-btn" data-cl-panels="${panels}" data-cl-activity="${activityId}" data-cl-subject="${esc(subject)}">${ic('clock', 13)}${label}</button>`;
+}
+function wireChangeLogBtns(root, title){
+  root.querySelectorAll('[data-cl-panels]').forEach((b) => b.onclick = () => openChangeLog(title || '', {
+    panels: b.dataset.clPanels, activityId: b.dataset.clActivity, subject: b.dataset.clSubject,
+  }));
+}
+async function openChangeLog(title, { panels = '', activityId = '', subject = '' } = {}){
+  const qs = new URLSearchParams({ tab: state.activity.tab });
+  if (panels) qs.set('panel', panels);
+  if (activityId) qs.set('activityId', activityId);
+  let history;
+  try { ({ history } = await api(`/projects/${state.activity.projectId}/activity-change-log?${qs}`)); }
+  catch (err) { toast(err.message, true); return; }
+  if (subject) history = history.filter((h) => h.subject === subject);
+  const mixed = !panels || panels.includes(',');
+  const body = history.length ? history.map((h) => `<div class="histrow">${whoHtml(h.changedBy, h.changedByName, h.changedAt)}<div><b>${mixed ? esc(CHANGE_PANEL_LABEL[h.panel]) + ' &mdash; ' : ''}${esc(h.subject)}</b>: ${esc(CHANGE_ACTION_LABEL[h.action])}${h.detail ? ' &middot; ' + esc(h.detail) : ''}</div></div>`).join('') : '<p class="muted">No changes recorded yet.</p>';
+  openModal2(`<h3>Change history</h3><p class="ctx">${title || `${esc(state.activity.code)} &middot; ${state.activity.combined ? 'Office and Field' : state.activity.tab === 'office' ? 'Office' : 'Field'} activities`}</p>${body}
+    <div class="actions"><button type="button" id="clClose">Close</button></div>`);
+  $('clClose').onclick = closeModal2;
+}
+$('actChangeLogBtn').onclick = () => openChangeLog('');
 
 function renderHistoryModal(title, entries, extra){
   const body = entries.length ? entries.map(historyEntryHtml).join('') : '<p class="muted">No changes recorded yet.</p>';
@@ -2828,12 +3206,18 @@ function renderHistoryModal(title, entries, extra){
   $('histClose').onclick = closeModal;
 }
 
-async function refreshActivityMeta(){ state.meta = await api('/activity-meta'); }
+// Column set is per project when that project has its own (see activityColumns.js), so the meta
+// is always fetched for the project whose grid is open.
+async function refreshActivityMeta(){
+  const pid = state.activity.projectId;
+  state.meta = await api(pid ? `/activity-meta?projectId=${pid}` : '/activity-meta');
+}
+const ownColumnSet = () => !!(state.meta.columnScope && state.meta.columnScope[state.activity.tab] === 'project');
 
 // Edit grid screen: add/rename/delete the column headers (shared per tab,
 // across projects) and the corridor row headers (per project). Replaces the
 // old plain "Add corridor" button.
-let egState = { editingCol: null, editingRow: null, addingRow: false };
+let egState = { editingCol: null, editingRow: null, editingDetailCol: null, addingRow: false };
 
 // Payment-milestone (KD) draft for the Edit screen, kept in egState.ms until
 // "Save changes": { basis, items: [{ key, label, weightage }], colMs: { colId: key } }.
@@ -2850,13 +3234,59 @@ function msDraftFromState(){
   return ms;
 }
 
+function editGridTitle(){
+  const kind = state.activity.combined ? 'Office and Field' : state.activity.tab === 'office' ? 'Office' : 'Field';
+  return `${state.activity.code}: ${abbr(state.activity.name)} ${kind} Activities`;
+}
+
 function openEditGridView(){
-  egState = { editingCol: null, editingRow: null, addingRow: false, ms: msDraftFromState(), wDraft: {} };
+  egState = { editingCol: null, editingRow: null, editingDetailCol: null, addingRow: false, ms: msDraftFromState(), wDraft: {}, kDraft: {} };
   $('egContent').innerHTML = '';
-  $('egTitle').textContent = `${state.activity.code}: ${abbr(state.activity.name)} ${state.activity.tab === 'office' ? 'Office' : 'Field'} Activities`;
+  $('egTitle').textContent = editGridTitle();
   showView('editGridView');
   pmisPush(4);
+  renderEgLayout();
   renderEditGridView();
+}
+
+// Per-project choice between separate Office / Field tabs and one combined tab. A combined
+// project is a single tab (stored as the Office tab) with one common set of columns, KDs and weightages.
+function renderEgLayout(){
+  const combined = state.activity.combined;
+  $('egLayout').innerHTML = `
+    <div class="mf"><label>Activity layout</label>
+      <p class="ctx" style="margin-top:0">Use separate Office and Field activities tabs, or a single &ldquo;Office and Field activities&rdquo; tab for projects that don't distinguish the two. The single tab has one common set of columns, KD distribution and weightages. Applies to everyone viewing this project.</p>
+      <select id="egLayoutSel" style="max-width:380px">
+        <option value="split" ${combined ? '' : 'selected'}>Separate Office and Field activities tabs</option>
+        <option value="combined" ${combined ? 'selected' : ''}>Single tab: Office and Field activities</option>
+      </select>
+    </div>`;
+  $('egLayoutSel').onchange = changeActivityLayout;
+}
+
+async function changeActivityLayout(){
+  const layout = $('egLayoutSel').value;
+  const revert = () => { $('egLayoutSel').value = state.activity.combined ? 'combined' : 'split'; };
+  if (egState.editingCol != null || egState.editingRow != null || egState.editingDetailCol != null || egState.editingBuiltin != null || egState.addingRow) {
+    toast('Finish or cancel the current edit first', true); revert(); return;
+  }
+  if (layout === 'combined' && state.activity.tab === 'field'
+      && !confirm("The single tab uses the Office columns, KDs and corridors. This project's Field activities stay saved but won't be shown while the single tab is on. Continue?")) { revert(); return; }
+  try {
+    const { seededColumns } = await api(`/projects/${state.activity.projectId}`, { method: 'PATCH', body: { activityLayout: layout } });
+    state.project.activityLayout = layout; state.project.layoutFor = state.project.id;
+    state.activity.combined = layout === 'combined';
+    state.activity.kindFilter = { office: true, field: true };
+    applyLayoutTabs();
+    setActiveTab('office');
+    state.activity.filter = 'all';
+    await refreshActivityMeta(); // a newly merged project may now have its own column set
+    await loadActivityRows();
+    openEditGridView();
+    toast(layout === 'combined'
+      ? `Showing Office and Field activities in a single tab${seededColumns ? ` (${seededColumns} standard columns added)` : ''}`
+      : 'Showing separate Office and Field tabs');
+  } catch (err) { toast(err.message, true); revert(); }
 }
 $('egBackBtn').onclick = () => { history.back(); };
 $('egActBack').onclick = () => { history.back(); };
@@ -2865,13 +3295,21 @@ $('egProjBack').onclick = () => {
   showView('projectView'); loadProjectView();
 };
 
+// One input per corridor-detail column (state.activity.detailColumns); values
+// are free text, so any mix of text and numbers is fine.
 function rowFormFields(prefix, r){
-  r = r || { corridor: '', lineType: '', lengthKm: '', responsiblePerson: '' };
+  r = r || { corridor: '', details: {} };
+  const details = r.details || {};
   return `
     <div class="mf"><label>Corridor name</label><input id="${prefix}Corridor" type="text" value="${esc(r.corridor)}"></div>
-    <div class="mf"><label>Line type</label><input id="${prefix}Line" type="text" placeholder="e.g. 4th Line, ROR, New Line" value="${esc(r.lineType || '')}"></div>
-    <div class="mf"><label>Length (Km)</label><input id="${prefix}Len" type="number" step="0.1" value="${r.lengthKm ?? ''}"></div>
-    <div class="mf"><label>Responsible person</label><input id="${prefix}Resp" type="text" placeholder="optional" value="${esc(r.responsiblePerson || '')}"></div>`;
+    ${(state.activity.detailColumns || []).map((d) => `<div class="mf"><label>${esc(d.name)}</label><input id="${prefix}D${d.id}" type="text" maxlength="200" placeholder="optional" value="${esc(details[d.id] ?? '')}"></div>`).join('')}`;
+}
+// Reads rowFormFields back into the { corridor, details } API payload.
+function readRowForm(prefix){
+  return {
+    corridor: $(prefix + 'Corridor').value.trim(),
+    details: Object.fromEntries((state.activity.detailColumns || []).map((d) => [d.id, $(`${prefix}D${d.id}`).value.trim()])),
+  };
 }
 
 // Pull whatever is currently typed/selected in the Edit screen's KD and
@@ -2885,6 +3323,7 @@ function syncEgDraft(){
     if (el.value) ms.colMs[el.dataset.colMs] = el.value; else delete ms.colMs[el.dataset.colMs];
   });
   document.querySelectorAll('.eg-weight').forEach((el) => { egState.wDraft[el.dataset.weightId] = Number(el.value) || 0; });
+  document.querySelectorAll('.eg-col-kind').forEach((el) => { egState.kDraft[el.dataset.colKind] = el.value; });
 }
 
 // skipSync: the caller already synced and then changed the draft itself.
@@ -2894,12 +3333,21 @@ function renderEditGridView(skipSync){
   const tab = state.activity.tab;
   const cols = (state.meta.columnDetail && state.meta.columnDetail[tab]) || [];
   const rows = state.activity.rows || [];
+  const dcols = state.activity.detailColumns || [];
   const ms = egState.ms;
   const colWeight = (c) => (egState.wDraft[c.id] ?? c.weightage);
 
   const msSelect = (c) => ms.items.length ? `
       <select class="eg-col-ms" data-col-ms="${c.id}" title="Payment milestone this column belongs to">
         <option value="">No KD</option>${ms.items.map((it) => `<option value="${it.key}" ${ms.colMs[c.id] === it.key ? 'selected' : ''}>${esc(it.label)}</option>`).join('')}
+      </select>` : '';
+
+  // Merged-layout projects class each column as an Office or a Field activity.
+  const kindOf = (c) => egState.kDraft[c.id] || state.activity.columnKinds[c.id] || 'office';
+  const kindSelect = (c) => state.activity.combined ? `
+      <select class="eg-col-kind" data-col-kind="${c.id}" title="Office or Field activity">
+        <option value="office" ${kindOf(c) === 'office' ? 'selected' : ''}>Office</option>
+        <option value="field" ${kindOf(c) === 'field' ? 'selected' : ''}>Field</option>
       </select>` : '';
 
   const colsHtml = cols.length ? cols.map((c) => egState.editingCol === c.id ? `
@@ -2911,7 +3359,7 @@ function renderEditGridView(skipSync){
       <span class="eg-col-name">${esc(c.name)}</span>
       <span class="eg-col-weight">
         <input type="number" class="eg-weight" data-weight-id="${c.id}" min="0" step="0.1" value="${colWeight(c)}">% weight
-      </span>${msSelect(c)}
+      </span>${kindSelect(c)}${msSelect(c)}
       <div class="eg-col-actions">
         <button type="button" class="iconbtn" data-col-edit="${c.id}">${ic('pencil', 14)}</button>
         <button type="button" class="iconbtn" data-col-del="${c.id}">${ic('trash', 14)}</button>
@@ -2923,10 +3371,38 @@ function renderEditGridView(skipSync){
       <div class="actions" style="margin-top:0"><button type="button" data-row-cancel="1">Cancel</button><button type="button" class="primary" data-row-save="${r.id}">Save</button></div>
     </li>` : `
     <li class="eg-row">
-      <span>${esc(r.corridor)}${r.lineType ? ` <small class="muted">(${esc(r.lineType)})</small>` : ''}</span>
+      <span>${esc(r.corridor)}${(() => { const lc = dcols.find((d) => /^line\b/i.test(d.name)); const v = lc && (r.details || {})[lc.id]; return v ? ` <small class="muted">(${esc(v)})</small>` : ''; })()}</span>
+      ${changeLogBtn('row', { activityId: r.id })}
       <button type="button" class="iconbtn" data-row-edit="${r.id}">${ic('pencil', 14)}</button>
       <button type="button" class="iconbtn" data-row-del="${r.id}">${ic('trash', 14)}</button>
     </li>`).join('') : '<li class="muted" style="list-style:none;padding:8px 0">No corridor rows yet.</li>';
+
+  const detailColsHtml = dcols.length ? dcols.map((d) => egState.editingDetailCol === d.id ? `
+    <li class="eg-row eg-row-form"><input id="egDcName${d.id}" type="text" value="${esc(d.name)}">
+      <div class="actions" style="margin-top:0"><button type="button" data-dc-cancel="1">Cancel</button><button type="button" class="primary" data-dc-save="${d.id}">Save</button></div>
+    </li>` : `
+    <li class="eg-row">
+      <span>${esc(d.name)}</span>
+      <button type="button" class="iconbtn" data-dc-edit="${d.id}">${ic('pencil', 14)}</button>
+      <button type="button" class="iconbtn" data-dc-del="${d.id}">${ic('trash', 14)}</button>
+    </li>`).join('') : '<li class="muted" style="list-style:none;padding:8px 0">No corridor columns yet.</li>';
+
+  // Built-in grid columns (Sl. No, % Complete, Last updated): renamable and removable like the
+  // corridor columns, but removing one only hides it (it can be restored below).
+  const bcols = state.activity.builtinColumns || [];
+  const builtinHtml = bcols.map((b) => egState.editingBuiltin === b.key ? `
+    <li class="eg-row eg-row-form"><input id="egBcName${b.key}" type="text" maxlength="60" value="${esc(b.name)}">
+      <div class="actions" style="margin-top:0"><button type="button" data-bc-cancel="1">Cancel</button><button type="button" class="primary" data-bc-save="${b.key}">Save</button></div>
+    </li>` : b.hidden ? '' : `
+    <li class="eg-row">
+      <span>${esc(b.name)}${b.key === 'pct' ? ' <small class="muted">(Calculated)</small>' : ''}</span>
+      <button type="button" class="iconbtn" data-bc-edit="${b.key}">${ic('pencil', 14)}</button>
+      <button type="button" class="iconbtn" data-bc-del="${b.key}">${ic('trash', 14)}</button>
+    </li>`).join('');
+  const removedBuiltin = bcols.filter((b) => b.hidden);
+  const restoreBuiltinHtml = removedBuiltin.length ? `
+    <p class="ctx" style="margin:10px 0 0">Removed built-in columns:
+      ${removedBuiltin.map((b) => `<button type="button" class="btn-o sm" data-bc-restore="${b.key}">${ic('plus', 14)}${esc(b.defaultName)}</button>`).join(' ')}</p>` : '';
 
   const addRowHtml = egState.addingRow ? `
     <li class="eg-row eg-row-form">${rowFormFields('egNewRow', null)}
@@ -2934,18 +3410,19 @@ function renderEditGridView(skipSync){
     </li>` : '';
 
   $('egContent').innerHTML = `
-    <div class="mf"><label>Columns</label>
-      <p class="ctx" style="margin-top:0">Weight sets how much each column counts toward the corridor's "% Complete" (right of Responsible on the grid) and the project's "Overall % Complete" KPI; it's shared across every project and must sum to 100%. Each column's % complete is set from its status-update dialog, not here.</p>
+    <div class="mf"><label>Columns${changeLogBtn('column,weight', { label: 'History' })}</label>
+      <p class="ctx" style="margin-top:0">Weight sets how much each column counts toward the corridor's "% Complete" (right of Responsible on the grid) and the project's "Overall % Complete" KPI; ${ownColumnSet() ? "this project has its own column set, so it applies to this project only" : "it's shared across every project"} and must sum to 100%. Each column's % complete is set from its status-update dialog, not here.</p>
       <div class="eg-col-grid">${colsHtml}</div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
         <span id="egWeightTotal"></span>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px">
-        <input id="egNewCol" type="text" placeholder="New column name" style="flex:1">
+        <input id="egNewCol" type="text" placeholder="New column name" style="flex:1;min-width:0">
+        ${state.activity.combined ? '<select id="egNewColKind" title="Office or Field activity" style="flex:none;width:120px"><option value="office">Office</option><option value="field">Field</option></select>' : ''}
         <button type="button" class="btn-o sm" id="egAddCol">${ic('plus', 14)}Add column</button>
       </div>
     </div>
-    <div class="mf"><label>Payment milestones (KD) &mdash; this project only</label>
+    <div class="mf"><label>Payment milestones (KD) &mdash; this project only ${changeLogBtn('milestone')}</label>
       <p class="ctx" style="margin-top:0">Optional. Adds a KD header band above this tab's columns, each KD carrying the share of the payment claimed at that milestone (must sum to 100%). Put a column under a KD with the dropdown on its card, and keep a KD's columns side by side so the band reads as one block. "% Complete" can then be computed from the column weights above (default) or from the KD weights.</p>
       ${ms.items.map((it) => `
       <div class="eg-ms">
@@ -2961,7 +3438,16 @@ function renderEditGridView(skipSync){
       </div>` : ''}
       <button type="button" class="btn-o sm" id="egAddMs" style="margin-top:10px">${ic('plus', 14)}Add KD</button>
     </div>
-    <div class="mf"><label>Corridor rows</label>
+    <div class="mf"><label>Corridor columns &mdash; this project only ${changeLogBtn('row')}</label>
+      <p class="ctx" style="margin-top:0">The detail columns shown beside each corridor name (Line, Length, Responsible, or anything you add). Each value is free text, so a cell can mix text and numbers. Deleting a column removes its values from every corridor in this tab. % Complete can be renamed or removed too; removing it only hides it from the grid (it is still calculated) and it can be restored.</p>
+      <ul style="list-style:none;padding:0;margin:0">${builtinHtml}${detailColsHtml}</ul>
+      ${restoreBuiltinHtml}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="egNewDc" type="text" placeholder="New corridor column name" style="flex:1">
+        <button type="button" class="btn-o sm" id="egAddDc">${ic('plus', 14)}Add column</button>
+      </div>
+    </div>
+    <div class="mf"><label>Corridor rows ${changeLogBtn('row')}</label>
       <ul style="list-style:none;padding:0;margin:0">${rowsHtml}${addRowHtml}</ul>
       ${egState.addingRow ? '' : `<button type="button" class="btn-o sm" id="egAddRowBtn" style="margin-top:10px">${ic('plus', 14)}Add corridor</button>`}
     </div>`;
@@ -3014,7 +3500,7 @@ function clampProgressInput(el){
 // (weightage, an always-on input per column); renaming/adding/deleting a
 // column or row saves immediately instead, since those are one-off actions.
 async function saveAllEgChanges(){
-  if (egState.editingCol != null || egState.editingRow != null || egState.addingRow) {
+  if (egState.editingCol != null || egState.editingRow != null || egState.editingDetailCol != null || egState.editingBuiltin != null || egState.addingRow) {
     toast('Finish or cancel the current edit first', true);
     return;
   }
@@ -3035,17 +3521,23 @@ async function saveAllEgChanges(){
   if (milestones.length && Math.abs(msSum - 100) > 0.05) { toast(`KD weightage must sum to 100 (currently ${msSum.toFixed(1)})`, true); return; }
 
   try {
-    await api('/activity-columns/weights', { method: 'PUT', body: { tab: state.activity.tab, weights } });
+    await api('/activity-columns/weights', { method: 'PUT', body: { tab: state.activity.tab, weights, projectId: state.activity.projectId } });
+    if (state.activity.combined) {
+      const kinds = {};
+      document.querySelectorAll('.eg-col-kind').forEach((el) => { kinds[el.dataset.colKind] = el.value; });
+      if (Object.keys(kinds).length) await api(`/projects/${state.activity.projectId}/column-kinds`, { method: 'PUT', body: { tab: state.activity.tab, kinds } });
+    }
     await api(`/projects/${state.activity.projectId}/milestones`, { method: 'PUT', body: {
       tab: state.activity.tab, basis: milestones.length ? ms.basis : 'column', milestones,
     }});
     await refreshActivityMeta(); await loadActivityRows();
-    egState.ms = msDraftFromState(); egState.wDraft = {};
+    egState.ms = msDraftFromState(); egState.wDraft = {}; egState.kDraft = {};
     toast('Changes saved'); renderEditGridView(true);
   } catch (err) { toast(err.message, true); }
 }
 
 function wireEditGridView(){
+  wireChangeLogBtns($('egContent'), '');
   updateWeightTotalDisplay();
   document.querySelectorAll('.eg-weight').forEach((el) => el.addEventListener('input', updateWeightTotalDisplay));
   $('egSaveAll').onclick = saveAllEgChanges;
@@ -3071,8 +3563,11 @@ function wireEditGridView(){
     const name = $('egNewCol').value.trim();
     if (!name) return;
     try {
-      await api('/activity-columns', { method: 'POST', body: { tab: state.activity.tab, name } });
-      await refreshActivityMeta();
+      const { id } = await api('/activity-columns', { method: 'POST', body: { tab: state.activity.tab, name, projectId: state.activity.projectId } });
+      if (state.activity.combined && $('egNewColKind').value === 'field') {
+        await api(`/projects/${state.activity.projectId}/column-kinds`, { method: 'PUT', body: { tab: state.activity.tab, kinds: { [id]: 'field' } } });
+      }
+      await refreshActivityMeta(); await loadActivityRows();
       toast('Column added');
       renderEditGridView();
     } catch (err) { toast(err.message, true); }
@@ -3089,7 +3584,7 @@ function wireEditGridView(){
     } catch (err) { toast(err.message, true); }
   });
   document.querySelectorAll('[data-col-del]').forEach((b) => b.onclick = () => confirmEgDelete(
-    'Delete column?', "This removes the column and all of its recorded statuses/history across every project. This can't be undone.",
+    'Delete column?', `This removes the column and all of its recorded statuses/history ${ownColumnSet() ? 'for this project' : 'across every project'}. This can't be undone.`,
     async () => {
       await api(`/activity-columns/${b.dataset.colDel}`, { method: 'DELETE' });
       await refreshActivityMeta(); await loadActivityRows();
@@ -3097,18 +3592,72 @@ function wireEditGridView(){
     }
   ));
 
+  const projectPath = `/projects/${state.activity.projectId}`;
+  $('egAddDc').onclick = async () => {
+    const name = $('egNewDc').value.trim();
+    if (!name) { toast('Column name is required', true); return; }
+    try {
+      await api(`${projectPath}/corridor-columns`, { method: 'POST', body: { tab: state.activity.tab, name } });
+      await loadActivityRows(); toast('Corridor column added'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  };
+  document.querySelectorAll('[data-dc-edit]').forEach((b) => b.onclick = () => { egState.editingDetailCol = +b.dataset.dcEdit; renderEditGridView(); });
+  document.querySelectorAll('[data-dc-cancel]').forEach((b) => b.onclick = () => { egState.editingDetailCol = null; renderEditGridView(); });
+  document.querySelectorAll('[data-dc-save]').forEach((b) => b.onclick = async () => {
+    const id = +b.dataset.dcSave;
+    const name = $('egDcName' + id).value.trim();
+    if (!name) { toast('Column name is required', true); return; }
+    try {
+      await api(`${projectPath}/corridor-columns/${id}`, { method: 'PATCH', body: { name } });
+      egState.editingDetailCol = null; await loadActivityRows();
+      toast('Corridor column renamed'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  });
+  document.querySelectorAll('[data-dc-del]').forEach((b) => b.onclick = () => confirmEgDelete(
+    'Delete corridor column?', "This removes the column and its values from every corridor in this tab. This can't be undone.",
+    async () => {
+      await api(`${projectPath}/corridor-columns/${b.dataset.dcDel}`, { method: 'DELETE' });
+      await loadActivityRows();
+      toast('Corridor column deleted');
+    }
+  ));
+
+  const builtinUrl = (key) => `${projectPath}/builtin-columns/${key}`;
+  document.querySelectorAll('[data-bc-edit]').forEach((b) => b.onclick = () => { egState.editingBuiltin = b.dataset.bcEdit; renderEditGridView(); });
+  document.querySelectorAll('[data-bc-cancel]').forEach((b) => b.onclick = () => { egState.editingBuiltin = null; renderEditGridView(); });
+  document.querySelectorAll('[data-bc-save]').forEach((b) => b.onclick = async () => {
+    const key = b.dataset.bcSave;
+    const name = $('egBcName' + key).value.trim();
+    if (!name) { toast('Column name is required', true); return; }
+    try {
+      await api(builtinUrl(key), { method: 'PATCH', body: { tab: state.activity.tab, name } });
+      egState.editingBuiltin = null; await loadActivityRows();
+      toast('Column renamed'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  });
+  document.querySelectorAll('[data-bc-del]').forEach((b) => b.onclick = () => confirmEgDelete(
+    'Remove built-in column?', 'This hides the column from the grid for this project. Nothing is deleted or recalculated, and you can restore it from this page.',
+    async () => {
+      await api(builtinUrl(b.dataset.bcDel), { method: 'PATCH', body: { tab: state.activity.tab, hidden: true } });
+      await loadActivityRows();
+      toast('Column removed from the grid');
+    }
+  ));
+  document.querySelectorAll('[data-bc-restore]').forEach((b) => b.onclick = async () => {
+    try {
+      await api(builtinUrl(b.dataset.bcRestore), { method: 'PATCH', body: { tab: state.activity.tab, hidden: false } });
+      await loadActivityRows(); toast('Column restored'); renderEditGridView();
+    } catch (err) { toast(err.message, true); }
+  });
+
   const addRowBtn = $('egAddRowBtn');
   if (addRowBtn) addRowBtn.onclick = () => { egState.addingRow = true; renderEditGridView(); };
   if ($('egNewRowCancel')) $('egNewRowCancel').onclick = () => { egState.addingRow = false; renderEditGridView(); };
   if ($('egNewRowSave')) $('egNewRowSave').onclick = async () => {
-    const corridor = $('egNewRowCorridor').value.trim();
-    if (!corridor) { toast('Corridor name is required', true); return; }
+    const form = readRowForm('egNewRow');
+    if (!form.corridor) { toast('Corridor name is required', true); return; }
     try {
-      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: {
-        tab: state.activity.tab, corridor, lineType: $('egNewRowLine').value.trim() || null,
-        lengthKm: Number($('egNewRowLen').value) || null,
-        responsiblePerson: $('egNewRowResp').value.trim() || null,
-      }});
+      await api(`/projects/${state.activity.projectId}/activities`, { method: 'POST', body: { tab: state.activity.tab, ...form }});
       egState.addingRow = false; await loadActivityRows();
       toast('Corridor added'); renderEditGridView();
     } catch (err) { toast(err.message, true); }
@@ -3118,13 +3667,10 @@ function wireEditGridView(){
   document.querySelectorAll('[data-row-cancel]').forEach((b) => b.onclick = () => { egState.editingRow = null; renderEditGridView(); });
   document.querySelectorAll('[data-row-save]').forEach((b) => b.onclick = async () => {
     const id = +b.dataset.rowSave, prefix = 'egRow' + id;
-    const corridor = $(prefix + 'Corridor').value.trim();
-    if (!corridor) { toast('Corridor name is required', true); return; }
+    const form = readRowForm(prefix);
+    if (!form.corridor) { toast('Corridor name is required', true); return; }
     try {
-      await api(`/projects/${state.activity.projectId}/activities/${id}`, { method: 'PATCH', body: {
-        corridor, lineType: $(prefix + 'Line').value.trim() || null, lengthKm: Number($(prefix + 'Len').value) || null,
-        responsiblePerson: $(prefix + 'Resp').value.trim() || null,
-      }});
+      await api(`/projects/${state.activity.projectId}/activities/${id}`, { method: 'PATCH', body: form });
       egState.editingRow = null; await loadActivityRows();
       toast('Corridor updated'); renderEditGridView();
     } catch (err) { toast(err.message, true); }
@@ -3163,7 +3709,7 @@ $('changePwBtn').onclick = () => {
 /* ---------- User provisioning (admin only, PRD §2.1) ---------- */
 $('manageUsersBtn').onclick = async () => {
   const { users } = await api('/users');
-  openModal(`<h3>Manage users</h3>
+  openModal(`<h3>Manage users ${auditBtn('user', { title: 'User accounts' })}</h3>
     <ul style="list-style:none;padding:0;margin:0 0 14px">
       ${users.map((u) => `<li style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
         <span>${esc(u.displayName)} <span class="muted">(${esc(u.username)})</span></span>
@@ -3265,6 +3811,41 @@ window.addEventListener('popstate', (e) => {
     if (to === 1) { showView('dashView'); loadAll(); }
     else if (to === 2) { showView('projectView'); loadProjectView(); }
   }
+});
+
+/* ---------- Ctrl+Z: undo the signed-in user's last saved change ----------
+   Server-side (POST /undo): reverts that user's latest save, in any area, and
+   refuses if someone else has changed the same data since. Left to the browser
+   while typing in a field or with a dialog open (native text undo / unsaved form). */
+async function reloadAfterUndo(){
+  const v = document.querySelector('.view.on');
+  if (v) {
+    if (v.id === 'dashView') await loadAll();
+    else if (v.id === 'projectView') await loadProjectView();
+    else if (v.id === 'scheduleView') await loadScheduleRows();
+    else if (v.id === 'activityView') { await refreshActivityMeta(); await loadActivityRows(); }
+    else if (v.id === 'editGridView') {
+      await refreshActivityMeta(); await loadActivityRows();
+      egState = { editingCol: null, editingRow: null, editingDetailCol: null, addingRow: false, ms: msDraftFromState(), wDraft: {}, kDraft: {} };
+      renderEgLayout(); renderEditGridView();
+    }
+  }
+  refreshReqBadge();
+}
+let undoBusy = false;
+document.addEventListener('keydown', async (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== 'z') return;
+  if (!state.user || undoBusy) return;
+  if (e.target.closest && e.target.closest('textarea, select, [contenteditable], input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit])')) return;
+  if ($('modal').classList.contains('on') || $('modal2').classList.contains('on')) return;
+  e.preventDefault();
+  undoBusy = true;
+  try {
+    const { label } = await api('/undo', { method: 'POST' });
+    toast('Undid: ' + label);
+    await reloadAfterUndo();
+  } catch (err) { toast(err.message, true); }
+  finally { undoBusy = false; }
 });
 </script>
 </body>

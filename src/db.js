@@ -10,6 +10,9 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
+const undoTriggers = require('./undoTriggers');
+undoTriggers.remove(db); // migrations rebuild tables; triggers are recreated afterwards
 require('./migrate')(db);
+undoTriggers.install(db);
 
 module.exports = db;

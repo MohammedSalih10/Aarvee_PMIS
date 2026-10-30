@@ -2,10 +2,26 @@ const express = require('express');
 const db = require('../db');
 const { requireAuth, requireAnyRole } = require('../auth');
 const { requireProjectAccess } = require('../scope');
+const { logAudit } = require('../changeLog');
 
 const router = express.Router();
 
 const PROJECT_ROLES = ['lead', 'coordinator'];
+const roleLabel = (r) => (r === 'lead' ? 'Project Lead' : r === 'coordinator' ? 'Project Coordinator' : 'none');
+
+// "Edit access: granted X; revoked Y" for a corridor list replaced wholesale;
+// an empty list means unrestricted for view access and none for edit access, so
+// say so rather than listing nothing.
+function describeList(before, after, label) {
+  const added = after.filter((c) => !before.includes(c));
+  const removed = before.filter((c) => !after.includes(c));
+  if (!added.length && !removed.length) return '';
+  const parts = [];
+  if (added.length) parts.push(`added ${added.join(', ')}`);
+  if (removed.length) parts.push(`removed ${removed.join(', ')}`);
+  const now = after.length ? after.join(', ') : (label === 'View access' ? 'all corridors' : 'none');
+  return `${label}: ${parts.join('; ')} (now: ${now})`;
+}
 
 // Granting per-corridor edit access is admin-only -- pmo keeps every other
 // assignment-management capability (roles, view-restriction corridors,
@@ -54,6 +70,10 @@ router.post('/projects/:id/assignments', requireAuth, requireProjectAccess(), re
     return res.status(400).json({ error: 'That user is already assigned to this project' });
   }
   if (projectRole) grantProjectRole(req.params.id, projectRole, username);
+  logAudit(req.user, {
+    projectId: Number(req.params.id), area: 'access', action: 'create', subject: username,
+    detail: `Added to the project${projectRole ? ` as Project ${projectRole === 'lead' ? 'Lead' : 'Coordinator'}` : ''}`,
+  });
   res.status(201).json({ ok: true });
 });
 
@@ -65,20 +85,29 @@ router.patch('/projects/:id/assignments/:username', requireAuth, requireProjectA
   if (projectRole && !PROJECT_ROLES.includes(projectRole)) {
     return res.status(400).json({ error: 'projectRole must be lead or coordinator' });
   }
-  const row = db.prepare('SELECT 1 FROM project_assignments WHERE project_id = ? AND username = ?')
+  const row = db.prepare('SELECT project_role AS projectRole FROM project_assignments WHERE project_id = ? AND username = ?')
     .get(req.params.id, req.params.username);
   if (!row) return res.status(404).json({ error: 'That user is not assigned to this project' });
+  // Granting a title takes it from whoever held it before; note that in the log too.
+  const previousHolder = projectRole
+    ? db.prepare('SELECT username FROM project_assignments WHERE project_id = ? AND project_role = ? AND username != ?').get(req.params.id, projectRole, req.params.username)
+    : null;
   if (projectRole) {
     grantProjectRole(req.params.id, projectRole, req.params.username);
   } else {
     db.prepare('UPDATE project_assignments SET project_role = NULL WHERE project_id = ? AND username = ?')
       .run(req.params.id, req.params.username);
   }
+  logAudit(req.user, {
+    projectId: Number(req.params.id), area: 'access', action: 'update', subject: req.params.username,
+    detail: `Project role: ${roleLabel(row.projectRole)} → ${roleLabel(projectRole)}${previousHolder ? ` (taken from ${previousHolder.username})` : ''}`,
+  });
   res.json({ ok: true });
 });
 
 router.delete('/projects/:id/assignments/:username', requireAuth, requireProjectAccess(), requireAnyRole('pmo'), (req, res) => {
-  db.prepare('DELETE FROM project_assignments WHERE project_id = ? AND username = ?').run(req.params.id, req.params.username);
+  const info = db.prepare('DELETE FROM project_assignments WHERE project_id = ? AND username = ?').run(req.params.id, req.params.username);
+  if (info.changes) logAudit(req.user, { projectId: Number(req.params.id), area: 'access', action: 'delete', subject: req.params.username, detail: 'Removed from the project' });
   res.json({ ok: true });
 });
 
@@ -120,9 +149,12 @@ router.put('/projects/:id/assignments/:username/corridors', requireAuth, require
   );
   const clean = [...new Set(corridors)].filter((c) => valid.has(c));
   db.transaction(() => {
+    const before = db.prepare('SELECT corridor FROM assignment_corridors WHERE assignment_id = ?').all(assignment.id).map((r) => r.corridor);
     db.prepare('DELETE FROM assignment_corridors WHERE assignment_id = ?').run(assignment.id);
     const ins = db.prepare('INSERT INTO assignment_corridors (assignment_id, corridor) VALUES (?,?)');
     clean.forEach((c) => ins.run(assignment.id, c));
+    const detail = describeList(before, clean, 'View access');
+    if (detail) logAudit(req.user, { projectId: Number(req.params.id), area: 'access', action: 'update', subject: req.params.username, detail });
   })();
   res.json({ ok: true });
 });
@@ -158,9 +190,12 @@ router.put('/projects/:id/assignments/:username/edit-corridors', requireAuth, re
   );
   const clean = [...new Set(corridors)].filter((c) => valid.has(c));
   db.transaction(() => {
+    const before = db.prepare('SELECT corridor FROM assignment_edit_corridors WHERE assignment_id = ?').all(assignment.id).map((r) => r.corridor);
     db.prepare('DELETE FROM assignment_edit_corridors WHERE assignment_id = ?').run(assignment.id);
     const ins = db.prepare('INSERT INTO assignment_edit_corridors (assignment_id, corridor) VALUES (?,?)');
     clean.forEach((c) => ins.run(assignment.id, c));
+    const detail = describeList(before, clean, 'Edit access');
+    if (detail) logAudit(req.user, { projectId: Number(req.params.id), area: 'access', action: 'update', subject: req.params.username, detail });
   })();
   res.json({ ok: true });
 });
